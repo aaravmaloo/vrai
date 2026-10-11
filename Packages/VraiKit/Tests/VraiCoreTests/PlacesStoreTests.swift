@@ -211,6 +211,18 @@ struct PlacesStoreTests {
         #expect(scratch.log.commands.contains("git worktree unlock -- \(release)"))
     }
 
+    @Test func worktreeChangesAreCountedFreshForLinkedWorktrees() async throws {
+        let (scratch, store) = try await open()
+        defer { scratch.remove() }
+        let release = sibling(scratch, "vrai-release")
+        #expect(await store.worktreeChanges(path: release) == 0)
+        let folder = URL(filePath: release, directoryHint: .isDirectory)
+        try Data("edited after the snapshot\n".utf8).write(to: folder.appending(path: "README.md"))
+        try Data("brand new\n".utf8).write(to: folder.appending(path: "notes.txt"))
+        #expect(await store.worktreeChanges(path: release) == 2)
+        #expect(await store.worktreeChanges(path: sibling(scratch, "vrai-missing")) == nil)
+    }
+
     @Test func removeACleanAndALockedWorktree() async throws {
         let (scratch, store) = try await open()
         defer { scratch.remove() }

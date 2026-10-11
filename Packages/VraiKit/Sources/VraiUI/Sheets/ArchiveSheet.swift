@@ -63,14 +63,16 @@ struct ArchiveSheet: View {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't write the archive", bundle: .module), message: failure)
             }
             SyncForm.Field(label: String(localized: "Format", bundle: .module)) {
-                SyncForm.Tabs(selection: $format, items: [
-                    SyncForm.Option(value: ArchiveFormat.zip, label: "zip"),
-                    SyncForm.Option(value: ArchiveFormat.tarGz, label: "tar.gz")
-                ], label: String(localized: "Format", bundle: .module))
+                SegmentedControl(selection: $format, items: [
+                    SegmentItem(value: ArchiveFormat.zip, title: "zip", label: "zip"),
+                    SegmentItem(value: ArchiveFormat.tarGz, title: "tar.gz", label: "tar.gz")
+                ], small: false)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(String(localized: "Format", bundle: .module))
             }
             SyncForm.Input(label: String(localized: "Folder inside the archive", bundle: .module), text: $prefix, mono: true, autofocus: true) { run() }
-            LongTailPathField(label: String(localized: "Save as", bundle: .module), text: Binding(get: { destination.isEmpty ? suggestedDestination : destination }, set: { destination = $0; destinationEdited = true }), kind: .saveFile(fileName), home: app.homeFolder)
             SyncForm.Options(commands: [command]) {
+                LongTailPathField(label: String(localized: "Save as", bundle: .module), text: Binding(get: { destination.isEmpty ? suggestedDestination : destination }, set: { destination = $0; destinationEdited = true }), kind: .saveFile(fileName), home: app.homeFolder)
                 SyncForm.Input(label: String(localized: "Only these paths", bundle: .module), text: $paths, placeholder: "Sources Docs/README.md", hint: String(localized: "Leave empty to export everything. Separate paths with spaces.", bundle: .module), mono: true) { run() }
             }
         } actions: {

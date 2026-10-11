@@ -303,6 +303,16 @@ struct LongTailStoreTests {
         #expect(store.bugReportCommands(to: folder, diagnostics: false).count == 1)
     }
 
+    @Test func compareTheCurrentBranchWithMain() async throws {
+        let (scratch, store) = try await prepared()
+        defer { scratch.remove() }
+        let comparison = try await store.compare(base: "feature/graph-renderer", head: "main")
+        #expect(comparison.baseCount == 3)
+        #expect(comparison.headCount == 0)
+        #expect(comparison.onlyInBase.map(\.subject).first == "Graph: draw merge curves with cubic béziers")
+        #expect(comparison.onlyInHead.isEmpty)
+    }
+
     @Test func compareBranchesAndPullRequestSummary() async throws {
         let (scratch, store) = try await prepared()
         defer { scratch.remove() }

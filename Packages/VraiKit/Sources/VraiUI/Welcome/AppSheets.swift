@@ -40,6 +40,7 @@ public final class WelcomeModel {
     public var statuses: [String: RecentStatus] = [:]
     public var selected = 0
     public var missing: RecentRepository?
+    public var closeAfterSheet = false
 
     public init() {}
 }
@@ -105,9 +106,20 @@ enum AppSheets {
         AppSheetContext(
             dismiss: { WelcomeModel.shared.sheet = nil },
             opened: { reference in
-                WelcomeModel.shared.sheet = nil
                 openWindow(value: app.request(reference))
-                dismissWindow(id: "welcome")
+                let model = WelcomeModel.shared
+                guard model.sheet != nil else {
+                    dismissWindow(id: "welcome")
+                    return
+                }
+                model.closeAfterSheet = true
+                model.sheet = nil
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(700))
+                    guard model.closeAfterSheet else { return }
+                    model.closeAfterSheet = false
+                    dismissWindow(id: "welcome")
+                }
             },
             switchTo: { next in
                 WelcomeModel.shared.sheet = nil

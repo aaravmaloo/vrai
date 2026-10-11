@@ -30,6 +30,7 @@ struct FileHistoryView: View {
             }
         }
         .task(id: LoadKey(path: store.fileFocus?.path, head: store.snapshot?.headOID, attempt: attempt)) { await load() }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("file-history-view")
     }
 
@@ -167,30 +168,66 @@ struct FileHistoryDetail: View {
             .padding(.bottom, Vrai.Space.s10)
             .background(Color.Vrai.bgSubtle)
             .hairline(.bottom)
-            HStack(spacing: Vrai.Space.s8) {
-                FileStatusTile(status: entry.file.status)
-                PathBar(path: entry.file.path)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .clipped()
-                if !widthClass.isNarrow {
-                    DiffStat(additions: entry.file.additions, deletions: entry.file.deletions)
-                    SegmentedControl(selection: Binding(get: { preferences.diffMode }, set: { preferences.diffMode = $0 }), items: [
-                        SegmentItem(value: Preferences.DiffMode.unified, icon: "text.alignleft", label: String(localized: "Unified", bundle: .module)),
-                        SegmentItem(value: Preferences.DiffMode.split, icon: "rectangle.split.2x1", label: String(localized: "Side by side", bundle: .module))
-                    ])
+            if widthClass >= .regular {
+                HStack(spacing: 0) {
+                    filesColumn
+                        .frame(width: Vrai.Size.filelist)
+                        .hairline(.trailing)
+                    VStack(spacing: 0) {
+                        fileBar(column: true)
+                        diffBody
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                IconMenu(icon: "ellipsis.circle", label: String(localized: "File actions", bundle: .module)) {
-                    CommitFileMenu(id: entry.commit.id, path: entry.file.path, window: window)
-                }
+            } else {
+                fileBar(column: false)
+                diffBody
             }
-            .padding(.leading, Vrai.Space.s12)
-            .padding(.trailing, Vrai.Space.s8)
-            .frame(height: Metrics.paneBarHeight)
-            .hairline(.bottom)
-            diffBody
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .task(id: context) { await load() }
+    }
+
+    var filesColumn: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: Vrai.Space.s8) {
+                Text(String(localized: "\(n(1, "file")) changed", bundle: .module))
+                    .font(Font.Vrai.captionStrong)
+                    .foregroundStyle(Color.Vrai.textSecondary)
+                    .lineLimit(1)
+                DiffStat(additions: entry.file.additions, deletions: entry.file.deletions, bar: true)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, Vrai.Space.s12)
+            .frame(height: Metrics.paneBarHeight)
+            FileRowView(path: entry.file.path, oldPath: entry.file.oldPath, status: entry.file.status, additions: entry.file.additions, deletions: entry.file.deletions, binary: entry.file.isBinary, selected: true)
+                .contextMenu { CommitFileMenu(id: entry.commit.id, path: entry.file.path, window: window) }
+                .padding(.horizontal, Vrai.Space.s4)
+            Spacer(minLength: 0)
+        }
+    }
+
+    func fileBar(column: Bool) -> some View {
+        HStack(spacing: Vrai.Space.s8) {
+            if !column { FileStatusTile(status: entry.file.status) }
+            PathBar(path: entry.file.path)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .clipped()
+            if !widthClass.isNarrow {
+                if !column { DiffStat(additions: entry.file.additions, deletions: entry.file.deletions) }
+                SegmentedControl(selection: Binding(get: { preferences.diffMode }, set: { preferences.diffMode = $0 }), items: [
+                    SegmentItem(value: Preferences.DiffMode.unified, icon: "text.alignleft", label: String(localized: "Unified", bundle: .module)),
+                    SegmentItem(value: Preferences.DiffMode.split, icon: "rectangle.split.2x1", label: String(localized: "Side by side", bundle: .module))
+                ])
+            }
+            IconMenu(icon: "ellipsis.circle", label: String(localized: "File actions", bundle: .module)) {
+                CommitFileMenu(id: entry.commit.id, path: entry.file.path, window: window)
+            }
+        }
+        .padding(.leading, Vrai.Space.s12)
+        .padding(.trailing, Vrai.Space.s8)
+        .frame(height: Metrics.paneBarHeight)
+        .hairline(.bottom)
     }
 
     @ViewBuilder var diffBody: some View {

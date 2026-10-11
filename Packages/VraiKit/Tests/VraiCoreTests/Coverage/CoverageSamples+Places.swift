@@ -9,6 +9,7 @@ extension CoverageSamples {
             PlacesCommands.unlockWorktree(path: "/tmp/vrai-sync-fix"),
             PlacesCommands.pruneWorktrees(),
             PlacesCommands.listWorktrees,
+            PlacesCommands.worktreeStatus,
             PlacesCommands.submodule(path: "Vendor/libgit2", action: .initUpdate),
             PlacesCommands.submodule(path: "Vendor/libgit2", action: .update),
             PlacesCommands.submodule(path: "Vendor/libgit2", action: .updateRemote),

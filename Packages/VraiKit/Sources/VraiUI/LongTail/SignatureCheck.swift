@@ -57,7 +57,6 @@ struct SignaturePopover: View {
                     Text(report.message)
                         .font(Font.Vrai.codeSmall)
                         .foregroundStyle(Color.Vrai.textSecondary)
-                        .textSelection(.enabled)
                         .lineLimit(8)
                         .fixedSize(horizontal: false, vertical: true)
                 }

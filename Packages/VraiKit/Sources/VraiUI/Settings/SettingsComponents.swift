@@ -19,8 +19,8 @@ enum SettingsMetrics {
     static let fieldNarrow = Vrai.Size.field - Vrai.Space.s64 - Vrai.Space.s40
     static let scopeColumn = Vrai.Space.s64 + Vrai.Space.s8
     static let previewDiff = Vrai.Space.s64 * 2 + Vrai.Space.s24
-    static let minWidth = WidthClass.compactBelow - Vrai.Space.s24
-    static let minHeight = Vrai.Size.sheet - Vrai.Space.s64 * 3
+    static let width = Vrai.Size.sheetWide
+    static let height = Vrai.Size.sheet - Vrai.Space.s24
 }
 
 struct SettingsForm<Content: View>: View {
@@ -241,7 +241,7 @@ struct SettingsSlider: View {
 
     var body: some View {
         HStack(spacing: Vrai.Space.s12) {
-            Slider(value: Binding(get: { Double(value) }, set: { set(Int(($0 / Double(step)).rounded()) * step) }), in: Double(range.lowerBound)...Double(range.upperBound), step: Double(step)) {
+            Slider(value: Binding(get: { Double(value) }, set: { change($0) }), in: Double(range.lowerBound)...Double(range.upperBound)) {
                 Text(label)
             }
             .labelsHidden()
@@ -254,6 +254,11 @@ struct SettingsSlider: View {
                 .foregroundStyle(Color.Vrai.textSecondary)
                 .frame(minWidth: Vrai.Space.s40, alignment: .trailing)
         }
+    }
+
+    func change(_ raw: Double) {
+        let next = min(max(Int((raw / Double(step)).rounded()) * step, range.lowerBound), range.upperBound)
+        if next != value { set(next) }
     }
 }
 
@@ -283,6 +288,7 @@ struct CommitField: View {
             TextField(label, text: $draft, prompt: placeholder.isEmpty ? nil : Text(placeholder))
                 .labelsHidden()
                 .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.leading)
                 .font(mono ? (small ? Font.Vrai.codeSmall : Font.Vrai.code) : (small ? Font.Vrai.callout : Font.Vrai.body))
                 .controlSize(small ? .small : .regular)
                 .focused($focused)
@@ -311,8 +317,8 @@ struct CommitField: View {
             loaded = true
             draft = value
         }
-        .onChange(of: value) { _, next in
-            if !focused { draft = next }
+        .onChange(of: value) { previous, next in
+            if !focused || draft == previous { draft = next }
         }
     }
 

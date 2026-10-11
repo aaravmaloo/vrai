@@ -3,12 +3,10 @@ import VraiCore
 import VraiGit
 
 struct CompareSheet: View {
-    let initialFirst: String?
-    let initialSecond: String?
     @Environment(RepositoryStore.self) private var store
     @Environment(WindowModel.self) private var window
-    @State private var first = ""
-    @State private var second = ""
+    @State private var first: String
+    @State private var second: String
     @State private var result: BranchComparison?
     @State private var loading = false
     @State private var failure: String?
@@ -21,12 +19,19 @@ struct CompareSheet: View {
         return out
     }
 
-    var defaultSecond: String {
+    init(first: String, second: String) {
+        _first = State(initialValue: first)
+        _second = State(initialValue: second)
+    }
+
+    @MainActor static func defaults(_ store: RepositoryStore, first: String?, second: String?) -> (first: String, second: String) {
         let names = store.snapshot?.branches.map(\.name) ?? []
         let current = store.snapshot?.currentBranch?.name
-        if let main = names.first(where: { BranchColors.mainLines.contains($0) && $0 != current }) { return main }
-        if let upstream = store.snapshot?.currentBranch?.upstream { return upstream }
-        return names.first { $0 != current } ?? "HEAD"
+        let start = first ?? current ?? "HEAD"
+        if let second { return (start, second) }
+        if let main = names.first(where: { BranchColors.mainLines.contains($0) && $0 != start }) { return (start, main) }
+        if let upstream = store.snapshot?.currentBranch?.upstream, upstream != start { return (start, upstream) }
+        return (start, names.first { $0 != start } ?? "HEAD")
     }
 
     var body: some View {
@@ -80,22 +85,26 @@ struct CompareSheet: View {
             .disabled(first.isEmpty)
             .accessibilityIdentifier("compare-show")
         }
-        .onAppear {
-            if first.isEmpty { first = initialFirst ?? store.snapshot?.currentBranch?.name ?? "HEAD" }
-            if second.isEmpty { second = initialSecond ?? defaultSecond }
-        }
         .task(id: first + "\u{0}" + second) {
             guard !first.isEmpty, !second.isEmpty else { return }
             loading = true
             failure = nil
+            let base = first
+            let head = second
             do {
-                result = try await store.compare(base: first, head: second)
-            } catch let error as GitError {
-                result = nil
-                failure = error.result?.errorOutput.trimmingCharacters(in: .whitespacesAndNewlines) ?? ErrorCopy(error).message
+                let compared = try await store.compare(base: base, head: head)
+                guard !Task.isCancelled, base == first, head == second else { return }
+                result = compared
+                failure = nil
             } catch {
+                guard !Task.isCancelled, base == first, head == second else { return }
+                if let error = error as? GitError, error.code == .cancelled { return }
                 result = nil
-                failure = error.localizedDescription
+                if let error = error as? GitError {
+                    failure = error.result?.errorOutput.trimmingCharacters(in: .whitespacesAndNewlines) ?? ErrorCopy(error).message
+                } else {
+                    failure = error.localizedDescription
+                }
             }
             loading = false
         }

@@ -12,8 +12,8 @@ final class ExpertFlowTests: XCTestCase {
         let app = fixture.launch()
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, true)
-        app.typeKey("j", modifierFlags: .command)
-        app.typeKey("b", modifierFlags: [.command, .shift])
+        ConsoleUI.hideConsole(app)
+        ExpertUI.newBranchSheet(app)
         let preview = app.textFields["command-preview"]
         XCTAssertTrue(preview.waitForExistence(timeout: 5))
         let built = preview.value as? String ?? ""
@@ -22,7 +22,7 @@ final class ExpertFlowTests: XCTestCase {
         preview.click()
         preview.typeKey("a", modifierFlags: .command)
         preview.typeText("git branch expert-edited main")
-        XCTAssertTrue(app.staticTexts["Runs as you typed it, and the output shows in the console."].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(app, "Runs as you typed it, and the output shows in the console.").waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Use the command Vrai built"].exists)
         ChangesFixtureCopy.attach(self, app, name: "expert-sheet-edited-light")
         let create = app.buttons["Create and switch"].exists ? app.buttons["Create and switch"] : app.buttons["Create branch"]
@@ -41,8 +41,8 @@ final class ExpertFlowTests: XCTestCase {
         let app = ChangesFixtureCopy.launch(Sandbox.fixture("everyday"), size: "1280x800")
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, true)
-        app.typeKey("j", modifierFlags: .command)
-        app.typeKey("b", modifierFlags: [.command, .shift])
+        ConsoleUI.hideConsole(app)
+        ExpertUI.newBranchSheet(app)
         let preview = app.textFields["command-preview"]
         XCTAssertTrue(preview.waitForExistence(timeout: 5))
         let built = preview.value as? String ?? ""
@@ -54,7 +54,7 @@ final class ExpertFlowTests: XCTestCase {
         let create = app.buttons["Create and switch"]
         XCTAssertTrue(create.waitForExistence(timeout: 5))
         create.click()
-        XCTAssertTrue(app.staticTexts["Put the git command first, like git status. Options before it, such as -C or -c, don't run here."].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(app, "Put the git command first, like git status. Options before it, such as -C or -c, don't run here.").waitForExistence(timeout: 5))
         revert.click()
         XCTAssertTrue(ConsoleUI.wait { (preview.value as? String) == built })
         XCTAssertFalse(create.isEnabled)
@@ -68,12 +68,14 @@ final class ExpertFlowTests: XCTestCase {
         let app = ChangesFixtureCopy.launch(Sandbox.fixture("everyday"), size: "1280x800")
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, false)
-        app.typeKey("j", modifierFlags: .command)
-        app.typeKey("b", modifierFlags: [.command, .shift])
-        XCTAssertTrue(app.staticTexts["New branch"].waitForExistence(timeout: 5))
-        let options = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Options")).firstMatch
-        if options.exists { options.click() }
-        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "git branch")).firstMatch.waitForExistence(timeout: 5) || app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "git switch")).firstMatch.exists)
+        ConsoleUI.hideConsole(app)
+        ExpertUI.newBranchSheet(app)
+        let options = app.buttons.matching(NSPredicate(format: "label == %@", "Options")).firstMatch
+        XCTAssertTrue(options.waitForExistence(timeout: 5))
+        if (options.value as? String) != "Expanded" { options.click() }
+        let preview = ConsoleUI.text(app, "command-preview")
+        XCTAssertTrue(preview.waitForExistence(timeout: 5), "No command preview under Options; check that Command previews is on in Settings for this sandbox")
+        XCTAssertTrue(ConsoleUI.shown(preview).hasPrefix("git "), ConsoleUI.shown(preview))
         XCTAssertFalse(app.textFields["command-preview"].exists)
         ChangesFixtureCopy.attach(self, app, name: "expert-sheet-off-light")
         app.typeKey(.escape, modifierFlags: [])
@@ -89,27 +91,34 @@ final class ExpertFlowTests: XCTestCase {
         let app = fixture.launch()
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, true)
-        app.typeKey("j", modifierFlags: .command)
+        ConsoleUI.hideConsole(app)
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", subject + ",")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         row.click()
-        let editor = app.textViews["Note"]
+        XCTAssertTrue(ConsoleUI.wait { row.isSelected }, "Clicking the commit didn't select it")
+        let editor = app.textViews["note-editor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 10))
-        editor.click()
-        editor.typeText("Reviewed in the flow test")
-        app.buttons["Add note"].click()
+        ExpertUI.reveal(app, editor)
+        ExpertUI.type("Reviewed in the flow test", into: editor, app: app)
+        let save = app.buttons["note-save"]
+        XCTAssertTrue(save.isEnabled)
+        save.click()
         XCTAssertTrue(ConsoleUI.wait(timeout: 10) { (try? fixture.git(["notes", "show", id]).output.trimmingCharacters(in: .whitespacesAndNewlines)) == "Reviewed in the flow test" })
-        XCTAssertTrue(app.staticTexts["Reviewed in the flow test"].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(app, "Reviewed in the flow test").waitForExistence(timeout: 5))
         ChangesFixtureCopy.attach(self, app, name: "expert-note-light")
 
-        app.buttons["Edit note"].click()
+        let edit = app.buttons["note-edit"]
+        ExpertUI.reveal(app, edit)
+        edit.click()
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
-        editor.typeKey("a", modifierFlags: .command)
-        editor.typeText("Reviewed twice")
-        app.buttons["Save note"].click()
+        ExpertUI.reveal(app, editor)
+        ExpertUI.type("Reviewed twice", into: editor, app: app, replacing: true)
+        save.click()
         XCTAssertTrue(ConsoleUI.wait(timeout: 10) { (try? fixture.git(["notes", "show", id]).output.trimmingCharacters(in: .whitespacesAndNewlines)) == "Reviewed twice" })
 
-        app.buttons["Remove note"].click()
+        let remove = app.buttons["note-remove"]
+        ExpertUI.reveal(app, remove)
+        remove.click()
         XCTAssertTrue(ConsoleUI.wait(timeout: 10) { (try? fixture.git(["notes", "show", id]).status) != 0 })
         XCTAssertTrue(editor.waitForExistence(timeout: 5))
         ConsoleUI.setExpert(app, false)
@@ -125,7 +134,7 @@ final class ExpertFlowTests: XCTestCase {
         let app = fixture.launch()
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, true)
-        app.typeKey("j", modifierFlags: .command)
+        ConsoleUI.hideConsole(app)
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", subject + ",")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         row.rightClick()
@@ -160,5 +169,43 @@ final class ExpertFlowTests: XCTestCase {
         app.typeKey(.escape, modifierFlags: [])
         ConsoleUI.setExpert(app, false)
         app.terminate()
+    }
+}
+
+enum ExpertUI {
+    @MainActor
+    static func newBranchSheet(_ app: XCUIApplication) {
+        let title = ConsoleUI.text(app, "New branch")
+        for attempt in 0..<3 {
+            if attempt > 0 { ConsoleUI.focusWindow(app) }
+            app.activate()
+            app.typeKey("b", modifierFlags: [.command, .shift])
+            if title.waitForExistence(timeout: 3) { return }
+        }
+        XCTFail("Shift-Command-B didn't open New branch")
+    }
+
+    @MainActor
+    static func reveal(_ app: XCUIApplication, _ element: XCUIElement) {
+        XCTAssertTrue(element.waitForExistence(timeout: 5))
+        let scroll = app.scrollViews.containing(.any, identifier: element.identifier).firstMatch
+        for _ in 0..<12 where !element.isHittable {
+            guard scroll.exists else { break }
+            scroll.scroll(byDeltaX: 0, deltaY: -120)
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        XCTAssertTrue(element.isHittable, "\(element.identifier) can't be reached")
+    }
+
+    @MainActor
+    static func type(_ text: String, into element: XCUIElement, app: XCUIApplication, replacing: Bool = false) {
+        let focused = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasKeyboardFocus == true"), object: element)
+        if XCTWaiter().wait(for: [focused], timeout: 1) != .completed {
+            element.click()
+            let again = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasKeyboardFocus == true"), object: element)
+            XCTAssertEqual(XCTWaiter().wait(for: [again], timeout: 3), .completed, "\(element.identifier) didn't take keyboard focus")
+        }
+        if replacing { app.typeKey("a", modifierFlags: .command) }
+        app.typeText(text)
     }
 }

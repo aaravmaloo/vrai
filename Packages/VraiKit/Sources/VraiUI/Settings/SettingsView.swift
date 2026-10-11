@@ -20,7 +20,7 @@ public struct SettingsView: View {
                 .accessibilityIdentifier("settings.tab." + pane.rawValue)
             }
         }
-        .frame(minWidth: SettingsMetrics.minWidth, idealWidth: Vrai.Size.sheetWide, maxWidth: .infinity, minHeight: SettingsMetrics.minHeight, idealHeight: Vrai.Size.sheet - Vrai.Space.s16, maxHeight: .infinity)
+        .frame(width: SettingsMetrics.width, height: SettingsMetrics.height)
         .modifier(SettingsHosts(context: context))
         .environment(app.preferences)
         .environment(\.expert, app.preferences.expert)

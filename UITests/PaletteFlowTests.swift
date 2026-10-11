@@ -11,7 +11,7 @@ final class PaletteFlowTests: XCTestCase {
         ConsoleUI.waitForHistory(app)
         PaletteUI.open(app)
         let palette = PaletteUI.palette(app)
-        XCTAssertTrue(palette.staticTexts["Suggestions"].exists || palette.staticTexts["Actions"].exists)
+        XCTAssertTrue(ConsoleUI.text(palette, "Suggestions").exists || ConsoleUI.text(palette, "Actions").exists)
         ChangesFixtureCopy.attach(self, app, name: "palette-empty-light")
         PaletteUI.query(app, "line")
         XCTAssertTrue(PaletteUI.item(app, "feature/line-staging").waitForExistence(timeout: 5))
@@ -64,9 +64,9 @@ final class PaletteFlowTests: XCTestCase {
         try fixture.clean()
         let app = fixture.launch()
         ConsoleUI.waitForHistory(app)
-        app.typeKey("b", modifierFlags: .command)
+        PaletteUI.switchTo(app)
         let palette = PaletteUI.palette(app)
-        XCTAssertTrue(palette.staticTexts["Branches"].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(palette, "Branches").waitForExistence(timeout: 5))
         XCTAssertTrue(PaletteUI.item(app, "main").exists)
         PaletteUI.query(app, "line-staging")
         XCTAssertTrue(PaletteUI.item(app, "feature/line-staging").waitForExistence(timeout: 5))
@@ -75,7 +75,7 @@ final class PaletteFlowTests: XCTestCase {
         XCTAssertTrue(ChangesFixtureCopy.waitUntilGone(palette, timeout: 5))
         XCTAssertTrue(ConsoleUI.wait(timeout: 15) { (try? fixture.git(["symbolic-ref", "--short", "HEAD"]).output.trimmingCharacters(in: .whitespacesAndNewlines)) == "feature/line-staging" })
 
-        app.typeKey("b", modifierFlags: .command)
+        PaletteUI.switchTo(app)
         XCTAssertTrue(palette.waitForExistence(timeout: 5))
         PaletteUI.query(app, "feature/palette-test")
         XCTAssertTrue(PaletteUI.item(app, "Create branch \u{201C}feature/palette-test\u{201D}\u{2026}").waitForExistence(timeout: 5))
@@ -89,12 +89,12 @@ final class PaletteFlowTests: XCTestCase {
         let app = ChangesFixtureCopy.launch(Sandbox.fixture("everyday"), size: "1280x800")
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, false)
-        app.typeKey("j", modifierFlags: .command)
+        ConsoleUI.hideConsole(app)
         PaletteUI.open(app)
         PaletteUI.query(app, "git status")
         XCTAssertTrue(PaletteUI.item(app, "git status").waitForExistence(timeout: 5))
         app.typeKey(.return, modifierFlags: [])
-        XCTAssertTrue(app.staticTexts["Running git commands is part of Expert mode"].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(app, "Running git commands is part of Expert mode").waitForExistence(timeout: 5))
         ChangesFixtureCopy.attach(self, app, name: "palette-expert-toast-light")
         app.terminate()
     }
@@ -109,11 +109,11 @@ final class PaletteFlowTests: XCTestCase {
         let head = try fixture.git(["rev-parse", "HEAD"]).output
         PaletteUI.open(app)
         let palette = PaletteUI.palette(app)
-        XCTAssertTrue(palette.staticTexts["Expert"].exists)
+        XCTAssertTrue(ConsoleUI.text(palette, "Expert").exists)
         PaletteUI.query(app, "git reset --hard HEAD~1")
         XCTAssertTrue(PaletteUI.item(app, "git reset --hard HEAD~1").waitForExistence(timeout: 5))
-        XCTAssertTrue(palette.staticTexts["Run in git"].exists)
-        XCTAssertTrue(palette.staticTexts["Destructive"].exists)
+        XCTAssertTrue(ConsoleUI.text(palette, "Run in git").exists)
+        XCTAssertTrue(PaletteUI.item(app, "git reset --hard HEAD~1").label.contains("Destructive"))
         ChangesFixtureCopy.attach(self, app, name: "palette-expert-risk-light")
         app.typeKey(.escape, modifierFlags: [])
         app.typeKey(.escape, modifierFlags: [])
@@ -172,23 +172,38 @@ enum PaletteUI {
     @MainActor
     static func open(_ app: XCUIApplication) {
         let palette = app.descendants(matching: .any)["command-palette"]
-        for _ in 0..<3 where !palette.exists {
+        for attempt in 0..<3 where !palette.exists {
+            if attempt > 0 { ConsoleUI.focusWindow(app) }
             app.activate()
             app.typeKey("k", modifierFlags: .command)
             if palette.waitForExistence(timeout: 3) { break }
         }
-        XCTAssertTrue(palette.exists)
+        XCTAssertTrue(palette.exists, "Command-K didn't open the palette")
+    }
+
+    @MainActor
+    static func switchTo(_ app: XCUIApplication) {
+        let palette = app.descendants(matching: .any)["command-palette"]
+        for attempt in 0..<3 where !palette.exists {
+            if attempt > 0 { ConsoleUI.focusWindow(app) }
+            app.activate()
+            app.typeKey("b", modifierFlags: .command)
+            if palette.waitForExistence(timeout: 3) { break }
+        }
+        XCTAssertTrue(palette.exists, "Command-B didn't open Switch to")
     }
 
     @MainActor
     static func query(_ app: XCUIApplication, _ text: String) {
         let field = field(app)
         XCTAssertTrue(field.waitForExistence(timeout: 5))
+        let focused = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasKeyboardFocus == true"), object: field)
+        XCTAssertEqual(XCTWaiter().wait(for: [focused], timeout: 3), .completed, "The palette field doesn't take keyboard focus when the palette opens")
         if !((field.value as? String) ?? "").isEmpty {
-            field.typeKey("a", modifierFlags: .command)
-            field.typeKey(.delete, modifierFlags: [])
+            app.typeKey("a", modifierFlags: .command)
+            app.typeKey(.delete, modifierFlags: [])
         }
-        field.typeText(text)
+        app.typeText(text)
     }
 
     @MainActor

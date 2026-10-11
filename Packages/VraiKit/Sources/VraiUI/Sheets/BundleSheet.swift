@@ -39,11 +39,10 @@ struct BundleSheet: View {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't write the bundle", bundle: .module), message: failure)
             }
-            SyncForm.Field(label: String(localized: "Include", bundle: .module)) {
-                SyncForm.Radios(selection: $include, choices: choices, label: String(localized: "Include", bundle: .module))
+            SyncForm.Radios(selection: $include, choices: choices, label: String(localized: "Include", bundle: .module))
+            SyncForm.Options(commands: [store.bundleCommand(refs: refs, to: target)]) {
+                LongTailPathField(label: String(localized: "Save as", bundle: .module), text: Binding(get: { destination.isEmpty ? suggested : destination }, set: { destination = $0 }), kind: .saveFile(window.repositoryName + ".bundle"), home: app.homeFolder)
             }
-            LongTailPathField(label: String(localized: "Save as", bundle: .module), text: Binding(get: { destination.isEmpty ? suggested : destination }, set: { destination = $0 }), kind: .saveFile(window.repositoryName + ".bundle"), home: app.homeFolder)
-            SyncForm.Options(commands: [store.bundleCommand(refs: refs, to: target)], hasContent: false) { EmptyView() }
         } actions: {
             LongTailFoot(label: String(localized: "Create bundle", bundle: .module), busy: busy, identifier: "bundle-run", cancel: { window.sheets.dismiss() }) { run() }
         }

@@ -8,9 +8,19 @@ final class LongTailFlowTests: XCTestCase {
     @MainActor
     private func open(_ fixture: RewriteFixture, appearance: String = "light", expert: Bool = false) -> XCUIApplication {
         let app = fixture.launch(appearance: appearance)
-        XCTAssertTrue(app.descendants(matching: .any)["commits"].waitForExistence(timeout: 15))
-        if expert { app.typeKey("e", modifierFlags: [.command, .option]) }
+        let commits = app.descendants(matching: .any)["commits"]
+        XCTAssertTrue(commits.waitForExistence(timeout: 15))
+        setExpert(app, expert)
         return app
+    }
+
+    @MainActor
+    private func setExpert(_ app: XCUIApplication, _ on: Bool) {
+        let toggle = app.switches["sidebar-expert"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        let wanted = on ? "1" : "0"
+        if String(describing: toggle.value ?? "") != wanted { toggle.click() }
+        XCTAssertTrue(eventually(5) { String(describing: toggle.value ?? "") == wanted }, on ? "Expert mode didn't turn on" : "Expert mode didn't turn off")
     }
 
     @MainActor
@@ -41,6 +51,13 @@ final class LongTailFlowTests: XCTestCase {
         field.click()
         field.typeKey("a", modifierFlags: .command)
         field.typeText(text)
+    }
+
+    @MainActor
+    private func openOptions(_ app: XCUIApplication) {
+        let options = app.sheets.firstMatch.buttons.matching(NSPredicate(format: "label == %@", "Options")).firstMatch
+        XCTAssertTrue(options.waitForExistence(timeout: 5))
+        options.click()
     }
 
     @MainActor
@@ -114,9 +131,11 @@ final class LongTailFlowTests: XCTestCase {
         let item = app.menuItems["Export archive\u{2026}"]
         XCTAssertTrue(item.waitForExistence(timeout: 5))
         item.click()
+        XCTAssertTrue(app.buttons["archive-run"].waitForExistence(timeout: 5))
+        attach(app, "j-archive-light")
+        openOptions(app)
         let field = app.textFields["Save as"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        attach(app, "j-archive-light")
         replace(field, with: output)
         app.buttons["archive-run"].click()
         XCTAssertTrue(eventually(15) { FileManager.default.fileExists(atPath: output) })
@@ -131,9 +150,11 @@ final class LongTailFlowTests: XCTestCase {
         let output = fixture.folder + "/vrai.bundle"
         let app = open(fixture)
         menu(app, "Repository", "Create bundle\u{2026}")
+        XCTAssertTrue(app.buttons["bundle-run"].waitForExistence(timeout: 5))
+        attach(app, "j-bundle-light")
+        openOptions(app)
         let field = app.textFields["Save as"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
-        attach(app, "j-bundle-light")
         replace(field, with: output)
         app.buttons["bundle-run"].click()
         XCTAssertTrue(eventually(20) { FileManager.default.fileExists(atPath: output) })
@@ -165,6 +186,7 @@ final class LongTailFlowTests: XCTestCase {
         XCTAssertTrue(undo.waitForExistence(timeout: 5))
         undo.click()
         XCTAssertTrue(try eventually(20) { try fixture.git(["log", "-1", "--format=%s", "HEAD~1"]).output.trimmingCharacters(in: .whitespacesAndNewlines) == "Graph: keep the HEAD halo above merge rings" })
+        setExpert(app, false)
         app.terminate()
     }
 
@@ -185,6 +207,7 @@ final class LongTailFlowTests: XCTestCase {
         app.buttons["split-run"].click()
         XCTAssertTrue(try eventually(20) { try fixture.git(["log", "-1", "--format=%s", "HEAD~2"]).output.trimmingCharacters(in: .whitespacesAndNewlines) == "Graph: assign lane colors from branch tips (part 2)" })
         XCTAssertEqual(try fixture.git(["log", "-1", "--format=%s", "HEAD~3"]).output.trimmingCharacters(in: .whitespacesAndNewlines), "Graph: assign lane colors from branch tips")
+        setExpert(app, false)
         app.terminate()
     }
 
@@ -202,6 +225,7 @@ final class LongTailFlowTests: XCTestCase {
         app.buttons["sparse-run"].click()
         XCTAssertTrue(eventually(20) { !FileManager.default.fileExists(atPath: fixture.root + "/Docs") })
         XCTAssertTrue(FileManager.default.fileExists(atPath: fixture.root + "/Sources"))
+        setExpert(app, false)
         app.terminate()
     }
 
@@ -230,6 +254,7 @@ final class LongTailFlowTests: XCTestCase {
         item.click()
         XCTAssertTrue(textContaining(app, "Fixup message ready in Changes").waitForExistence(timeout: 10))
         attach(app, "j-fixup-light")
+        setExpert(app, false)
         app.terminate()
     }
 }

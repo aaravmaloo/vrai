@@ -179,29 +179,42 @@ struct ShortcutsPane: View {
                 SettingsForm {
                     ForEach(groups) { group in
                         SettingsSection(group.title, footer: group.footer) {
-                            ForEach(group.items) { item in
-                                LabeledContent {
-                                    HStack(spacing: Vrai.Space.s6) {
-                                        ForEach(Array(item.keys.enumerated()), id: \.offset) { index, keys in
-                                            if index > 0 {
-                                                Text("or", bundle: .module)
-                                                    .font(Font.Vrai.caption)
-                                                    .foregroundStyle(Color.Vrai.textTertiary)
-                                            }
-                                            KeyCaps(keys: keys)
-                                        }
-                                    }
-                                } label: {
-                                    Text(item.label)
-                                        .font(Font.Vrai.body)
-                                        .foregroundStyle(Color.Vrai.text)
+                            VStack(spacing: 0) {
+                                ForEach(group.items) { item in
+                                    ShortcutRow(item: item)
                                 }
-                                .accessibilityElement(children: .combine)
                             }
+                            .padding(.vertical, Vrai.Space.s4)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+struct ShortcutRow: View {
+    let item: ShortcutItem
+
+    var body: some View {
+        HStack(spacing: Vrai.Space.s12) {
+            Text(item.label)
+                .font(Font.Vrai.body)
+                .foregroundStyle(Color.Vrai.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: Vrai.Space.s6) {
+                ForEach(Array(item.keys.enumerated()), id: \.offset) { index, keys in
+                    if index > 0 {
+                        Text("or", bundle: .module)
+                            .font(Font.Vrai.caption)
+                            .foregroundStyle(Color.Vrai.textTertiary)
+                    }
+                    KeyCaps(keys: keys)
+                }
+            }
+        }
+        .frame(minHeight: Vrai.Space.s24)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("settings.shortcut." + item.label)
     }
 }

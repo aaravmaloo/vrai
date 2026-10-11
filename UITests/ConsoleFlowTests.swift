@@ -14,17 +14,19 @@ final class ConsoleFlowTests: XCTestCase {
         ConsoleUI.setExpert(app, false)
         let console = ConsoleUI.console(app)
         let entries = console.descendants(matching: .any).matching(identifier: "console-entry")
-        XCTAssertTrue(entries.firstMatch.waitForExistence(timeout: 10) || console.buttons.matching(NSPredicate(format: "label CONTAINS %@", "background command")).firstMatch.exists)
+        let rows = console.descendants(matching: .any).matching(NSPredicate(format: "identifier == %@ OR label CONTAINS %@", "console-entry", "background command"))
+        XCTAssertTrue(rows.firstMatch.waitForExistence(timeout: 10), "The console lists nothing Vrai ran at launch")
         XCTAssertTrue(console.buttons["Turn on Expert mode"].exists)
         ConsoleUI.menu(app, "Repository", "Fetch")
         let fetch = entries.matching(NSPredicate(format: "label CONTAINS %@", "git fetch")).firstMatch
         XCTAssertTrue(fetch.waitForExistence(timeout: 20))
+        XCTAssertTrue(fetch.label.hasPrefix("Vrai, "), fetch.label)
         ChangesFixtureCopy.attach(self, app, name: "console-all-light")
         console.buttons["Background"].click()
         XCTAssertTrue(entries.matching(NSPredicate(format: "label BEGINSWITH %@", "Vrai, ")).firstMatch.waitForExistence(timeout: 5))
-        XCTAssertFalse(entries.matching(NSPredicate(format: "label CONTAINS %@", "git fetch")).firstMatch.exists)
+        XCTAssertTrue(ChangesFixtureCopy.waitUntilGone(fetch, timeout: 5))
         console.buttons["Failed"].click()
-        XCTAssertTrue(console.staticTexts["No failed commands."].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(console, "No failed commands.").waitForExistence(timeout: 5))
         console.buttons["All"].click()
         let field = console.textFields["Filter commands and output"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
@@ -33,7 +35,7 @@ final class ConsoleFlowTests: XCTestCase {
         XCTAssertTrue(ConsoleUI.wait { entries.count == 1 })
         app.typeKey("j", modifierFlags: .command)
         XCTAssertTrue(ChangesFixtureCopy.waitUntilGone(console, timeout: 5))
-        let button = app.buttons["Show console"]
+        let button = app.toolbars.buttons["Show console"].firstMatch
         XCTAssertTrue(button.waitForExistence(timeout: 5))
         button.click()
         XCTAssertTrue(console.waitForExistence(timeout: 5))
@@ -76,7 +78,7 @@ final class ConsoleFlowTests: XCTestCase {
         prompt.typeKey(.delete, modifierFlags: [])
 
         ConsoleUI.run(app, "-c core.editor=vim commit")
-        XCTAssertTrue(app.staticTexts["Put the git command first, like git status. Options before it, such as -C or -c, don't run here."].waitForExistence(timeout: 5))
+        XCTAssertTrue(ConsoleUI.text(app, "Put the git command first, like git status. Options before it, such as -C or -c, don't run here.").waitForExistence(timeout: 5))
         ConsoleUI.setExpert(app, false)
         app.terminate()
     }
@@ -89,8 +91,7 @@ final class ConsoleFlowTests: XCTestCase {
         ConsoleUI.waitForHistory(app)
         ConsoleUI.setExpert(app, true)
         let console = ConsoleUI.console(app)
-        app.typeKey("j", modifierFlags: .command)
-        XCTAssertTrue(ChangesFixtureCopy.waitUntilGone(console, timeout: 5))
+        ConsoleUI.hideConsole(app)
         PaletteUI.open(app)
         PaletteUI.query(app, "git checkout no-such-branch")
         app.typeKey(.return, modifierFlags: [])
@@ -98,7 +99,8 @@ final class ConsoleFlowTests: XCTestCase {
         let entry = ConsoleUI.entry(app, "git checkout no-such-branch")
         XCTAssertTrue(entry.waitForExistence(timeout: 10))
         XCTAssertTrue(entry.label.contains("failed"), entry.label)
-        XCTAssertTrue(console.staticTexts.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "no-such-branch", "no-such-branch")).count > 1)
+        XCTAssertEqual(entry.value as? String, "Expanded")
+        XCTAssertTrue(console.staticTexts.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "no-such-branch", "no-such-branch")).firstMatch.waitForExistence(timeout: 5))
         console.buttons["Failed"].click()
         XCTAssertTrue(entry.waitForExistence(timeout: 5))
         ChangesFixtureCopy.attach(self, app, name: "console-failed-light")
@@ -127,6 +129,7 @@ final class ConsoleFlowTests: XCTestCase {
                 XCTAssertTrue(app.textFields["console-prompt"].isHittable, "\(name) \(appearance): the prompt can't be reached")
                 ChangesFixtureCopy.attach(self, app, name: "console-\(name)-\(appearance)")
                 ConsoleUI.setExpert(app, false)
+                Thread.sleep(forTimeInterval: 0.5)
                 ChangesFixtureCopy.attach(self, app, name: "console-\(name)-\(appearance)-off")
                 app.terminate()
             }
@@ -139,18 +142,41 @@ enum ConsoleUI {
     static func waitForHistory(_ app: XCUIApplication) {
         XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 10))
         XCTAssertTrue(app.descendants(matching: .any)["commits"].waitForExistence(timeout: 15))
+        focusWindow(app)
+    }
+
+    @MainActor
+    static func focusWindow(_ app: XCUIApplication) {
         app.activate()
+        let filter = app.textFields["Filter by subject, author or hash"]
+        guard filter.waitForExistence(timeout: 5), filter.isHittable else { return }
+        filter.click()
+        let focused = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasKeyboardFocus == true"), object: filter)
+        _ = XCTWaiter().wait(for: [focused], timeout: 2)
     }
 
     @MainActor
     static func console(_ app: XCUIApplication) -> XCUIElement {
         let console = app.descendants(matching: .any)["console"]
-        if !console.exists {
+        if console.waitForExistence(timeout: 1) { return console }
+        for attempt in 0..<3 {
+            if attempt > 0 { focusWindow(app) }
             app.activate()
             app.typeKey("j", modifierFlags: .command)
+            if console.waitForExistence(timeout: 3) { return console }
         }
-        XCTAssertTrue(console.waitForExistence(timeout: 5))
+        let button = app.toolbars.buttons["Show console"].firstMatch
+        if button.exists { button.click() }
+        XCTAssertTrue(console.waitForExistence(timeout: 5), "The console didn't open")
         return console
+    }
+
+    @MainActor
+    static func hideConsole(_ app: XCUIApplication) {
+        let console = app.descendants(matching: .any)["console"]
+        guard console.waitForExistence(timeout: 1) else { return }
+        console.buttons["Hide console"].firstMatch.click()
+        XCTAssertTrue(ChangesFixtureCopy.waitUntilGone(console, timeout: 5), "The console didn't close")
     }
 
     @MainActor
@@ -160,7 +186,11 @@ enum ConsoleUI {
         let turnOn = console.buttons["Turn on Expert mode"]
         for _ in 0..<3 {
             if on ? prompt.waitForExistence(timeout: 2) : turnOn.waitForExistence(timeout: 2) { return }
-            app.typeKey("e", modifierFlags: [.command, .option])
+            if on, turnOn.exists {
+                turnOn.click()
+            } else {
+                menu(app, "View", "Expert mode")
+            }
         }
         XCTFail(on ? "Expert mode didn't turn on" : "Expert mode didn't turn off")
     }
@@ -174,14 +204,26 @@ enum ConsoleUI {
     }
 
     @MainActor
+    static func text(_ scope: XCUIElement, _ text: String) -> XCUIElement {
+        scope.staticTexts.matching(NSPredicate(format: "identifier == %@ OR label == %@ OR value == %@", text, text, text)).firstMatch
+    }
+
+    @MainActor
+    static func shown(_ element: XCUIElement) -> String {
+        if let value = element.value as? String, !value.isEmpty { return value }
+        return element.label
+    }
+
+    @MainActor
     static func entry(_ app: XCUIApplication, _ command: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: "console-entry").matching(NSPredicate(format: "label CONTAINS %@", ", " + command + ", ")).firstMatch
     }
 
     @MainActor
     static func menu(_ app: XCUIApplication, _ menu: String, _ title: String) {
-        for _ in 0..<5 {
+        for attempt in 0..<5 {
             app.activate()
+            if attempt > 0 { focusWindow(app) }
             app.menuBars.menuBarItems[menu].click()
             let item = app.menuBars.menuItems[title]
             if item.waitForExistence(timeout: 3), item.isEnabled {

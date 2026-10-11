@@ -37,6 +37,7 @@ struct ReflogView: View {
         }
         .task(id: key) { await load() }
         .task(id: UndoKey(head: store.snapshot?.headOID, stashes: store.snapshot?.stashes.count ?? 0, tab: tab)) { await loadUndo() }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("reflog-view")
     }
 

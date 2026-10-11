@@ -15,19 +15,25 @@ struct SidebarView: View {
             RepositorySwitcher()
                 .padding(.horizontal, Vrai.Space.s6)
                 .padding(.bottom, Vrai.Space.s4)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    workspace
-                    branches
-                    remotes
-                    tags
-                    worktrees
-                    submodules
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        workspace
+                        branches
+                        remotes
+                        tags
+                        worktrees
+                        submodules
+                    }
+                    .padding(.horizontal, Vrai.Space.s4)
+                    .padding(.bottom, Vrai.Space.s8)
                 }
-                .padding(.horizontal, Vrai.Space.s4)
-                .padding(.bottom, Vrai.Space.s8)
+                .scrollIndicators(.automatic)
+                .onChange(of: window.expandedSections) { old, new in
+                    guard let key = SidebarAnchor.revealed.first(where: { new[$0] == true && old[$0] != true }) else { return }
+                    Task { proxy.scrollTo(SidebarAnchor(key: key)) }
+                }
             }
-            .scrollIndicators(.automatic)
             HStack(spacing: Vrai.Space.s8) {
                 Toggle(isOn: Binding(get: { preferences.expert }, set: { _ in window.toggleExpert() })) {
                     Text("Expert", bundle: .module)
@@ -37,6 +43,7 @@ struct SidebarView: View {
                 .toggleStyle(.switch)
                 .controlSize(.mini)
                 .help(String(localized: "Expert mode", bundle: .module))
+                .accessibilityIdentifier("sidebar-expert")
                 IconButton(icon: "gearshape", label: String(localized: "Settings", bundle: .module), small: true) {
                     openSettings()
                 }
@@ -321,7 +328,13 @@ struct SidebarSection<Content: View>: View {
             }
         }
         .padding(.top, Vrai.Space.s10)
+        .id(SidebarAnchor(key: key))
     }
+}
+
+struct SidebarAnchor: Hashable {
+    static let revealed = ["worktrees", "submodules"]
+    let key: String
 }
 
 struct SidebarItem: View {

@@ -66,6 +66,7 @@ struct InitSheet: View {
                 SyncForm.Input(label: String(localized: "First branch", bundle: .module), text: $branch, error: branchError, mono: true) { create() }
                 SyncForm.Field(label: String(localized: ".gitignore", bundle: .module)) {
                     SyncForm.Select(selection: $template, options: GitignoreTemplate.allCases.map { SyncForm.Option(value: $0, label: label($0)) }, label: String(localized: ".gitignore template", bundle: .module))
+                        .fixedSize(horizontal: true, vertical: false)
                 }
             }
             SyncForm.Checkbox(isOn: $readme, label: String(localized: "Add a README", bundle: .module))

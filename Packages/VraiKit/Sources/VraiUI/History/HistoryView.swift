@@ -286,9 +286,15 @@ struct CommitList: View {
         .focusable()
         .focusEffectDisabled()
         .focused($focused)
-        .onAppear {
+        .defaultFocus($focused, true)
+        .onAppear { window.listFocused = true }
+        .task {
             focused = true
-            window.listFocused = true
+            for delay in [60, 120, 240] {
+                try? await Task.sleep(for: .milliseconds(delay))
+                if focused { break }
+                focused = true
+            }
         }
         .onChange(of: focused) { _, value in window.listFocused = value }
         .onMoveCommand { direction in

@@ -4,13 +4,22 @@
     " and " : {
 
     },
+    " and %lld more" : {
+
+    },
     " and your %@" : {
+
+    },
+    " by %@" : {
 
     },
     " into %@" : {
 
     },
     " yet." : {
+
+    },
+    "--depth 50. Fetch more later." : {
 
     },
     "--include-untracked" : {
@@ -37,7 +46,46 @@
     ", but they're on %@." : {
 
     },
+    ", exit %@" : {
+
+    },
+    ", stopped" : {
+
+    },
+    ". Copied the imap-send command." : {
+
+    },
+    ". Copied the send-email command." : {
+
+    },
+    ".gitignore" : {
+
+    },
+    ".gitignore already has %@" : {
+
+    },
+    ".gitignore template" : {
+
+    },
+    "(no message)" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@\nIt can throw work away, and Undo history doesn't cover commands you type." : {
+
+    },
     "%@ (current)" : {
+
+    },
+    "%@ (default)" : {
+
+    },
+    "%@ (detached)" : {
+
+    },
+    "%@ (main)" : {
 
     },
     "%@ %@\n\nWhat's in this release." : {
@@ -62,6 +110,12 @@
           }
         }
       }
+    },
+    "%@ already exists" : {
+
+    },
+    "%@ already exists." : {
+
     },
     "%@ already has %@" : {
       "localizations" : {
@@ -113,11 +167,61 @@
         }
       }
     },
+    "%@ and %@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ and %2$@ on %3$@"
+          }
+        }
+      }
+    },
     "%@ are deleted" : {
 
     },
     "%@ are out of date" : {
 
+    },
+    "%@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@"
+          }
+        }
+      }
+    },
+    "%@ at %@ didn't open" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@ didn't open"
+          }
+        }
+      }
+    },
+    "%@ at %@, %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@, %3$@."
+          }
+        }
+      }
+    },
+    "%@ at %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@."
+          }
+        }
+      }
     },
     "%@ back in Changes." : {
 
@@ -128,10 +232,19 @@
     "%@ back in unstaged changes." : {
 
     },
+    "%@ behind the recorded one" : {
+
+    },
     "%@ changed" : {
 
     },
+    "%@ changed it" : {
+
+    },
     "%@ changed on both sides. Vrai walks you through each conflict." : {
+
+    },
+    "%@ didn't accept your credentials" : {
 
     },
     "%@ didn't accept your credentials for %@." : {
@@ -157,6 +270,9 @@
         }
       }
     },
+    "%@ didn't open" : {
+
+    },
     "%@ doesn't exist at %@, so this deletes it from your working tree. A copy stays in Undo history for 14 days." : {
       "localizations" : {
         "en" : {
@@ -170,10 +286,23 @@
     "%@ dropped" : {
 
     },
+    "%@ failed with exit %d" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ failed with exit %2$d"
+          }
+        }
+      }
+    },
     "%@ folded in" : {
 
     },
     "%@ go back to the last commit" : {
+
+    },
+    "%@ goes back to where it was" : {
 
     },
     "%@ has %@ you don't have" : {
@@ -206,6 +335,9 @@
         }
       }
     },
+    "%@ has it. A branch can be checked out in one worktree at a time, so pick another branch or create a new one." : {
+
+    },
     "%@ has no commits that aren't on %@." : {
       "localizations" : {
         "en" : {
@@ -216,7 +348,13 @@
         }
       }
     },
+    "%@ has no signature git can verify" : {
+
+    },
     "%@ has no upstream" : {
+
+    },
+    "%@ hasn't been rebased lately" : {
 
     },
     "%@ holds changes to %@. A copy stays in Undo history for 14 days." : {
@@ -229,10 +367,49 @@
         }
       }
     },
+    "%@ holds the repository itself, so it can't be removed. Remove the other worktrees instead." : {
+
+    },
+    "%@ in %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ in %2$@"
+          }
+        }
+      }
+    },
+    "%@ in %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ in %2$@, %3$@"
+          }
+        }
+      }
+    },
     "%@ in Changes, ready to review." : {
 
     },
+    "%@ into %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ into %2$@"
+          }
+        }
+      }
+    },
+    "%@ is already a git repository. Open it instead." : {
+
+    },
     "%@ is back where it was." : {
+
+    },
+    "%@ is empty" : {
 
     },
     "%@ is gone" : {
@@ -241,10 +418,32 @@
     "%@ is out of date" : {
 
     },
+    "%@ is signed by %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ is signed by %2$@"
+          }
+        }
+      }
+    },
     "%@ is the first bad commit" : {
 
     },
+    "%@ isn't a git repository" : {
+
+    },
+    "%@ isn't installed" : {
+
+    },
     "%@ isn't on any remote yet. Pushing it sets the upstream, so later pushes are one click." : {
+
+    },
+    "%@ isn't pushed yet, so others can't fetch it. Push it first." : {
+
+    },
+    "%@ isn't where it used to be" : {
 
     },
     "%@ left in %@. Pick a side for each, or open it in your merge tool." : {
@@ -263,10 +462,29 @@
     "%@ left. Resolve them, then continue." : {
 
     },
+    "%@ looks already applied" : {
+
+    },
     "%@ lose their upstream." : {
 
     },
     "%@ loses its upstream." : {
+
+    },
+    "%@ merged cleanly this time" : {
+
+    },
+    "%@ moved into a new pack; %@ left." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ moved into a new pack; %2$@ left."
+          }
+        }
+      }
+    },
+    "%@ moved to a second commit." : {
 
     },
     "%@ moves back past %@:" : {
@@ -295,6 +513,26 @@
     "%@ now uses SSH" : {
 
     },
+    "%@ of %@ objects" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ of %2$@ objects"
+          }
+        }
+      }
+    },
+    "%@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ on %2$@"
+          }
+        }
+      }
+    },
     "%@ on %@ can come along, or wait in a stash until you come back." : {
       "localizations" : {
         "en" : {
@@ -305,7 +543,26 @@
         }
       }
     },
+    "%@ on %@ that %@ doesn't have" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ on %2$@ that %3$@ doesn't have"
+          }
+        }
+      }
+    },
     "%@ on it aren't in HEAD. Delete it from the branch menu to confirm; Undo history keeps it for 14 days." : {
+
+    },
+    "%@ only" : {
+
+    },
+    "%@ passed" : {
+
+    },
+    "%@ past the recorded one" : {
 
     },
     "%@ rejected your credentials" : {
@@ -318,6 +575,9 @@
 
     },
     "%@ rewritten." : {
+
+    },
+    "%@ s" : {
 
     },
     "%@ squashed" : {
@@ -397,6 +657,16 @@
         }
       }
     },
+    "%@, %@. Nothing was sent." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@. Nothing was sent."
+          }
+        }
+      }
+    },
     "%@, %lld staged, on %@" : {
       "localizations" : {
         "en" : {
@@ -410,10 +680,41 @@
     "%@, checked out" : {
 
     },
+    "%@, signed in %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, signed in %2$@"
+          }
+        }
+      }
+    },
+    "%@, the server no longer accepts the saved token" : {
+
+    },
     "%@, using git stash." : {
 
     },
+    "%@, which the reflog or Undo history may still keep." : {
+
+    },
     "%@." : {
+
+    },
+    "%@. Repositories you open from now on use it." : {
+
+    },
+    "%lld ahead" : {
+
+    },
+    "%lld behind" : {
+
+    },
+    "%lld failed" : {
+
+    },
+    "%lld ms" : {
 
     },
     "%lld new" : {
@@ -459,6 +760,9 @@
         }
       }
     },
+    "%lld pt" : {
+
+    },
     "+%lld" : {
 
     },
@@ -483,6 +787,12 @@
     "2, the merged branch" : {
 
     },
+    "A bare copy that fetch keeps identical, --mirror." : {
+
+    },
+    "A bare repository in %@." : {
+
+    },
     "A beautiful Git client, made for Mac." : {
 
     },
@@ -498,22 +808,49 @@
     "a commit" : {
 
     },
+    "A commit with the same changes is already on %@. git skips patches it finds empty." : {
+
+    },
     "A copy of what was discarded stays in Undo history." : {
+
+    },
+    "A copy stays in Undo history for 14 days" : {
 
     },
     "A copy stays in Undo history for 14 days." : {
 
     },
+    "A git hook in this repository." : {
+
+    },
     "a hunk" : {
 
     },
+    "A mirror, with every ref, in %@." : {
+
+    },
     "A normal push will be rejected. Pull first, or force push with lease to replace them." : {
+
+    },
+    "a plain text file" : {
+
+    },
+    "A plain text file" : {
+
+    },
+    "A read-only copy." : {
 
     },
     "A remote is another copy of this repository you fetch from and push to." : {
 
     },
     "A remote named %@ already exists." : {
+
+    },
+    "A second working folder for this repository, on another branch. Both share one history." : {
+
+    },
+    "A submodule already lives at this path." : {
 
     },
     "A tag named %@ already exists." : {
@@ -531,6 +868,12 @@
     "Abort merge" : {
 
     },
+    "Abort the merge" : {
+
+    },
+    "Abort the rebase" : {
+
+    },
     "Aborted" : {
 
     },
@@ -544,6 +887,9 @@
 
     },
     "Aborted the revert" : {
+
+    },
+    "About %@ left" : {
 
     },
     "About Vrai" : {
@@ -567,10 +913,31 @@
     "Accept incoming for the whole file" : {
 
     },
+    "Accounts" : {
+
+    },
     "Action for %@" : {
 
     },
     "Actions" : {
+
+    },
+    "Add" : {
+
+    },
+    "Add a Co-authored-by trailer to the message" : {
+
+    },
+    "Add a note to this commit" : {
+
+    },
+    "Add a README" : {
+
+    },
+    "Add co-author" : {
+
+    },
+    "Add executable scripts to .git/hooks, or share a folder of them with core.hooksPath." : {
 
     },
     "Add files to %@ and they appear in Changes." : {
@@ -591,6 +958,9 @@
     "Add remote…" : {
 
     },
+    "Add Signed-off-by" : {
+
+    },
     "Add submodule" : {
 
     },
@@ -604,6 +974,12 @@
 
     },
     "Added" : {
+
+    },
+    "Added %@ to .gitignore" : {
+
+    },
+    "Added a note to %@" : {
 
     },
     "Added line %lld: %@" : {
@@ -622,7 +998,13 @@
     "After the rebase, push with force with lease. Anyone who pulled %@ will need to reset to the new version." : {
 
     },
+    "After you close the last repository window, for example." : {
+
+    },
     "Against %@" : {
+
+    },
+    "All" : {
 
     },
     "All authors" : {
@@ -631,10 +1013,16 @@
     "All branches" : {
 
     },
+    "All commits, file contents on demand" : {
+
+    },
     "All conflicts resolved. Commit the merge to finish." : {
 
     },
     "All remotes" : {
+
+    },
+    "Already applied" : {
 
     },
     "Already up to date" : {
@@ -646,7 +1034,13 @@
     "Also delete it on %@" : {
 
     },
+    "Also on %@" : {
+
+    },
     "Always make a merge commit" : {
+
+    },
+    "Always on in Expert mode." : {
 
     },
     "Amend last commit" : {
@@ -658,16 +1052,31 @@
     "Amended the last commit on %@" : {
 
     },
+    "An empty repository on %@. Its first files are in Changes." : {
+
+    },
     "and %@" : {
 
     },
+    "and %lld more in the console" : {
+
+    },
     "Annotated" : {
+
+    },
+    "annotated tag" : {
 
     },
     "Annotated, plus your SSH signature so others can verify it." : {
 
     },
     "Another git process is running" : {
+
+    },
+    "another helper" : {
+
+    },
+    "another worktree" : {
 
     },
     "Answer" : {
@@ -685,7 +1094,13 @@
     "Applied the patches" : {
 
     },
+    "Applies patches from mail or format-patch files as commits, keeping authors and messages." : {
+
+    },
     "Apply" : {
+
+    },
+    "Apply %@" : {
 
     },
     "Apply and drop (pop)" : {
@@ -694,10 +1109,16 @@
     "Apply latest stash" : {
 
     },
+    "Apply patches" : {
+
+    },
     "Apply patches…" : {
 
     },
     "Apply the changes without committing" : {
+
+    },
+    "Apply the latest stash" : {
 
     },
     "Applying patches" : {
@@ -730,10 +1151,28 @@
     "Back to %@" : {
 
     },
+    "Back to history" : {
+
+    },
+    "Background" : {
+
+    },
+    "Background fetch" : {
+
+    },
+    "Background maintenance" : {
+
+    },
     "Bad" : {
 
     },
     "Bad signature" : {
+
+    },
+    "bare" : {
+
+    },
+    "Bare repository" : {
 
     },
     "Base · %@" : {
@@ -743,6 +1182,9 @@
 
     },
     "Binary file, not shown." : {
+
+    },
+    "bisect" : {
 
     },
     "Bisect checks out commits halfway between a good one and a bad one. You say good or bad until one is left." : {
@@ -764,6 +1206,15 @@
 
     },
     "Blame at %@" : {
+
+    },
+    "Blame at HEAD" : {
+
+    },
+    "Blame before this change" : {
+
+    },
+    "Blaming the commit before %@" : {
 
     },
     "Both sides changed %@" : {
@@ -790,13 +1241,22 @@
     "branch %@, checked out" : {
 
     },
+    "Branch name" : {
+
+    },
     "Branch names can't contain spaces." : {
 
     },
     "Branch to merge" : {
 
     },
+    "Branch to track" : {
+
+    },
     "Branches" : {
+
+    },
+    "Branches checked out side by side" : {
 
     },
     "Branches shown" : {
@@ -814,7 +1274,19 @@
     "Can't fast-forward %@" : {
 
     },
+    "Can't reach %@" : {
+
+    },
+    "Can't test this one" : {
+
+    },
     "Cancel" : {
+
+    },
+    "Certificate" : {
+
+    },
+    "Certificate for %@, through gpg.x509.program." : {
 
     },
     "Change upstream…" : {
@@ -823,13 +1295,31 @@
     "Change what you need, then continue." : {
 
     },
+    "Changed" : {
+
+    },
     "Changed files" : {
+
+    },
+    "Changed inside" : {
 
     },
     "Changes" : {
 
     },
+    "Changes the message without a full rebase. %@ get new hashes too." : {
+
+    },
+    "Changes the message without a full rebase. It's the latest commit." : {
+
+    },
+    "Changes you made inside it are lost." : {
+
+    },
     "Check a file or press Space." : {
+
+    },
+    "Check again" : {
 
     },
     "Check for updates…" : {
@@ -847,7 +1337,19 @@
     "Check out as %@" : {
 
     },
+    "Check signature" : {
+
+    },
+    "Check the path, or choose the folder instead." : {
+
+    },
     "Check the signing key in Settings, Accounts, or turn off signing for this repository. Your message is kept." : {
+
+    },
+    "Check the URL and that you can reach it, then try again." : {
+
+    },
+    "Check your connection, then clone again." : {
 
     },
     "Check your connection, then try again." : {
@@ -857,6 +1359,24 @@
 
     },
     "Check your connection. Vrai retries %@ when you're back online." : {
+
+    },
+    "Checked out" : {
+
+    },
+    "Checking Git LFS" : {
+
+    },
+    "Checking out %@" : {
+
+    },
+    "Checking the signature…" : {
+
+    },
+    "Checks out only the folders you pick. The rest stays in history, out of the way." : {
+
+    },
+    "Checks the commit message. If it fails, the commit stops." : {
 
     },
     "Cherry-pick" : {
@@ -887,7 +1407,55 @@
     "Cherry-picking %@" : {
 
     },
+    "Choose" : {
+
+    },
+    "Choose a .pack file, for example from another clone, to copy the objects it has into this repository." : {
+
+    },
+    "Choose a git binary…" : {
+
+    },
+    "Choose a key" : {
+
+    },
+    "Choose another Terminal app in General." : {
+
+    },
+    "Choose Blame from a file's menu in Changes or in a commit to see who last changed each line." : {
+
+    },
+    "Choose File history from a file's menu in Changes or in a commit to see every commit that changed it." : {
+
+    },
+    "Choose one of your SSH keys below." : {
+
+    },
+    "Choose other files…" : {
+
+    },
+    "Choose patch files…" : {
+
+    },
+    "Choose…" : {
+
+    },
+    "Clean" : {
+
+    },
     "Clean up" : {
+
+    },
+    "Clean up and prune now" : {
+
+    },
+    "Clean up thoroughly" : {
+
+    },
+    "Cleaned up the repository" : {
+
+    },
+    "Cleaning up…" : {
 
     },
     "Clear" : {
@@ -899,22 +1467,79 @@
     "Click line numbers to pick lines, Shift-click to extend, then unstage just those." : {
 
     },
+    "Clone" : {
+
+    },
+    "Clone a repository" : {
+
+    },
     "Clone a repository…" : {
+
+    },
+    "Clone cancelled" : {
+
+    },
+    "Clone keeps going in the background" : {
+
+    },
+    "Clone submodules too" : {
 
     },
     "Clone…" : {
 
     },
+    "Cloned %@" : {
+
+    },
+    "Clones with scalar: sparse, blobless, background maintenance." : {
+
+    },
+    "Cloning %@" : {
+
+    },
+    "Cloning submodule %@" : {
+
+    },
+    "Cloning submodules" : {
+
+    },
+    "close" : {
+
+    },
     "Close" : {
+
+    },
+    "Close a sheet, menu or the palette" : {
+
+    },
+    "Close window" : {
+
+    },
+    "Code" : {
+
+    },
+    "Code size" : {
 
     },
     "Collapsed" : {
 
     },
+    "Collects git's own bug report and, if you like, a diagnostics archive, into a folder you can attach." : {
+
+    },
     "Comfortable" : {
 
     },
+    "command" : {
+
+    },
+    "Command" : {
+
+    },
     "Command palette" : {
+
+    },
+    "Command previews in every sheet, a git prompt in the console, Reflog and Refs in the sidebar, and tools that rewrite history." : {
 
     },
     "Command previews, the console prompt, Reflog and Refs are now available." : {
@@ -926,6 +1551,12 @@
     "Commit" : {
 
     },
+    "Commit .gitignore to share the rule." : {
+
+    },
+    "Commit %@" : {
+
+    },
     "Commit actions" : {
 
     },
@@ -935,10 +1566,16 @@
     "Commit description" : {
 
     },
+    "Commit details beside history." : {
+
+    },
     "Commit merge" : {
 
     },
     "Commit summary" : {
+
+    },
+    "Commit the merge" : {
 
     },
     "Commit to %@" : {
@@ -963,6 +1600,12 @@
     "Commits anyone pushed since your last fetch are lost too." : {
 
     },
+    "Commits here use their own identity, not your global one." : {
+
+    },
+    "Commits here use your global identity." : {
+
+    },
     "Commits you make here won't belong to any branch. Create a branch to keep them." : {
 
     },
@@ -984,7 +1627,22 @@
     "Compact" : {
 
     },
+    "Compare branches" : {
+
+    },
     "Compare branches…" : {
+
+    },
+    "Compare with before rebase" : {
+
+    },
+    "Compared with" : {
+
+    },
+    "Confirm before force pushing" : {
+
+    },
+    "Conflict" : {
 
     },
     "Conflict %lld" : {
@@ -1005,6 +1663,18 @@
     "Conflicts resolved" : {
 
     },
+    "Connecting" : {
+
+    },
+    "Connecting to %@" : {
+
+    },
+    "Console" : {
+
+    },
+    "Console and tools" : {
+
+    },
     "Continue" : {
 
     },
@@ -1017,10 +1687,19 @@
     "Continue or abort it from the banner." : {
 
     },
+    "Continue the rebase" : {
+
+    },
     "Continue to commit it, or abort to go back." : {
 
     },
     "Continue to commit the revert, or abort to go back." : {
+
+    },
+    "Contributors" : {
+
+    },
+    "Control" : {
 
     },
     "Copied" : {
@@ -1029,7 +1708,19 @@
     "Copied %@" : {
 
     },
+    "Copied the public key" : {
+
+    },
+    "Copied the pull request summary" : {
+
+    },
+    "Copies a repository and its whole history to this Mac." : {
+
+    },
     "Copies the changes of a commit onto the current branch as a new commit." : {
+
+    },
+    "Copies Vrai keeps for Undo history." : {
 
     },
     "Copy “%@” onto %@ as a new commit." : {
@@ -1057,10 +1748,19 @@
     "Copy name" : {
 
     },
+    "Copy output" : {
+
+    },
     "Copy path" : {
 
     },
+    "Copy public key" : {
+
+    },
     "Copy pull request summary" : {
+
+    },
+    "Copy ref name" : {
 
     },
     "Copy subject" : {
@@ -1069,13 +1769,37 @@
     "Copy URL" : {
 
     },
+    "Copy value" : {
+
+    },
+    "Couldn't open the output" : {
+
+    },
     "Couldn't reach %@" : {
 
     },
     "Couldn't reach %@ on the last fetch." : {
 
     },
+    "Couldn't read its branches. Vrai clones the default branch." : {
+
+    },
+    "Couldn't save the note" : {
+
+    },
+    "Couldn't search this repository" : {
+
+    },
+    "Counting objects…" : {
+
+    },
     "Create a branch here to push these commits." : {
+
+    },
+    "Create a repository here…" : {
+
+    },
+    "Create a repository in it, or pick the folder that holds the .git folder." : {
 
     },
     "Create and switch" : {
@@ -1084,19 +1808,40 @@
     "Create branch" : {
 
     },
+    "Create branch “%@”…" : {
+
+    },
     "Create branch here and switch…" : {
 
     },
     "Create branch here…" : {
 
     },
+    "Create bundle" : {
+
+    },
     "Create bundle…" : {
+
+    },
+    "Create fixup commit for selected" : {
 
     },
     "Create fixup commit for this" : {
 
     },
+    "Create one in Terminal with ssh-keygen -t ed25519." : {
+
+    },
+    "Create report" : {
+
+    },
+    "Create repository" : {
+
+    },
     "Create tag" : {
+
+    },
+    "Created %@" : {
 
     },
     "Created %@ from stash@{%lld}" : {
@@ -1109,6 +1854,9 @@
         }
       }
     },
+    "Created fixup commit %@" : {
+
+    },
     "Current · %@" : {
 
     },
@@ -1119,6 +1867,21 @@
 
     },
     "Date" : {
+
+    },
+    "Default branch" : {
+
+    },
+    "Deinitialize" : {
+
+    },
+    "Deinitialize %@?" : {
+
+    },
+    "Deinitialize…" : {
+
+    },
+    "Delete" : {
 
     },
     "Delete %@" : {
@@ -1156,10 +1919,16 @@
     "Delete file" : {
 
     },
+    "Delete file…" : {
+
+    },
     "Delete here and on %@…" : {
 
     },
     "Delete on %@" : {
+
+    },
+    "Delete saved passwords?" : {
 
     },
     "Delete tag" : {
@@ -1168,10 +1937,19 @@
     "Delete the tag %@?" : {
 
     },
+    "Delete…" : {
+
+    },
     "Deleted" : {
 
     },
+    "Deleted %@" : {
+
+    },
     "Deleted from the working tree. Stage the deletion to remove it in the next commit." : {
+
+    },
+    "Deleted the saved passwords" : {
 
     },
     "Density" : {
@@ -1195,7 +1973,22 @@
     "Detached HEAD" : {
 
     },
+    "Detect renames" : {
+
+    },
     "Diff" : {
+
+    },
+    "Diff algorithm" : {
+
+    },
+    "Diff layout" : {
+
+    },
+    "Diffs" : {
+
+    },
+    "Diffs and code" : {
 
     },
     "Discard" : {
@@ -1214,6 +2007,9 @@
 
     },
     "Discard changes to %@?" : {
+
+    },
+    "Discard changes to the selected file" : {
 
     },
     "Discard changes…" : {
@@ -1238,6 +2034,9 @@
         }
       }
     },
+    "Discards, hard resets, deleted branches and dropped stashes land here first. Restore puts them back exactly as they were." : {
+
+    },
     "Dismiss" : {
 
     },
@@ -1245,6 +2044,18 @@
 
     },
     "Done" : {
+
+    },
+    "Down Arrow" : {
+
+    },
+    "Download missing files" : {
+
+    },
+    "Downloaded the missing files" : {
+
+    },
+    "Downloading missing files…" : {
 
     },
     "Drag to reorder, or select a step and press ⌥↑ ⌥↓. Keys set the action: p pick, r reword, e edit, s squash, f fixup, d drop." : {
@@ -1275,6 +2086,9 @@
     "Dropped stash@{%lld}" : {
 
     },
+    "Each sheet shows the git command it runs, under Options." : {
+
+    },
     "Each step halves what's left." : {
 
     },
@@ -1290,10 +2104,16 @@
     "Edit .mailmap" : {
 
     },
+    "Edit %@" : {
+
+    },
     "Edit %@…" : {
 
     },
     "Edit a file in %@ and it shows up here." : {
+
+    },
+    "Edit note" : {
 
     },
     "Edit remote %@" : {
@@ -1305,6 +2125,15 @@
     "Edit, Undo history lists older changes you can restore." : {
 
     },
+    "Edit…" : {
+
+    },
+    "Edits show up in Changes, ready to commit." : {
+
+    },
+    "Email" : {
+
+    },
     "End" : {
 
     },
@@ -1314,25 +2143,106 @@
     "Ended bisect" : {
 
     },
+    "Enter a branch name." : {
+
+    },
+    "Enter a name." : {
+
+    },
     "Enter a personal access token to sign in again." : {
+
+    },
+    "Enter a value." : {
+
+    },
+    "Enter an email address." : {
+
+    },
+    "Enter the certificate ID below." : {
+
+    },
+    "Enter the ID of a key in your GPG keychain below." : {
+
+    },
+    "Enter your username and a personal access token for %@." : {
+
+    },
+    "Every %@" : {
+
+    },
+    "Every branch and tag" : {
+
+    },
+    "Every branch is checked out somewhere already. Create a new one instead." : {
 
     },
     "Every commit picked as is" : {
 
     },
+    "Every commit you make records this name and email." : {
+
+    },
     "Every conflict in %@ has a resolution. Mark it resolved to stage it." : {
+
+    },
+    "Every conflict is back as the merge left it." : {
 
     },
     "Every file merged cleanly." : {
 
     },
+    "Every file sits at the top of the repository." : {
+
+    },
+    "Every folder is checked out again." : {
+
+    },
+    "Every hour" : {
+
+    },
+    "Every move of %@, kept 90 days" : {
+
+    },
+    "Every move of HEAD, kept 90 days" : {
+
+    },
+    "Every name git keeps for a commit. Branches, remote branches and tags have their own sections in the sidebar; this is all of them, raw." : {
+
+    },
+    "Every object is reachable and intact." : {
+
+    },
+    "Every pack holds objects that no other pack has." : {
+
+    },
+    "Every reachable object was already in a pack." : {
+
+    },
+    "every ref" : {
+
+    },
     "Every remote branch still exists on %@." : {
+
+    },
+    "Every value git reads in %@. Local beats global, and global beats system." : {
+
+    },
+    "Every value git reads outside a repository. Global beats system." : {
+
+    },
+    "Everything Expert mode adds is also in the menus and the palette." : {
 
     },
     "Everything on it is already in %@." : {
 
     },
     "Everything stays one step away in menus and the palette." : {
+
+    },
+    "Existing branch" : {
+
+    },
+    "Exit 0 after %@ s." : {
 
     },
     "Expanded" : {
@@ -1350,7 +2260,31 @@
     "Expert mode is on" : {
 
     },
+    "Expired" : {
+
+    },
+    "Export" : {
+
+    },
+    "Export %@" : {
+
+    },
     "Export archive…" : {
+
+    },
+    "Exported %@" : {
+
+    },
+    "failed" : {
+
+    },
+    "Failed" : {
+
+    },
+    "Failed %lld" : {
+
+    },
+    "Fall back to a three-way merge" : {
 
     },
     "Fast-forward" : {
@@ -1378,6 +2312,9 @@
     "Fast-forwarded." : {
 
     },
+    "Fast, and git's default. Can pair unrelated lines when code moves." : {
+
+    },
     "feature/halo-experiments" : {
 
     },
@@ -1391,6 +2328,9 @@
 
     },
     "Fetch every tag" : {
+
+    },
+    "Fetch in the background" : {
 
     },
     "Fetch reads, pull integrates, push writes. Each tab shows the exact command." : {
@@ -1420,6 +2360,9 @@
     "Fetching every remote" : {
 
     },
+    "File" : {
+
+    },
     "File actions" : {
 
     },
@@ -1429,16 +2372,50 @@
     "Files" : {
 
     },
+    "Files at least %lld%% alike count as renamed, like --find-renames=%lld%%." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Files at least %1$lld%% alike count as renamed, like --find-renames=%2$lld%%."
+          }
+        }
+      }
+    },
+    "Files git should never track." : {
+
+    },
+    "Fills in the commit message before you edit it." : {
+
+    },
+    "Filter" : {
+
+    },
     "Filter by subject, author or hash" : {
 
     },
+    "Filter commands and output" : {
+
+    },
+    "Filter refs" : {
+
+    },
+    "Find git automatically" : {
+
+    },
     "Find in history" : {
+
+    },
+    "Find redundant packs" : {
 
     },
     "Find the commit that broke something" : {
 
     },
     "Finding the first bad commit, about %@ left" : {
+
+    },
+    "Fingerprint" : {
 
     },
     "Finish the %@ first" : {
@@ -1450,13 +2427,46 @@
     "Finish the rebase first" : {
 
     },
+    "First" : {
+
+    },
+    "First branch" : {
+
+    },
+    "First branch name" : {
+
+    },
+    "First commit" : {
+
+    },
+    "Fix the patch, then continue from the banner." : {
+
+    },
     "Fix what the hook reports, then try again." : {
 
     },
     "Fixup" : {
 
     },
+    "Fixup message ready in Changes" : {
+
+    },
+    "Folder" : {
+
+    },
+    "Folder inside the archive" : {
+
+    },
+    "Folder is gone" : {
+
+    },
     "Folds fixup! commits in" : {
+
+    },
+    "Follow the installer that just opened" : {
+
+    },
+    "For %@, ready to paste." : {
 
     },
     "Force" : {
@@ -1483,7 +2493,50 @@
     "Force, hooks" : {
 
     },
+    "Forget now" : {
+
+    },
+    "Forgot the passwords in memory" : {
+
+    },
+    "Format" : {
+
+    },
+    "Found %@" : {
+
+    },
     "From" : {
+
+    },
+    "From %@" : {
+
+    },
+    "From %@, as %@%@ on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "From %1$@, as %2$@%3$@ on %4$@."
+          }
+        }
+      }
+    },
+    "From %@. Verify integrity to check the repository again." : {
+
+    },
+    "from Homebrew" : {
+
+    },
+    "From the clipboard:" : {
+
+    },
+    "from the Xcode command line tools" : {
+
+    },
+    "from Xcode" : {
+
+    },
+    "Full clone" : {
 
     },
     "full hash" : {
@@ -1492,10 +2545,46 @@
     "Full history" : {
 
     },
+    "Garbage" : {
+
+    },
+    "General" : {
+
+    },
+    "Git" : {
+
+    },
     "Git %@ is too old" : {
 
     },
+    "Git %@ is too old for Vrai" : {
+
+    },
+    "git adds a worktree only in a new or empty folder. Choose another folder, then try again." : {
+
+    },
+    "git annotate didn't run" : {
+
+    },
+    "git asks %@, in that order." : {
+
+    },
+    "git asks a credential helper for HTTPS passwords and tokens." : {
+
+    },
+    "git asks again the next time a remote needs one." : {
+
+    },
+    "Git binary" : {
+
+    },
+    "git blocks local submodule URLs" : {
+
+    },
     "git can't continue while files still have conflicts. Resolve each one and mark the file resolved, then continue." : {
+
+    },
+    "git can't find a repository at that URL" : {
 
     },
     "git can't find a repository here. Open the folder that holds the .git folder, or create a repository in it." : {
@@ -1513,13 +2602,85 @@
     "git can't use the push URL. Try one like git@github.com:owner/repo.git." : {
 
     },
+    "git config stopped without saying why. Check the file in Terminal with git config --list --show-origin." : {
+
+    },
+    "Git configuration" : {
+
+    },
+    "Git configuration is read only" : {
+
+    },
+    "git couldn't change the worktree" : {
+
+    },
+    "git couldn't compare them" : {
+
+    },
+    "git couldn't create the repository" : {
+
+    },
+    "git couldn't find %@. Check the URL, then try again." : {
+
+    },
     "git couldn't find the remote it needs. Add one to fetch, pull and push." : {
+
+    },
+    "git couldn't list the files" : {
+
+    },
+    "git couldn't open %@. Remove it from maintenance.repo if it's gone." : {
 
     },
     "git couldn't read this repository" : {
 
     },
+    "git couldn't remove the file" : {
+
+    },
+    "git couldn't rename it" : {
+
+    },
+    "git couldn't rename the file" : {
+
+    },
+    "git couldn't show that object" : {
+
+    },
+    "git couldn't show the page for %@. Install the git documentation, or read it at git-scm.com." : {
+
+    },
     "git couldn't sign the commit" : {
+
+    },
+    "git couldn't update refs/notes/commits. Try again, or run git notes in the console to see why." : {
+
+    },
+    "git couldn't update your saved credentials" : {
+
+    },
+    "git couldn't write the archive" : {
+
+    },
+    "git couldn't write the bundle" : {
+
+    },
+    "git couldn't write the patches" : {
+
+    },
+    "git couldn't write the report" : {
+
+    },
+    "git credential-cache keeps them for a while after you sign in." : {
+
+    },
+    "git credential-store keeps them unencrypted in %@." : {
+
+    },
+    "git credential-store removes every HTTPS password it saved. Remotes ask you to sign in again." : {
+
+    },
+    "git didn't change that setting" : {
 
     },
     "git doesn't allow that name. Use letters, numbers, dashes and slashes." : {
@@ -1528,16 +2689,74 @@
     "Git doesn't track %@, so no commit has a copy. Undo history keeps one for 14 days." : {
 
     },
+    "git doesn't understand that address" : {
+
+    },
+    "git for-each-repo ran it in every registered repository." : {
+
+    },
+    "git format-patch writes them; mail clients export mbox." : {
+
+    },
+    "git found %@ in %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "git found %1$@ in %2$@"
+          }
+        }
+      }
+    },
+    "git fsck reads every object." : {
+
+    },
+    "git has no history for this file" : {
+
+    },
+    "git history stopped" : {
+
+    },
+    "git hook run stopped without saying why. Check that the script is executable." : {
+
+    },
     "git is asking to continue" : {
 
     },
     "Git isn't installed" : {
 
     },
+    "git itself discourages filter-branch: it's slow and easy to get wrong, and git filter-repo is the tool it recommends. This rewrites history, and Vrai can't undo what you run here." : {
+
+    },
     "git left a lock file at %@. Wait for the other process to finish, then try again." : {
 
     },
     "git left a lock file at %@. Wait for the other process to finish, then try again. If nothing else is running, delete the lock file." : {
+
+    },
+    "Git LFS %@" : {
+
+    },
+    "git lfs env can't run on this Mac. Install Git LFS, for example with brew install git-lfs, to keep large files out of the history." : {
+
+    },
+    "Git LFS isn't installed" : {
+
+    },
+    "Git LFS stores big binaries on the server and downloads them on checkout." : {
+
+    },
+    "git lists them first; nothing is removed until you confirm." : {
+
+    },
+    "git maintenance stopped without saying why. The console shows what ran." : {
+
+    },
+    "git merges %@ again from both sides and puts every conflict back. Choices you made in this file are lost." : {
+
+    },
+    "git merges each file again from both sides and puts every conflict back. Choices you made in these files are lost." : {
 
     },
     "git needs a summary line for every commit. Type one above the description, then commit." : {
@@ -1549,7 +2768,37 @@
     "git needs an answer" : {
 
     },
+    "git no longer has this commit." : {
+
+    },
+    "git now remembers passwords in %@" : {
+
+    },
+    "Git now tracks %@" : {
+
+    },
+    "git reads no configuration here." : {
+
+    },
     "Git reference" : {
+
+    },
+    "Git removes it from the folder and stages the deletion. A copy stays in Undo history for 14 days." : {
+
+    },
+    "git reused your earlier resolution" : {
+
+    },
+    "git shows the original object again everywhere. A copy stays in Undo history for 14 days." : {
+
+    },
+    "Git skips %@ in this checkout" : {
+
+    },
+    "git staged the merged file." : {
+
+    },
+    "git still lists it. Prune removes what git kept about it; its branch stays." : {
 
     },
     "git stopped because %@ you changed would be overwritten: %@%@. Set your changes aside while pulling, or commit them first." : {
@@ -1565,6 +2814,12 @@
     "git stopped because files you changed would be overwritten. Set your changes aside while pulling, or commit them first." : {
 
     },
+    "git stopped before it finished. Nothing else changed." : {
+
+    },
+    "git stopped before it finished. Try a shorter search." : {
+
+    },
     "git stopped so it doesn't overwrite %@ you changed: %@. Commit or stash them, then try again." : {
       "localizations" : {
         "en" : {
@@ -1578,16 +2833,40 @@
     "git stopped so it doesn't overwrite files you changed. Commit or stash them, then try again." : {
 
     },
+    "git uses %@." : {
+
+    },
     "git was cancelled before it finished." : {
 
     },
     "Git was not found" : {
 
     },
+    "Git watches %@ again" : {
+
+    },
+    "Git will assume %@ is unchanged" : {
+
+    },
+    "git won't accept that branch name. Avoid spaces, .., ~ ^ : ? * [ \\ and a trailing slash." : {
+
+    },
     "git won't accept that name" : {
 
     },
     "git won't accept that name: avoid .., ~ ^ : ? * [ \\ and a trailing slash." : {
+
+    },
+    "git won't put a submodule where a file or folder already exists. Choose an empty path, like Vendor/name." : {
+
+    },
+    "git won't remove it while it has changes. Commit or stash them there, or remove it anyway and keep a copy in Undo history." : {
+
+    },
+    "git's default" : {
+
+    },
+    "git@github.com:owner/repo.git or https://…" : {
 
     },
     "gone" : {
@@ -1605,10 +2884,32 @@
     "Hash" : {
 
     },
+    "HEAD and pseudo refs" : {
+
+    },
     "HEAD at %@" : {
 
     },
     "HEAD records newer commits than the ones checked out. Update to match." : {
+
+    },
+    "Help" : {
+
+    },
+    "Hidden until you add them back: %@%@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hidden until you add them back: %1$@%2$@."
+          }
+        }
+      }
+    },
+    "Hide" : {
+
+    },
+    "Hide console" : {
 
     },
     "Hide inspector" : {
@@ -1617,10 +2918,43 @@
     "Hide sidebar" : {
 
     },
+    "Hide Vrai" : {
+
+    },
+    "Histogram" : {
+
+    },
     "History" : {
 
     },
     "History didn't load" : {
+
+    },
+    "History rows are %lld points tall." : {
+
+    },
+    "History shows these people as:" : {
+
+    },
+    "History, submodules" : {
+
+    },
+    "Hold ⌥ in a menu or over the toolbar to see the alternates." : {
+
+    },
+    "Hooks" : {
+
+    },
+    "Hourly prefetch and commit graph, daily loose objects, weekly pack cleanup." : {
+
+    },
+    "How git diffs, merges and stores particular paths." : {
+
+    },
+    "How often" : {
+
+    },
+    "How often to fetch" : {
 
     },
     "How to integrate" : {
@@ -1629,13 +2963,34 @@
     "How to merge" : {
 
     },
+    "Identity" : {
+
+    },
     "Ignore %@" : {
 
     },
     "Ignore all %@ files" : {
 
     },
+    "In" : {
+
+    },
+    "In %@." : {
+
+    },
+    "In conflict" : {
+
+    },
+    "Include" : {
+
+    },
+    "Include a diagnostics archive" : {
+
+    },
     "Include untracked files" : {
+
+    },
+    "Includes build products and anything else .gitignore hides. git lists them first; nothing is removed until you confirm." : {
 
     },
     "Includes untracked" : {
@@ -1644,7 +2999,16 @@
     "Incoming · %@" : {
 
     },
+    "Initialize and check out" : {
+
+    },
     "Inspector" : {
+
+    },
+    "Install command line tools" : {
+
+    },
+    "Installed, but not set up for your account. Run git lfs install once in Terminal." : {
 
     },
     "Intent to add" : {
@@ -1659,13 +3023,37 @@
     "Interactive rebase…" : {
 
     },
+    "Into %@" : {
+
+    },
+    "Into %@." : {
+
+    },
     "it" : {
+
+    },
+    "It folds into %@ on the next interactive rebase with autosquash." : {
 
     },
     "It goes back to the last commit" : {
 
     },
+    "It has no branches yet." : {
+
+    },
+    "It isn't empty, so git won't clone into it. Pick another folder or name." : {
+
+    },
+    "It isn't empty, so git won't use it. Pick another folder or name." : {
+
+    },
+    "It isn't in that commit. It may be new, renamed or deleted." : {
+
+    },
     "It matches %@ again." : {
+
+    },
+    "It may have been pruned. Check the reflog for where it went." : {
 
     },
     "It may have been renamed or deleted outside Vrai. Pick another, then try again." : {
@@ -1687,11 +3075,33 @@
         }
       }
     },
+    "It's in Changes, ready to commit." : {
+
+    },
     "It's in Changes, ready to review." : {
+
+    },
+    "It's locked (%@); removing it unlocks it first." : {
+
+    },
+    "It's locked; removing it unlocks it first." : {
 
     },
     "It's untracked, so the file is deleted" : {
 
+    },
+    "Its %@ are deleted with it. A copy stays in Undo history for 14 days." : {
+
+    },
+    "Its %@ aren't recorded in %@ yet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Its %1$@ aren't recorded in %2$@ yet."
+          }
+        }
+      }
     },
     "its base" : {
 
@@ -1700,6 +3110,18 @@
 
     },
     "Its changes are in Changes." : {
+
+    },
+    "Its commits stay in the repository." : {
+
+    },
+    "Its contents aren't staged yet, so it shows in diffs." : {
+
+    },
+    "Its edits stay out of Changes until you undo this." : {
+
+    },
+    "Its last move in the reflog wasn't a rebase, so there's no before to compare with." : {
 
     },
     "Its message, files and diff appear here." : {
@@ -1732,10 +3154,16 @@
     "Keep the summary under 50 characters. git log --oneline cuts at 72." : {
 
     },
+    "Keeps ahead and behind counts current. Fetching never changes your branches or files." : {
+
+    },
     "Keeps both histories; adds a merge commit when they diverged." : {
 
     },
     "Keeps the branch visible in the graph as its own line." : {
+
+    },
+    "Keeps what you commit at %@" : {
 
     },
     "Kept base" : {
@@ -1750,7 +3178,22 @@
     "Kept incoming" : {
 
     },
+    "Key" : {
+
+    },
+    "Key %@ from your GPG keychain." : {
+
+    },
+    "Key %@." : {
+
+    },
+    "Key ID" : {
+
+    },
     "Keyboard shortcuts" : {
+
+    },
+    "Keys live in %@. ssh-agent loads them from your keychain." : {
 
     },
     "Kind" : {
@@ -1762,7 +3205,34 @@
     "Known good" : {
 
     },
+    "Large files" : {
+
+    },
+    "Large repository" : {
+
+    },
+    "Last 50 commits" : {
+
+    },
+    "Layout" : {
+
+    },
+    "Learn about filter-repo" : {
+
+    },
+    "Leave at least one file in the first commit." : {
+
+    },
+    "Leave empty to export everything. Separate paths with spaces." : {
+
+    },
+    "Leave it empty to follow the remote's default branch." : {
+
+    },
     "Leave staged changes in place" : {
+
+    },
+    "Lets others check that your commits really come from you." : {
 
     },
     "Light" : {
@@ -1777,19 +3247,87 @@
     "Limit how many commits to fetch on a shallow clone." : {
 
     },
+    "Line %lld, %@. %@, %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Line %1$lld, %2$@. %3$@, %4$@, %5$@"
+          }
+        }
+      }
+    },
+    "Lines changed later show their earlier history." : {
+
+    },
     "Loading" : {
+
+    },
+    "local is .git/config, global is %@, system is the gitconfig that ships with git." : {
+
+    },
+    "Locate…" : {
+
+    },
+    "Lock" : {
+
+    },
+    "Lock reason" : {
+
+    },
+    "Locked" : {
+
+    },
+    "Look" : {
 
     },
     "Looking at %@, not on a branch" : {
 
     },
+    "macOS reserves these; they work in every window." : {
+
+    },
     "Made %@, which undoes its changes." : {
+
+    },
+    "Main worktree" : {
 
     },
     "Maintenance" : {
 
     },
+    "Maintenance › Run background maintenance now" : {
+
+    },
+    "Maintenance didn't finish" : {
+
+    },
+    "Maintenance finished in %@" : {
+
+    },
+    "Maintenance is already running" : {
+
+    },
+    "Maintenance ran in %lld of %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Maintenance ran in %1$lld of %2$@"
+          }
+        }
+      }
+    },
     "Make the first commit" : {
+
+    },
+    "Maps the names and emails in history to one person each." : {
+
+    },
+    "Mark %@ as bad" : {
+
+    },
+    "Mark %@ as good" : {
 
     },
     "Mark as bad" : {
@@ -1804,13 +3342,28 @@
     "Marked %@ as resolved" : {
 
     },
+    "Marks from the bisect in progress." : {
+
+    },
+    "Marks spaces and tabs in changed lines." : {
+
+    },
     "Match the system" : {
+
+    },
+    "Matches unique lines first, so moved blocks stay together." : {
 
     },
     "Meld into the commit above, drop this message" : {
 
     },
     "Meld into the commit above, keep both messages" : {
+
+    },
+    "memory" : {
+
+    },
+    "Memory, for 15 minutes" : {
 
     },
     "merge" : {
@@ -1879,6 +3432,9 @@
         }
       }
     },
+    "Merging %@" : {
+
+    },
     "Merging %@ into %@: %@ left" : {
       "localizations" : {
         "en" : {
@@ -1898,6 +3454,31 @@
     "Message, strategy" : {
 
     },
+    "Minimal" : {
+
+    },
+    "Minimize" : {
+
+    },
+    "Mirror every ref" : {
+
+    },
+    "missing" : {
+
+    },
+    "Missing" : {
+
+    },
+    "missing %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "missing %1$@ %2$@"
+          }
+        }
+      }
+    },
     "Mixed" : {
 
     },
@@ -1913,13 +3494,37 @@
     "Move branches that point into the rebased commits" : {
 
     },
+    "Move the step down" : {
+
+    },
+    "Move the step up" : {
+
+    },
+    "Move these files into a second commit:" : {
+
+    },
     "Moves %@ forward if it hasn't diverged; otherwise makes a merge commit." : {
 
     },
     "Moves the branch and keeps your uncommitted changes; stops if they'd be overwritten." : {
 
     },
+    "Moves the file and stages the rename in one step, so history follows it." : {
+
+    },
+    "Myers" : {
+
+    },
     "Name" : {
+
+    },
+    "Names can't contain spaces." : {
+
+    },
+    "navigate" : {
+
+    },
+    "Navigation" : {
 
     },
     "New branch" : {
@@ -1937,6 +3542,9 @@
     "New branch from stash…" : {
 
     },
+    "New branch here" : {
+
+    },
     "New branch here…" : {
 
     },
@@ -1952,6 +3560,15 @@
     "New name" : {
 
     },
+    "New path" : {
+
+    },
+    "New repositories" : {
+
+    },
+    "New repository" : {
+
+    },
     "New repository…" : {
 
     },
@@ -1961,10 +3578,37 @@
     "New tag here…" : {
 
     },
+    "Next commit" : {
+
+    },
+    "Next file" : {
+
+    },
+    "No accounts yet" : {
+
+    },
+    "No actions match “%@”." : {
+
+    },
+    "No background commands." : {
+
+    },
+    "No blame for %@" : {
+
+    },
     "No changes are staged. Check a file or press Space to stage it, then commit." : {
 
     },
     "No changes to commit" : {
+
+    },
+    "No commands match “%@”." : {
+
+    },
+    "No commands yet. Every git command Vrai runs shows up here, with its output." : {
+
+    },
+    "No commits touched this file." : {
 
     },
     "no commits yet" : {
@@ -1979,22 +3623,76 @@
     "No conflicts expected" : {
 
     },
+    "No contributors yet" : {
+
+    },
+    "No failed commands." : {
+
+    },
     "No file changes." : {
 
     },
     "No file selected" : {
 
     },
+    "No free branches" : {
+
+    },
+    "No helper is set, so git asks for a password every time." : {
+
+    },
+    "No history for this file" : {
+
+    },
+    "No hooks yet" : {
+
+    },
     "No local changes to save" : {
+
+    },
+    "No one in history is renamed yet." : {
+
+    },
+    "No output" : {
+
+    },
+    "No problems found" : {
 
     },
     "No recent repositories" : {
 
     },
+    "No redundant packs" : {
+
+    },
+    "No reflog entries" : {
+
+    },
+    "No reflog entries yet." : {
+
+    },
+    "No refs match." : {
+
+    },
+    "No repository is open" : {
+
+    },
+    "No repository is registered yet. Turn on Background maintenance to add this one." : {
+
+    },
+    "No shortcut matches “%@”." : {
+
+    },
     "No spaces." : {
 
     },
+    "No SSH keys yet" : {
+
+    },
     "No stashes" : {
+
+    },
+    "No submodules" : {
 
     },
     "No text changes." : {
@@ -2006,13 +3704,40 @@
     "No unstaged changes in this file." : {
 
     },
+    "No working tree, for servers and mirrors." : {
+
+    },
+    "No worktree selected" : {
+
+    },
     "None" : {
+
+    },
+    "None yet" : {
 
     },
     "Normal push" : {
 
     },
+    "Not found" : {
+
+    },
+    "Not initialized" : {
+
+    },
+    "Not on any branch now. The reflog still keeps it." : {
+
+    },
+    "Not published" : {
+
+    },
+    "Not set" : {
+
+    },
     "Not signed" : {
+
+    },
+    "Not signed in" : {
 
     },
     "Not staged" : {
@@ -2022,6 +3747,12 @@
 
     },
     "Note where it came from in the message" : {
+
+    },
+    "notes" : {
+
+    },
+    "Nothing" : {
 
     },
     "Nothing changes on %@." : {
@@ -2048,10 +3779,25 @@
     "Nothing to rebase" : {
 
     },
+    "Nothing to remove" : {
+
+    },
+    "Nothing to show yet." : {
+
+    },
     "Nothing to stash" : {
 
     },
     "Nothing to undo" : {
+
+    },
+    "Nothing to undo yet." : {
+
+    },
+    "Nothing was left behind." : {
+
+    },
+    "Nothing yet" : {
 
     },
     "Nothing yet. Commits, merges, rebases and discards show up here." : {
@@ -2063,13 +3809,37 @@
     "Notifications" : {
 
     },
+    "Notify me about new commits" : {
+
+    },
+    "Nowhere, ask every time" : {
+
+    },
+    "Object format" : {
+
+    },
+    "Objects younger than 2 weeks were kept." : {
+
+    },
     "off" : {
+
+    },
+    "Off" : {
+
+    },
+    "Off: the file isn't executable." : {
 
     },
     "Offline" : {
 
     },
     "On" : {
+
+    },
+    "on %@" : {
+
+    },
+    "On %@" : {
 
     },
     "On %@, %@" : {
@@ -2105,6 +3875,9 @@
     "On branches" : {
 
     },
+    "Only %@" : {
+
+    },
     "Only reachable from remote branches or tags." : {
 
     },
@@ -2115,6 +3888,9 @@
 
     },
     "Only the incoming side added %@" : {
+
+    },
+    "Only these paths" : {
 
     },
     "Onto" : {
@@ -2133,34 +3909,147 @@
         }
       }
     },
+    "Open a repository" : {
+
+    },
+    "Open a repository first; the archive describes one repository." : {
+
+    },
+    "Open a repository to change its identity, hooks and maintenance. The settings here apply to the repository you used last." : {
+
+    },
+    "Open a repository with an HTTPS remote to sign in to its host, or sign in when git asks." : {
+
+    },
     "Open a repository…" : {
 
     },
     "Open Changes" : {
 
     },
+    "Open in %@" : {
+
+    },
+    "Open in diff tool" : {
+
+    },
     "Open in merge tool" : {
+
+    },
+    "Open in new window" : {
 
     },
     "Open in Terminal" : {
 
     },
+    "Open in Vrai" : {
+
+    },
     "Open recent" : {
+
+    },
+    "Open the console when a command fails" : {
+
+    },
+    "Open the console, where every command Vrai runs is logged" : {
 
     },
     "Open…" : {
 
     },
+    "opened %@" : {
+
+    },
+    "Opened %@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Opened %1$@ at %2$@"
+          }
+        }
+      }
+    },
+    "Opened %@ in %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Opened %1$@ in %2$@"
+          }
+        }
+      }
+    },
+    "Opened %@ in a new window" : {
+
+    },
     "Opened %@ in FileMerge" : {
+
+    },
+    "Opened the interactive rebase sheet. Vrai edits the todo list there instead of in an editor." : {
+
+    },
+    "Opening" : {
+
+    },
+    "Opening %@" : {
 
     },
     "Operation" : {
 
     },
+    "Option" : {
+
+    },
     "Options" : {
 
     },
+    "or" : {
+
+    },
     "Or abort it from the banner to put %@ back." : {
+
+    },
+    "other" : {
+
+    },
+    "Other…" : {
+
+    },
+    "output" : {
+
+    },
+    "Overridden by a closer scope" : {
+
+    },
+    "pack %@ failed verify-pack" : {
+
+    },
+    "Pack loose objects" : {
+
+    },
+    "Pack refs" : {
+
+    },
+    "Packed loose objects" : {
+
+    },
+    "Packed refs" : {
+
+    },
+    "Packing loose objects…" : {
+
+    },
+    "Packing refs…" : {
+
+    },
+    "Packs" : {
+
+    },
+    "Packs commits into one file you can clone or fetch from, for moving a repository without a server." : {
+
+    },
+    "Packs loose objects and refreshes the commit graph." : {
 
     },
     "Panels" : {
@@ -2181,13 +4070,40 @@
     "Parents" : {
 
     },
+    "partial clone (%@)" : {
+
+    },
+    "Partial clone, --filter=blob:none. Fast for big repositories." : {
+
+    },
     "Partly staged" : {
 
     },
     "Passphrase" : {
 
     },
+    "Passwords" : {
+
+    },
+    "Passwords in memory" : {
+
+    },
+    "Passwords saved by the previous helper stay where they are." : {
+
+    },
+    "Paste it in Terminal to mail the series." : {
+
+    },
     "path" : {
+
+    },
+    "Path" : {
+
+    },
+    "Patience" : {
+
+    },
+    "Patience, extended for lines that repeat. Reads best for code." : {
 
     },
     "People" : {
@@ -2196,7 +4112,13 @@
     "Pick" : {
 
     },
+    "Pick .patch or .mbox files" : {
+
+    },
     "Pick a file to see its diff." : {
+
+    },
+    "Pick a folder with a git repository. Vrai also finds the repository from any folder inside it." : {
 
     },
     "Pick a side for each conflict or combine them, then mark the file resolved." : {
@@ -2206,6 +4128,18 @@
 
     },
     "Pick an older good commit." : {
+
+    },
+    "Pick another in Settings, General." : {
+
+    },
+    "Pick every folder to turn it off." : {
+
+    },
+    "Pins another repository at an exact commit inside this one." : {
+
+    },
+    "Points at" : {
 
     },
     "Pop" : {
@@ -2223,7 +4157,28 @@
     "Prefer %@ (-X theirs)" : {
 
     },
+    "Preview" : {
+
+    },
+    "Preview of the history list and a diff with these settings" : {
+
+    },
+    "Previous commit" : {
+
+    },
+    "Previous file" : {
+
+    },
+    "Prune" : {
+
+    },
+    "Prune didn't finish" : {
+
+    },
     "Prune stale branches" : {
+
+    },
+    "Prune stale worktrees" : {
 
     },
     "Prune unreachable objects" : {
@@ -2232,10 +4187,22 @@
     "Pruned %@" : {
 
     },
+    "Pruned unreachable objects" : {
+
+    },
     "Pruning %@" : {
 
     },
+    "Pruning unreachable objects…" : {
+
+    },
+    "pseudo" : {
+
+    },
     "Publish %@" : {
+
+    },
+    "Publish %@…" : {
 
     },
     "Pull" : {
@@ -2251,6 +4218,18 @@
 
     },
     "Pull from…" : {
+
+    },
+    "Pull makes a merge commit that joins both histories." : {
+
+    },
+    "Pull mode" : {
+
+    },
+    "Pull replays your commits on top of the upstream. Their hashes change." : {
+
+    },
+    "Pull stops and lets you choose when the histories have diverged." : {
 
     },
     "Pull with changes set aside" : {
@@ -2285,6 +4264,9 @@
       }
     },
     "Push annotated tags on these commits" : {
+
+    },
+    "Push it and track it" : {
 
     },
     "Push it first to set one, or choose a branch to pull from." : {
@@ -2334,7 +4316,16 @@
         }
       }
     },
+    "Put the git command first, like git status. Options before it, such as -C or -c, don't run here." : {
+
+    },
     "Puts all of %@'s changes in Changes as one commit for you to write." : {
+
+    },
+    "Puts the series in your IMAP drafts folder." : {
+
+    },
+    "Quit Vrai" : {
 
     },
     "Reading %@" : {
@@ -2349,6 +4340,21 @@
           }
         }
       }
+    },
+    "Reading branches…" : {
+
+    },
+    "Reading credential.helper…" : {
+
+    },
+    "Reading folders…" : {
+
+    },
+    "Reading the manual…" : {
+
+    },
+    "Reading your git configuration" : {
+
     },
     "rebase" : {
 
@@ -2413,16 +4419,58 @@
         }
       }
     },
+    "Rebuild the pack index" : {
+
+    },
+    "Rebuilt the index for %@" : {
+
+    },
     "Recent" : {
+
+    },
+    "Recent branches" : {
 
     },
     "Recent repositories" : {
 
     },
+    "Record new commit" : {
+
+    },
+    "Record the new commit to share it, or update to put the recorded one back." : {
+
+    },
+    "Recorded" : {
+
+    },
     "Records who tagged it, when, and a message. Use for releases." : {
 
     },
+    "Recover" : {
+
+    },
+    "Recover objects from a pack file…" : {
+
+    },
+    "Recovered %@" : {
+
+    },
     "Redo" : {
+
+    },
+    "Ref" : {
+
+    },
+    "Reflog" : {
+
+    },
+    "Reflog, in Expert mode" : {
+
+    },
+    "Refs" : {
+
+    },
+    "Registered in maintenance.repo in %@. The schedule from git maintenance start runs it in the background." : {
 
     },
     "Regular" : {
@@ -2431,13 +4479,28 @@
     "Release notes" : {
 
     },
+    "Remember passwords in" : {
+
+    },
+    "remote" : {
+
+    },
     "Remote" : {
 
     },
     "remote branch %@" : {
 
     },
+    "Remote branches" : {
+
+    },
     "Remotes" : {
+
+    },
+    "Remotes that use SSH keep working. HTTPS remotes ask you to sign in." : {
+
+    },
+    "Remove" : {
 
     },
     "Remove %@" : {
@@ -2446,13 +4509,25 @@
     "Remove %@…" : {
 
     },
+    "Remove anyway" : {
+
+    },
     "Remove branches deleted on the remote when fetching" : {
 
     },
-    "Remove from recents" : {
+    "Remove from list" : {
+
+    },
+    "Remove note" : {
 
     },
     "Remove remote branches that were deleted" : {
+
+    },
+    "Remove replacement" : {
+
+    },
+    "Remove replacement…" : {
 
     },
     "Remove the commit" : {
@@ -2461,10 +4536,31 @@
     "Remove the remote %@?" : {
 
     },
+    "Remove the replacement for %@?" : {
+
+    },
+    "Remove the worktree %@?" : {
+
+    },
+    "Remove untracked and ignored files" : {
+
+    },
+    "Remove untracked and ignored files…" : {
+
+    },
+    "Remove untracked files" : {
+
+    },
     "Remove untracked files…" : {
 
     },
+    "Remove worktree" : {
+
+    },
     "Remove…" : {
+
+    },
+    "Removed %@" : {
 
     },
     "Removed %@ that no longer exist on %@." : {
@@ -2489,6 +4585,9 @@
           }
         }
       }
+    },
+    "Removed the note from %@" : {
+
     },
     "Rename" : {
 
@@ -2521,6 +4620,15 @@
     "Renamed from %@, no content changes." : {
 
     },
+    "Renamed to %@" : {
+
+    },
+    "Renamed without changes." : {
+
+    },
+    "Reopen the last repository" : {
+
+    },
     "Reorder, edit, squash or drop %@ on %@. Oldest first, like git's todo list." : {
       "localizations" : {
         "en" : {
@@ -2532,6 +4640,18 @@
       }
     },
     "Repack" : {
+
+    },
+    "Repacked the repository" : {
+
+    },
+    "Repacking…" : {
+
+    },
+    "replacement" : {
+
+    },
+    "Replacements: git shows the target in place of the original object." : {
 
     },
     "Replaces it no matter what. Others' commits can be lost." : {
@@ -2546,7 +4666,13 @@
     "Replays your commits on top of another branch, as if you had started from there. Their hashes change." : {
 
     },
+    "Report a git problem" : {
+
+    },
     "Report a git problem…" : {
+
+    },
+    "Repositories in ~/Developer" : {
 
     },
     "Repositories you open, clone or create show up here." : {
@@ -2556,6 +4682,15 @@
 
     },
     "Repository info…" : {
+
+    },
+    "Repository layout and stats, no file contents." : {
+
+    },
+    "Repository root" : {
+
+    },
+    "Repository, Open in Terminal uses it." : {
 
     },
     "Reset" : {
@@ -2591,6 +4726,12 @@
 
     },
     "Reset to here" : {
+
+    },
+    "Resolutions live in .git/rr-cache." : {
+
+    },
+    "Resolve %@" : {
 
     },
     "Resolve %@ to commit the merge" : {
@@ -2644,7 +4785,16 @@
     "Retry" : {
 
     },
+    "Return" : {
+
+    },
+    "Reuse recorded resolutions" : {
+
+    },
     "Reveal in Finder" : {
+
+    },
+    "Revealed %@ in Finder" : {
 
     },
     "Revert" : {
@@ -2662,7 +4812,13 @@
     "Reverting %@" : {
 
     },
+    "Review %@" : {
+
+    },
     "Reword" : {
+
+    },
+    "Reword %@" : {
 
     },
     "Reword in place…" : {
@@ -2671,13 +4827,121 @@
     "Reword selected in place…" : {
 
     },
+    "Reworded %@" : {
+
+    },
     "Rewrites history" : {
+
+    },
+    "Rewrote %@." : {
 
     },
     "Root commit" : {
 
     },
+    "run" : {
+
+    },
+    "Run %@ the way git would" : {
+
+    },
+    "Run %lld destructive commands?" : {
+
+    },
+    "Run a git command" : {
+
+    },
+    "Run a palette item with options" : {
+
+    },
+    "Run again" : {
+
+    },
+    "Run all" : {
+
+    },
     "Run background maintenance now" : {
+
+    },
+    "Run command" : {
+
+    },
+    "Run commands" : {
+
+    },
+    "Run filter-branch" : {
+
+    },
+    "Run for every registered repository" : {
+
+    },
+    "Run git annotate in the console" : {
+
+    },
+    "Run git filter-branch?" : {
+
+    },
+    "Run in git" : {
+
+    },
+    "Run maintenance now" : {
+
+    },
+    "Run now" : {
+
+    },
+    "Run this destructive command?" : {
+
+    },
+    "run with options" : {
+
+    },
+    "Run your own git commands here." : {
+
+    },
+    "running" : {
+
+    },
+    "Running git commands is part of Expert mode" : {
+
+    },
+    "Running git lfs env." : {
+
+    },
+    "Runs after a pull or merge finishes." : {
+
+    },
+    "Runs after each commit." : {
+
+    },
+    "Runs after switching branches or checking out files." : {
+
+    },
+    "Runs as you typed it, and the output shows in the console." : {
+
+    },
+    "Runs before a merge commit. If it fails, the merge stops." : {
+
+    },
+    "Runs before a rebase starts. If it fails, the rebase stops." : {
+
+    },
+    "Runs before each commit. If it fails, the commit stops." : {
+
+    },
+    "Runs before each push. If it fails, nothing is pushed." : {
+
+    },
+    "Runs git fetch --prune for %@." : {
+
+    },
+    "Runs git fetch --prune for the remotes of each open repository." : {
+
+    },
+    "Runs git maintenance in each repository listed in maintenance.repo." : {
+
+    },
+    "Runs git maintenance in the %@ listed in maintenance.repo." : {
 
     },
     "Runs git push -u %@ after creating it." : {
@@ -2689,7 +4953,68 @@
     "Save" : {
 
     },
+    "Save %@" : {
+
+    },
+    "Save %@ as a patch" : {
+
+    },
+    "Save as" : {
+
+    },
     "Save as patch…" : {
+
+    },
+    "Save note" : {
+
+    },
+    "Save patch" : {
+
+    },
+    "Save selected as patch…" : {
+
+    },
+    "Save to" : {
+
+    },
+    "saved %@" : {
+
+    },
+    "Saved %@" : {
+
+    },
+    "Saved %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Saved %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Saved a patch" : {
+
+    },
+    "Saved a patch to the Desktop" : {
+
+    },
+    "Saved passwords" : {
+
+    },
+    "Saved the report to the Desktop" : {
+
+    },
+    "Saves a numbered series." : {
+
+    },
+    "Saves the files at that commit, without the .git folder." : {
+
+    },
+    "Scope" : {
+
+    },
+    "Scripts in %@, run exactly as git runs them. In Expert mode, Skip hooks in the commit composer bypasses them for one commit." : {
 
     },
     "Search" : {
@@ -2698,10 +5023,31 @@
     "Search actions, branches, commits" : {
 
     },
+    "Search actions, branches, commits and files" : {
+
+    },
+    "Search or run a command" : {
+
+    },
     "Search or run a git command" : {
 
     },
+    "Search shortcuts" : {
+
+    },
+    "Search, or type a git command" : {
+
+    },
+    "Second" : {
+
+    },
     "Select a commit" : {
+
+    },
+    "Select all" : {
+
+    },
+    "Select none" : {
 
     },
     "Send" : {
@@ -2728,16 +5074,49 @@
     "Settings…" : {
 
     },
+    "shallow" : {
+
+    },
+    "Shift" : {
+
+    },
+    "Shortcuts" : {
+
+    },
     "Show" : {
+
+    },
+    "Show %@ in history" : {
+
+    },
+    "Show %@, the first bad commit" : {
+
+    },
+    "Show all" : {
+
+    },
+    "Show all output" : {
 
     },
     "Show changes" : {
 
     },
+    "Show commands in sheets" : {
+
+    },
+    "Show commit" : {
+
+    },
     "Show console" : {
 
     },
+    "Show details" : {
+
+    },
     "Show history" : {
+
+    },
+    "Show in Finder" : {
 
     },
     "Show in history" : {
@@ -2749,6 +5128,18 @@
     "Show object" : {
 
     },
+    "Show or hide the console" : {
+
+    },
+    "Show or hide the inspector" : {
+
+    },
+    "Show or hide the sidebar" : {
+
+    },
+    "Show remote branches in the sidebar" : {
+
+    },
     "Show sidebar" : {
 
     },
@@ -2756,6 +5147,15 @@
 
     },
     "Show the diff against another parent" : {
+
+    },
+    "Show the inspector" : {
+
+    },
+    "Show the reflog of" : {
+
+    },
+    "Show the Welcome window" : {
 
     },
     "Show the Welcome window when no repository is open" : {
@@ -2767,13 +5167,31 @@
     "Show whitespace" : {
 
     },
+    "Showing the first 32 KB." : {
+
+    },
+    "Shows git's own output and exit code, so you see exactly what went wrong." : {
+
+    },
+    "Shows who signed it" : {
+
+    },
     "Side by side" : {
+
+    },
+    "Sign commits and tags" : {
 
     },
     "Sign in" : {
 
     },
+    "Sign in again" : {
+
+    },
     "Sign in again to fetch, pull and push." : {
+
+    },
+    "Sign in again when a remote asks." : {
 
     },
     "Sign in again…" : {
@@ -2785,13 +5203,28 @@
     "Sign in to %@" : {
 
     },
+    "Sign in with a personal access token in Settings, Accounts, then clone again." : {
+
+    },
+    "Sign in…" : {
+
+    },
     "Sign off" : {
+
+    },
+    "Sign out" : {
+
+    },
+    "Sign with" : {
 
     },
     "Signature" : {
 
     },
     "Signed" : {
+
+    },
+    "Signed by %@" : {
 
     },
     "Signed in to %@ as %@" : {
@@ -2803,6 +5236,9 @@
           }
         }
       }
+    },
+    "Signed out of %@" : {
+
     },
     "Signed with %@ by %@" : {
       "localizations" : {
@@ -2817,7 +5253,19 @@
     "Signed with %@ key not in your allowed signers" : {
 
     },
+    "Signing" : {
+
+    },
+    "Signing key" : {
+
+    },
+    "Size on disk" : {
+
+    },
     "Skip" : {
+
+    },
+    "Skip %@" : {
 
     },
     "Skip didn't finish" : {
@@ -2827,6 +5275,9 @@
 
     },
     "Skip the pre-push hook" : {
+
+    },
+    "Skip worktree" : {
 
     },
     "Soft" : {
@@ -2841,7 +5292,46 @@
     "Some of its commits aren't in HEAD. Delete it from the branch menu to confirm; Undo history keeps it for 14 days." : {
 
     },
+    "Something is already at that path" : {
+
+    },
+    "Something is already at this path. Choose an empty one." : {
+
+    },
+    "Something is already there. Choose a new or empty folder." : {
+
+    },
+    "sparse checkout" : {
+
+    },
+    "Sparse checkout" : {
+
+    },
+    "Sparse checkout didn't change" : {
+
+    },
+    "Sparse checkout is off" : {
+
+    },
+    "Sparse checkout is on" : {
+
+    },
     "Sparse checkout…" : {
+
+    },
+    "Spends extra time to find the smallest possible diff." : {
+
+    },
+    "Split" : {
+
+    },
+    "Split %@" : {
+
+    },
+    "Split %@ in two" : {
+
+    },
+    "Split commit" : {
 
     },
     "Split commit…" : {
@@ -2851,6 +5341,9 @@
 
     },
     "Split selected…" : {
+
+    },
+    "Split works file by file, so it needs at least two." : {
 
     },
     "Squash" : {
@@ -2868,6 +5361,9 @@
           }
         }
       }
+    },
+    "SSH keys" : {
+
     },
     "Stacked branches follow along (--update-refs)." : {
 
@@ -2890,7 +5386,13 @@
     "Stage hunk" : {
 
     },
+    "Stage or unstage the selected file" : {
+
+    },
     "Stage the files in Changes, write a summary and commit. The graph starts there." : {
+
+    },
+    "Stage the fix and commit; autosquash folds it in on the next interactive rebase." : {
 
     },
     "Staged" : {
@@ -2917,16 +5419,43 @@
     "Start from" : {
 
     },
+    "Start over" : {
+
+    },
+    "Start over with %@?" : {
+
+    },
+    "Start over with every conflicted file?" : {
+
+    },
+    "Start over with every file" : {
+
+    },
     "Start rebase" : {
 
     },
+    "Start with git to run a command, for example git log --oneline -5." : {
+
+    },
+    "Start with git to run any command, for example git log --oneline -5." : {
+
+    },
+    "Started over with %@" : {
+
+    },
     "Starts a branch at %@, where the stash was made, then applies and drops it. Useful when the stash no longer applies cleanly." : {
+
+    },
+    "stash" : {
 
     },
     "Stash" : {
 
     },
     "Stash %@" : {
+
+    },
+    "Stash %@…" : {
 
     },
     "Stash and switch" : {
@@ -2953,6 +5482,9 @@
     "Stashes" : {
 
     },
+    "Stashes them first and brings them back after, so a pull never refuses to start." : {
+
+    },
     "Stashing sets your changes aside so you can switch branches with a clean working tree, then bring them back." : {
 
     },
@@ -2976,6 +5508,9 @@
         }
       }
     },
+    "Stop" : {
+
+    },
     "Stop after applying, to amend it" : {
 
     },
@@ -2985,7 +5520,16 @@
     "Stop tracking" : {
 
     },
+    "Stopped" : {
+
+    },
     "Stopped %@" : {
+
+    },
+    "Stopped applying patches" : {
+
+    },
+    "Stopped at %@" : {
 
     },
     "Stopped at %@ because of conflicts. Resolve them, then continue." : {
@@ -3013,10 +5557,26 @@
     "Stopped on conflicts" : {
 
     },
+    "Stopped tracking %@" : {
+
+    },
     "Stops if your branch has commits the remote lacks." : {
 
     },
     "Stops instead of making a merge commit." : {
+
+    },
+    "Stored in %@ as %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Stored in %1$@ as %2$@."
+          }
+        }
+      }
+    },
+    "Stored in refs/notes/commits." : {
 
     },
     "Strategy option" : {
@@ -3028,6 +5588,15 @@
     "Submodules" : {
 
     },
+    "Submodules pin another repository at an exact commit inside this one." : {
+
+    },
+    "succeeded" : {
+
+    },
+    "Suggestions" : {
+
+    },
     "Summary" : {
 
     },
@@ -3037,10 +5606,16 @@
     "Summary of the amended commit" : {
 
     },
+    "Summary of the second commit" : {
+
+    },
     "Switch %@ to another branch first, then try again." : {
 
     },
     "Switch and bring changes" : {
+
+    },
+    "Switch back to %@" : {
 
     },
     "Switch branch" : {
@@ -3052,7 +5627,13 @@
     "Switch to %@" : {
 
     },
+    "Switch to a branch" : {
+
+    },
     "Switch to a branch to pull into it." : {
+
+    },
+    "Switch to a branch, or name a new one" : {
 
     },
     "Switch to another branch first, then delete it." : {
@@ -3064,10 +5645,22 @@
     "Switch to…" : {
 
     },
+    "symbolic" : {
+
+    },
     "Sync" : {
 
     },
+    "Sync URL" : {
+
+    },
     "Sync with remotes" : {
+
+    },
+    "System" : {
+
+    },
+    "tag" : {
 
     },
     "Tag" : {
@@ -3088,10 +5681,22 @@
     "Target" : {
 
     },
+    "Terminal app" : {
+
+    },
     "Testing %@. Build and try it, then mark it." : {
 
     },
+    "That branch is already checked out" : {
+
+    },
     "That conflict wasn't resolved" : {
+
+    },
+    "That doesn't look like a git URL. Try git@host:owner/repo.git or https://host/owner/repo.git." : {
+
+    },
+    "That folder already exists" : {
 
     },
     "That name is taken" : {
@@ -3103,7 +5708,13 @@
     "The %@ hook stopped this" : {
 
     },
+    "The archive wasn't written" : {
+
+    },
     "the branch" : {
+
+    },
+    "The branch %@ and its commits stay in the repository." : {
 
     },
     "The branch or files changed after it, so putting it back now would lose newer work. Earlier states stay in Reflog, part of Expert mode." : {
@@ -3115,13 +5726,45 @@
     "The branches have diverged. Merge with a merge commit instead." : {
 
     },
+    "The bundle wasn't written" : {
+
+    },
     "The changes are staged, not committed yet." : {
 
     },
     "the changes in %@" : {
 
     },
+    "The check didn't finish" : {
+
+    },
+    "The checkout is %@ behind what %@ records" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The checkout is %1$@ behind what %2$@ records"
+          }
+        }
+      }
+    },
+    "The checkout is %@ past what %@ records" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The checkout is %1$@ past what %2$@ records"
+          }
+        }
+      }
+    },
     "The cherry-pick didn't finish" : {
+
+    },
+    "The clone didn't finish" : {
+
+    },
+    "The co-author wasn't added" : {
 
     },
     "the commit" : {
@@ -3130,31 +5773,82 @@
     "The commit stays; only the name goes. Undo history keeps it for 14 days." : {
 
     },
+    "The comparison didn't run" : {
+
+    },
     "The conflict didn't come back" : {
+
+    },
+    "The credential helper stopped without saying why." : {
 
     },
     "The current side deleted %@" : {
 
     },
+    "The deletion is staged." : {
+
+    },
+    "The diff tool didn't open" : {
+
+    },
     "The file changed after Vrai showed it, so git couldn't apply the lines you picked. The diff is up to date now; pick the lines again." : {
+
+    },
+    "The file stays in the folder. Commit to record it; add it to .gitignore to keep it out." : {
+
+    },
+    "The file wasn't added" : {
 
     },
     "The file wasn't marked resolved" : {
 
     },
+    "The file wasn't removed" : {
+
+    },
     "The file wasn't resolved" : {
+
+    },
+    "The files weren't removed" : {
 
     },
     "The first step can't be squash or fixup" : {
 
     },
+    "The fixup commit wasn't made" : {
+
+    },
+    "The git imap-send command" : {
+
+    },
+    "The git send-email command" : {
+
+    },
     "The good commit must be an ancestor of the bad one" : {
+
+    },
+    "The history didn't load" : {
+
+    },
+    "The hook didn't run" : {
 
     },
     "The hook exited with an error and printed nothing." : {
 
     },
+    "The hook printed nothing. Run it in Terminal to see more." : {
+
+    },
     "The incoming side deleted %@" : {
+
+    },
+    "The index flag wasn't changed" : {
+
+    },
+    "The manual page isn't installed" : {
+
+    },
+    "The manual page that comes with git %@." : {
 
     },
     "The merge didn't finish" : {
@@ -3163,7 +5857,28 @@
     "The merge tool didn't open" : {
 
     },
+    "The new commit wasn't staged" : {
+
+    },
+    "The objects weren't packed" : {
+
+    },
+    "The objects weren't recovered" : {
+
+    },
     "the other branch" : {
+
+    },
+    "The pack index wasn't rebuilt" : {
+
+    },
+    "The packs weren't checked" : {
+
+    },
+    "The patch wasn't saved" : {
+
+    },
+    "The patches didn't apply" : {
 
     },
     "The pre-push hook stopped the push" : {
@@ -3173,6 +5888,12 @@
 
     },
     "The rebase didn't finish" : {
+
+    },
+    "The reflog didn't load" : {
+
+    },
+    "The refs didn't load" : {
 
     },
     "the remote" : {
@@ -3187,10 +5908,31 @@
     "The remote protects this branch" : {
 
     },
+    "The remote's default branch" : {
+
+    },
+    "The rename is staged." : {
+
+    },
+    "The replacement wasn't removed" : {
+
+    },
+    "The repository already had every object" : {
+
+    },
     "The reset didn't finish" : {
 
     },
     "The revert didn't finish" : {
+
+    },
+    "The reword didn't finish" : {
+
+    },
+    "The rule wasn't added" : {
+
+    },
+    "The same change is on %@ as a different commit, usually a cherry-pick." : {
 
     },
     "the server" : {
@@ -3199,7 +5941,16 @@
     "The server" : {
 
     },
+    "The server no longer accepts the saved token" : {
+
+    },
     "The signature does not match the commit" : {
+
+    },
+    "The signature doesn't check out" : {
+
+    },
+    "The split didn't finish" : {
 
     },
     "The stash didn't apply" : {
@@ -3209,6 +5960,21 @@
 
     },
     "The stash wasn't dropped" : {
+
+    },
+    "The submodule didn't update" : {
+
+    },
+    "The submodule URLs didn't sync" : {
+
+    },
+    "The submodule wasn't added" : {
+
+    },
+    "The submodule wasn't deinitialized" : {
+
+    },
+    "The summary wasn't made" : {
 
     },
     "The token is in the sandbox credential store." : {
@@ -3223,20 +5989,66 @@
     "The working tree is clean." : {
 
     },
+    "The worktree wasn't added" : {
+
+    },
+    "The worktree wasn't locked" : {
+
+    },
+    "The worktree wasn't removed" : {
+
+    },
+    "The worktree wasn't unlocked" : {
+
+    },
     "Their changes come back as staged changes, ready to commit again." : {
 
     },
     "Their changes come back unstaged. Your files don't change." : {
 
     },
+    "Their objects are in other packs too. Clean up removes them." : {
+
+    },
     "them" : {
+
+    },
+    "Then copy" : {
+
+    },
+    "There are no folders to pick" : {
+
+    },
+    "There are no lines to blame at this commit." : {
+
+    },
+    "There are no untracked files." : {
+
+    },
+    "There are no untracked or ignored files." : {
 
     },
     "There's no earlier commit in the list to fold it into. Pick it, or move it down." : {
 
     },
+    "There's no repository at that address" : {
+
+    },
+    "There's only one file in this commit" : {
+
+    },
     "They go back to the last commit" : {
 
+    },
+    "They split at %@%@. %@ differ since then." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "They split at %1$@%2$@. %3$@ differ since then."
+          }
+        }
+      }
     },
     "They're staged. Commit to finish the merge." : {
 
@@ -3259,6 +6071,9 @@
     "This commit is not signed" : {
 
     },
+    "This deletes the folder %@." : {
+
+    },
     "This diff didn't load" : {
 
     },
@@ -3274,6 +6089,9 @@
     "This is a merge. Diff against parent" : {
 
     },
+    "This is the main worktree" : {
+
+    },
     "This puts back the version from %@. The result shows up in Changes for you to review." : {
 
     },
@@ -3287,6 +6105,9 @@
         }
       }
     },
+    "This removes its files from your working tree and stops updating it. It stays in .gitmodules, so you can initialize it again later." : {
+
+    },
     "This replaces %@ with your version of %@." : {
       "localizations" : {
         "en" : {
@@ -3297,7 +6118,16 @@
         }
       }
     },
+    "This repository" : {
+
+    },
+    "This repository doesn't track any files with Git LFS." : {
+
+    },
     "This repository has no remotes" : {
+
+    },
+    "This repository has no remotes yet." : {
 
     },
     "This stash didn't load" : {
@@ -3306,13 +6136,40 @@
     "This throws away your uncommitted changes to it. A copy stays in Undo history for 14 days." : {
 
     },
+    "This worktree has uncommitted changes" : {
+
+    },
+    "This worktree is locked" : {
+
+    },
+    "This worktree's folder is gone" : {
+
+    },
     "those commits' changes" : {
 
     },
     "Those lines changed on disk" : {
 
     },
+    "To" : {
+
+    },
+    "To %@" : {
+
+    },
     "Token" : {
+
+    },
+    "Tokens are stored in the sandbox credential store, $VRAI_SANDBOX/git-credentials." : {
+
+    },
+    "Tokens are stored in your login keychain through git's osxkeychain credential helper." : {
+
+    },
+    "Too large to keep a copy" : {
+
+    },
+    "Top hit" : {
 
     },
     "Track" : {
@@ -3328,13 +6185,56 @@
         }
       }
     },
+    "Tracking %@: %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tracking %1$@: %2$@."
+          }
+        }
+      }
+    },
+    "Tracking %@." : {
+
+    },
+    "Tracks" : {
+
+    },
     "Try again" : {
 
     },
     "Try again. If it keeps failing, check the repository in Terminal." : {
 
     },
+    "Try again. If it keeps failing, run git submodule in Terminal to see why." : {
+
+    },
+    "Try again. If it keeps failing, run git worktree list in Terminal to see why." : {
+
+    },
+    "Try again. The console shows everything git said." : {
+
+    },
     "Trying again." : {
+
+    },
+    "Turn it on to run %@ here and in the console." : {
+
+    },
+    "Turn off" : {
+
+    },
+    "Turn on Expert mode" : {
+
+    },
+    "Turn on Expert mode to edit these values. Everyday settings are in the other tabs." : {
+
+    },
+    "Turn the hook on to run it" : {
+
+    },
+    "Type a git command, like status or log --oneline." : {
 
     },
     "Type changed" : {
@@ -3346,6 +6246,9 @@
     "Uncommitted changes, %@" : {
 
     },
+    "Under Remotes, grouped by remote." : {
+
+    },
     "Undid: %@" : {
 
     },
@@ -3353,6 +6256,9 @@
 
     },
     "Undo %@" : {
+
+    },
+    "undo copy" : {
 
     },
     "Undo didn't finish" : {
@@ -3364,6 +6270,16 @@
     "Undo history keeps the branch for 14 days." : {
 
     },
+    "Undo history keeps up to %@ and %@. These are gone for good once removed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Undo history keeps up to %1$@ and %2$@. These are gone for good once removed."
+          }
+        }
+      }
+    },
     "Undo history…" : {
 
     },
@@ -3373,6 +6289,9 @@
     "Unified diff" : {
 
     },
+    "Unknown" : {
+
+    },
     "Unknown branch" : {
 
     },
@@ -3380,6 +6299,9 @@
 
     },
     "Unlock" : {
+
+    },
+    "Unlock it first, then remove it. Someone locked it so git leaves it alone." : {
 
     },
     "Unlock your SSH key" : {
@@ -3415,7 +6337,22 @@
     "Untracked" : {
 
     },
+    "Up Arrow" : {
+
+    },
+    "Up to date" : {
+
+    },
+    "Update" : {
+
+    },
+    "Update from %@" : {
+
+    },
     "Update submodules" : {
+
+    },
+    "Update to check out the recorded commit." : {
 
     },
     "Upstream" : {
@@ -3424,10 +6361,31 @@
     "Upstream for %@" : {
 
     },
+    "Upstream is gone" : {
+
+    },
+    "Upstream of %@" : {
+
+    },
     "URL" : {
 
     },
+    "Use a bundle file…" : {
+
+    },
+    "Use a different identity in this repository" : {
+
+    },
+    "Use a path inside this repository, like Vendor/name." : {
+
+    },
     "Use an https or SSH address, like git@github.com:owner/repo.git." : {
+
+    },
+    "Use an https or SSH address, like https://github.com/apple/swift-argument-parser.git." : {
+
+    },
+    "Use git@host:owner/repo.git or https://host/owner/repo.git." : {
 
     },
     "Use slashes to group branches, like feature/ or fix/." : {
@@ -3436,10 +6394,28 @@
     "Use SSH instead" : {
 
     },
+    "Use the command Vrai built" : {
+
+    },
     "Use the commit as it is" : {
 
     },
     "Use the commit, edit its message" : {
+
+    },
+    "Use the In field for the folder; the name can't contain a slash." : {
+
+    },
+    "Use this git" : {
+
+    },
+    "Used by %@. Not signed in" : {
+
+    },
+    "Used by New repository and by git init." : {
+
+    },
+    "Used for signing." : {
 
     },
     "Username" : {
@@ -3458,10 +6434,19 @@
     "Uses git replay; conflicts stop it instead of pausing." : {
 
     },
+    "Value" : {
+
+    },
     "Verified" : {
 
     },
     "Verify integrity" : {
+
+    },
+    "Verify integrity again to confirm." : {
+
+    },
+    "Verifying integrity…" : {
 
     },
     "Version %@ (%@)" : {
@@ -3474,13 +6459,67 @@
         }
       }
     },
+    "View" : {
+
+    },
+    "Vrai" : {
+
+    },
+    "Vrai asks before --force-with-lease or --force replaces commits on a remote." : {
+
+    },
+    "Vrai can't find %@" : {
+
+    },
+    "Vrai can't find a repository at %@. It may have been moved, renamed or deleted." : {
+
+    },
+    "Vrai can't find git on this Mac." : {
+
+    },
+    "Vrai couldn't read the repository" : {
+
+    },
+    "Vrai couldn't save %@" : {
+
+    },
+    "Vrai keeps its own settings in %@." : {
+
+    },
+    "Vrai kept the first 1 MB of this output." : {
+
+    },
+    "Vrai needs git" : {
+
+    },
     "Vrai needs git %@ or later. Update git, then open the repository again." : {
 
     },
     "Vrai never stores the token; git hands it to your credential helper." : {
 
     },
+    "Vrai now runs git %@" : {
+
+    },
+    "Vrai opens it when it's done." : {
+
+    },
+    "Vrai passes both to diff and log. Changing the algorithm also writes diff.algorithm to %@, so git diff in Terminal matches." : {
+
+    },
+    "Vrai runs one task at a time." : {
+
+    },
+    "Vrai runs the git already on this Mac, and it isn't installed yet. Install Apple's command line tools; it takes a few minutes. Nothing else is needed." : {
+
+    },
+    "Vrai runs the git already on this Mac, and it needs git %@ or later. Install the latest command line tools from Apple, or update git with Homebrew, then check again." : {
+
+    },
     "Vrai runs the git you already have. Install the command line tools, then open the repository again." : {
+
+    },
+    "Vrai settings. git diff in Terminal is unaffected." : {
 
     },
     "Vrai stops fetching from %@ and forgets its %@." : {
@@ -3493,22 +6532,64 @@
         }
       }
     },
+    "Vrai works with git %@ or newer and runs every command through it." : {
+
+    },
+    "Vrai's console doesn't open an editor. Pass a message with -m, or use the composer in Changes." : {
+
+    },
     "Welcome to Vrai" : {
 
     },
     "Welcome window" : {
 
     },
+    "What did you do, what did you expect, and what happened instead?" : {
+
+    },
+    "What happened" : {
+
+    },
     "What happens to your files" : {
+
+    },
+    "What Vrai can put back, kept 14 days" : {
 
     },
     "What Vrai can put back. Discards, resets, deleted branches and dropped stashes are kept for 14 days." : {
 
     },
+    "When" : {
+
+    },
+    "When a conflict you resolved before comes back, during a rebase for example, git resolves it the same way." : {
+
+    },
+    "When a fetch brings new commits to a branch you track." : {
+
+    },
     "When both sides changed the same lines" : {
 
     },
+    "When both sides have new commits" : {
+
+    },
+    "When it finishes, choose Check again." : {
+
+    },
+    "When Vrai opens" : {
+
+    },
+    "Where" : {
+
+    },
     "Which changes" : {
+
+    },
+    "Window" : {
+
+    },
+    "Windows" : {
 
     },
     "WIP on %@" : {
@@ -3517,13 +6598,43 @@
     "Workspace" : {
 
     },
+    "Worktree, %@" : {
+
+    },
     "Worktrees" : {
+
+    },
+    "Wrap long lines" : {
 
     },
     "Write a summary to commit" : {
 
     },
     "Write commit graph" : {
+
+    },
+    "Writes format-patch files you can mail or apply elsewhere with Apply patches." : {
+
+    },
+    "Writes user.name and user.email to .git/config instead of %@." : {
+
+    },
+    "Writing the commit graph…" : {
+
+    },
+    "Writing the multi-pack index…" : {
+
+    },
+    "Wrote the commit graph" : {
+
+    },
+    "Wrote the multi-pack index" : {
+
+    },
+    "You" : {
+
+    },
+    "You can keep working." : {
 
     },
     "You have %@ that %@ doesn't, and it has %lld you don't. Merge them, or rebase your %@ on top of it." : {
@@ -3537,6 +6648,9 @@
       }
     },
     "You have uncommitted changes to %@ that this would replace. Commit or stash them, then try again." : {
+
+    },
+    "You resolved this conflict before, so git replayed that resolution (rerere). Check it, then mark the file resolved." : {
 
     },
     "You won't be on a branch. Commits you make there are easy to lose unless you create a branch for them." : {
@@ -3563,7 +6677,22 @@
     "Your changes would be overwritten" : {
 
     },
+    "Your commits show as" : {
+
+    },
+    "Your git config doesn't allow the file transport for submodules (protocol.file.allow). Use an https or SSH URL instead." : {
+
+    },
     "Your local branches keep their commits." : {
+
+    },
+    "Your local edits stay put through pulls and switches until you undo this." : {
+
+    },
+    "your login keychain" : {
+
+    },
+    "Your login keychain" : {
 
     },
     "Your message is kept. Fix what the hook reports, then commit again." : {

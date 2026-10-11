@@ -25,10 +25,15 @@ struct CommitNoteEditor: View {
                     VraiButton(title: String(localized: "Edit note", bundle: .module), icon: "pencil", size: .small) {
                         text = existing
                         editing = true
-                        focused = true
+                        Task {
+                            try? await Task.sleep(for: .milliseconds(120))
+                            focused = true
+                        }
                     }
+                    .accessibilityIdentifier("note-edit")
                     VraiButton(title: String(localized: "Remove note", bundle: .module), icon: "trash", size: .small) { remove() }
                         .disabled(busy)
+                        .accessibilityIdentifier("note-remove")
                 }
             } else {
                 ZStack(alignment: .topLeading) {
@@ -45,6 +50,7 @@ struct CommitNoteEditor: View {
                         .scrollContentBackground(.hidden)
                         .focused($focused)
                         .accessibilityLabel(Text("Note", bundle: .module))
+                        .accessibilityIdentifier("note-editor")
                 }
                 .padding(.vertical, Vrai.Space.s4)
                 .padding(.horizontal, Vrai.Space.s4)
@@ -54,6 +60,7 @@ struct CommitNoteEditor: View {
                 HStack(spacing: Vrai.Space.s6) {
                     VraiButton(title: existing == nil ? String(localized: "Add note", bundle: .module) : String(localized: "Save note", bundle: .module), size: .small) { save() }
                         .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || busy)
+                        .accessibilityIdentifier("note-save")
                     if editing {
                         VraiButton(title: String(localized: "Cancel", bundle: .module), size: .small) {
                             editing = false

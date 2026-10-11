@@ -28,6 +28,9 @@ final class WelcomeFlowTests: XCTestCase {
 
     @MainActor
     private func launch(appearance: String = "light") -> XCUIApplication {
+        let defaults = UserDefaults(suiteName: Sandbox.root + "/com.aaravmaloo.vrai.sandbox")
+        defaults?.set(false, forKey: "expert")
+        defaults?.synchronize()
         let app = XCUIApplication()
         app.launchArguments = ["-VraiSandbox", Sandbox.root, "-VraiAppearance", appearance, "-VraiNow", Sandbox.now, "-VraiCapture", "YES", "-ApplePersistenceIgnoreState", "YES"]
         app.launch()
@@ -91,7 +94,9 @@ final class WelcomeFlowTests: XCTestCase {
         url.click()
         url.typeText(lab.origin)
         replace(app.textFields["Where"], with: target)
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "(default)", "(default)")).firstMatch.waitForExistence(timeout: 10))
+        let branch = app.menuButtons["Branch"]
+        XCTAssertTrue(branch.waitForExistence(timeout: 5))
+        XCTAssertTrue(eventually(15) { String(describing: branch.value ?? "").contains("(default)") }, String(describing: branch.value ?? ""))
         attach(app, "j-clone-sheet-light")
         app.buttons["clone-run"].click()
         let progress = app.descendants(matching: .any)["clone-progress"]

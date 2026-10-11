@@ -44,6 +44,7 @@ public enum PlacesCommands {
     }
 
     public static let listWorktrees = WorktreeParser.command
+    public static let worktreeStatus = GitCommand.read(["status", "--porcelain=v2", "-z", "--untracked-files=normal"])
 
     public static func submodule(path: String?, action: SubmoduleAction) -> GitCommand {
         let paths = path.map { ["--", $0] } ?? []

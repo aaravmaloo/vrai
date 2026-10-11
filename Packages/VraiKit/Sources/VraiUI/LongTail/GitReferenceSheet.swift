@@ -29,7 +29,6 @@ struct GitReferenceSheet: View {
                 Text(Self.styled(page))
                     .font(Font.Vrai.codeSmall)
                     .foregroundStyle(Color.Vrai.text)
-                    .textSelection(.enabled)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityIdentifier("git-reference")

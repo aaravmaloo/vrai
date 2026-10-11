@@ -111,6 +111,15 @@ extension RepositoryStore {
         }
     }
 
+    public func worktreeChanges(path: String) async -> Int? {
+        let folder = URL(filePath: path, directoryHint: .isDirectory)
+        guard FileManager.default.fileExists(atPath: folder.path(percentEncoded: false)),
+              let result = try? await git.process(at: folder).runAllowingFailure(PlacesCommands.worktreeStatus, background: true),
+              result.exitCode == 0 else { return nil }
+        let report = StatusParser.parse(result.stdout)
+        return report.files.count + report.conflicts.count
+    }
+
     @discardableResult
     public func removeWorktree(path: String, force: Bool = false) async throws -> ActionSummary {
         try await perform("removeWorktree") {

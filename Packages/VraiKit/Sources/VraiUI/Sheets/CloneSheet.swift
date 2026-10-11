@@ -198,6 +198,7 @@ struct CloneSheet: View {
             LongTailPathField(label: String(localized: "Where", bundle: .module), text: Binding(get: { destination }, set: { path = $0 }), placeholder: "~/Developer/repo", kind: .folder, home: app.homeFolder)
             SyncForm.Field(label: String(localized: "Branch", bundle: .module), hint: headsHint) {
                 SyncForm.Select(selection: $branch, options: branchOptions, label: String(localized: "Branch", bundle: .module))
+                    .fixedSize(horizontal: true, vertical: false)
                     .disabled(heads == nil || mirror)
             }
             SyncForm.Options(commands: [request.command], detail: String(localized: "History, submodules", bundle: .module)) {

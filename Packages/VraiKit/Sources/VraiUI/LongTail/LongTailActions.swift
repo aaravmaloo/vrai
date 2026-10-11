@@ -32,7 +32,8 @@ enum LongTailActions {
     }
 
     static func openCompare(_ window: WindowModel, first: String? = nil, second: String? = nil) {
-        window.sheets.present { CompareSheet(initialFirst: first, initialSecond: second) }
+        let picked = CompareSheet.defaults(window.store, first: first, second: second)
+        window.sheets.present { CompareSheet(first: picked.first, second: picked.second) }
     }
 
     static func openReword(_ window: WindowModel, id: OID) {

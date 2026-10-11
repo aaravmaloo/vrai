@@ -174,8 +174,16 @@ struct PaletteView: View {
             cursor.active = 0
             search.update(next, store: window.store)
         }
+        .defaultFocus($focused, true)
         .task {
             focused = true
+            for delay in [60, 120, 240] {
+                try? await Task.sleep(for: .milliseconds(delay))
+                if focused { break }
+                focused = true
+            }
+        }
+        .task {
             search.update(query, store: window.store)
             await search.start(window: window)
         }
@@ -315,7 +323,7 @@ struct PaletteRow: View {
         .onHover { inside in
             if inside, cursor.active != index { cursor.active = index }
         }
-        .accessibilityLabel([item.label, item.detail].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityLabel([item.label, item.detail, item.risk.flatMap { RiskTag.tag($0)?.label }].compactMap { $0 }.joined(separator: ", "))
         .accessibilityAddTraits(active ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier("palette-item")
     }

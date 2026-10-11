@@ -80,13 +80,14 @@ struct ConsoleDrawer: View {
     static let barHeight = Vrai.Size.control + Vrai.Space.s6
     static let minimumHeight = barHeight * 2 + Vrai.Size.row
     static let contentReserve = Vrai.Size.toolbar + Vrai.Space.s64 * 2 + Vrai.Space.s32
+    static let shareOfWindow: CGFloat = 0.36
 
     var height: CGFloat {
         let wanted = max(Self.minimumHeight, window.console.height)
         let total = window.sync.windowHeight
         guard total > 0 else { return wanted }
         let room = total - Self.contentReserve - (widthClass.isNarrow ? Vrai.Space.s40 : 0)
-        return max(Self.minimumHeight, min(wanted, room))
+        return max(Self.minimumHeight, min(wanted, room, (total * Self.shareOfWindow).rounded()))
     }
 
     var body: some View {
@@ -168,6 +169,7 @@ struct ConsoleDrawer: View {
                 SegmentItem(value: ConsoleFilter.failed, title: failed > 0 ? String(localized: "Failed \(failed)", bundle: .module) : String(localized: "Failed", bundle: .module), label: String(localized: "Failed", bundle: .module)),
                 SegmentItem(value: ConsoleFilter.background, title: String(localized: "Background", bundle: .module), label: String(localized: "Background", bundle: .module))
             ])
+            .accessibilityElement(children: .contain)
             .accessibilityLabel(Text("Show", bundle: .module))
             Spacer(minLength: 0)
             Button {

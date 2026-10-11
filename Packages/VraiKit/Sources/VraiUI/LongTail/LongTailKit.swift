@@ -11,6 +11,9 @@ enum LongTailMetrics {
     static let referenceHeight = Vrai.Size.sheetWide - Vrai.Space.s64
     static let listMax = Vrai.Space.s64 * 3
     static let welcomeHeight = Vrai.Size.sheet - Vrai.Space.s16
+    static let welcomeTitlebar = Vrai.Space.s32
+    static let welcomeContentHeight = welcomeHeight - welcomeTitlebar
+    static let welcomeSheetRoom = welcomeHeight + Vrai.Space.s48
     static let welcomeWidth = Vrai.Size.sheetWide + Vrai.Space.s64 * 2
     static let welcomeRight = Vrai.Size.sheet - Vrai.Space.s24
     static let welcomeActions = Vrai.Size.field - Vrai.Space.s24
@@ -236,7 +239,6 @@ struct LongTailKeyValue: View {
             Text(value)
                 .font(mono ? Font.Vrai.codeSmall : Font.Vrai.callout)
                 .foregroundStyle(Color.Vrai.text)
-                .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }

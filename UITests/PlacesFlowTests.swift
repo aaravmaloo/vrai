@@ -11,8 +11,8 @@ final class PlacesFlowTests: XCTestCase {
         defer { fixture.remove() }
         let app = fixture.launch()
         PlacesFixture.expand(app, "worktrees")
-        let release = app.buttons["vrai-release"]
-        XCTAssertTrue(release.waitForExistence(timeout: 10))
+        let release = PlacesFixture.sidebarItem(app, "vrai-release")
+        XCTAssertTrue(release.exists)
         release.click()
         XCTAssertTrue(app.descendants(matching: .any)["worktree-detail"].waitForExistence(timeout: 10))
         PlacesFixture.attach(self, app, "places-worktrees-light")
@@ -40,7 +40,7 @@ final class PlacesFlowTests: XCTestCase {
         let remove = app.buttons["worktree-remove"]
         XCTAssertTrue(remove.waitForExistence(timeout: 5))
         remove.click()
-        let confirm = app.buttons["Remove worktree"]
+        let confirm = PlacesFixture.alertButton(app, "Remove worktree")
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.click()
         XCTAssertTrue(PlacesFixture.eventually(15) { !FileManager.default.fileExists(atPath: folder) })
@@ -55,15 +55,17 @@ final class PlacesFlowTests: XCTestCase {
         try Data("edited in a test\n".utf8).write(to: URL(filePath: worktree + "/README.md"))
         let app = fixture.launch()
         PlacesFixture.expand(app, "worktrees")
-        let release = app.buttons["vrai-release"]
-        XCTAssertTrue(release.waitForExistence(timeout: 10))
+        let release = PlacesFixture.sidebarItem(app, "vrai-release")
+        XCTAssertTrue(release.exists)
         release.click()
+        XCTAssertTrue(app.descendants(matching: .any)["worktree-detail"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["1 uncommitted change"].waitForExistence(timeout: 10))
         app.buttons["worktree-remove"].click()
-        let confirm = app.buttons["Remove worktree"]
+        let confirm = PlacesFixture.alertButton(app, "Remove worktree")
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.click()
         XCTAssertTrue(PlacesFixture.eventually(15) { !FileManager.default.fileExists(atPath: worktree) })
-        let undo = app.buttons["Undo"]
+        let undo = PlacesFixture.windowButton(app, "Undo")
         XCTAssertTrue(undo.waitForExistence(timeout: 5))
         undo.click()
         XCTAssertTrue(PlacesFixture.eventually(10) { (try? fixture.git(["stash", "list", "--format=%gs"]).output.contains("changes from worktree vrai-release")) == true })
@@ -76,8 +78,8 @@ final class PlacesFlowTests: XCTestCase {
         defer { fixture.remove() }
         let app = fixture.launch()
         PlacesFixture.expand(app, "submodules")
-        let parser = app.buttons["swift-argument-parser"]
-        XCTAssertTrue(parser.waitForExistence(timeout: 10))
+        let parser = PlacesFixture.sidebarItem(app, "swift-argument-parser")
+        XCTAssertTrue(parser.exists)
         parser.click()
         let initialize = app.buttons["submodule-init"]
         XCTAssertTrue(initialize.waitForExistence(timeout: 10))
@@ -87,7 +89,7 @@ final class PlacesFlowTests: XCTestCase {
         let deinitialize = app.buttons["submodule-deinit"]
         XCTAssertTrue(PlacesFixture.eventually { deinitialize.isEnabled })
         deinitialize.click()
-        let confirm = app.buttons["Deinitialize"]
+        let confirm = PlacesFixture.alertButton(app, "Deinitialize")
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.click()
         XCTAssertTrue(PlacesFixture.eventually(15) { ((try? FileManager.default.contentsOfDirectory(atPath: fixture.root + "/Vendor/swift-argument-parser")) ?? ["x"]).isEmpty })
@@ -129,10 +131,10 @@ final class PlacesFlowTests: XCTestCase {
         let before = try fixture.value(["rev-parse", "HEAD@{1}"])
         let app = fixture.launch()
         let toggled = PlacesFixture.expert(app)
-        let reflog = app.buttons["Reflog"]
-        XCTAssertTrue(reflog.waitForExistence(timeout: 10))
+        let reflog = PlacesFixture.sidebarItem(app, "Reflog")
+        XCTAssertTrue(reflog.exists)
         reflog.click()
-        let entry = app.descendants(matching: .any)["HEAD@{1}"]
+        let entry = app.buttons["HEAD@{1}"]
         XCTAssertTrue(entry.waitForExistence(timeout: 10))
         entry.click()
         XCTAssertTrue(app.descendants(matching: .any)["reflog-detail"].waitForExistence(timeout: 10))
@@ -145,9 +147,11 @@ final class PlacesFlowTests: XCTestCase {
         keep.click()
         sheet.buttons["reset-run"].click()
         XCTAssertTrue(PlacesFixture.eventually(10) { (try? fixture.value(["rev-parse", "HEAD"])) == before })
-        app.typeKey("z", modifierFlags: .command)
+        let undo = PlacesFixture.windowButton(app, "Undo")
+        XCTAssertTrue(undo.waitForExistence(timeout: 5))
+        undo.click()
         XCTAssertTrue(PlacesFixture.eventually(10) { (try? fixture.value(["rev-parse", "HEAD"])) == moved })
-        if toggled { app.typeKey("e", modifierFlags: [.command, .option]) }
+        if toggled { PlacesFixture.expertOff(app) }
         app.terminate()
     }
 
@@ -160,14 +164,14 @@ final class PlacesFlowTests: XCTestCase {
         try fixture.mustGit(["replace", main, release])
         let app = fixture.launch()
         let toggled = PlacesFixture.expert(app)
-        let refs = app.buttons["Refs"]
-        XCTAssertTrue(refs.waitForExistence(timeout: 10))
+        let refs = PlacesFixture.sidebarItem(app, "Refs")
+        XCTAssertTrue(refs.exists)
         refs.click()
         XCTAssertTrue(app.descendants(matching: .any)["refs-group-refs/heads"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.descendants(matching: .any)["refs-group-refs/replace"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["ref-refs/heads/main"].exists)
         PlacesFixture.attach(self, app, "places-refs-light")
-        if toggled { app.typeKey("e", modifierFlags: [.command, .option]) }
+        if toggled { PlacesFixture.expertOff(app) }
         app.terminate()
     }
 
@@ -176,15 +180,17 @@ final class PlacesFlowTests: XCTestCase {
         let app = PlacesFixture.launch(Sandbox.fixture("everyday"))
         PlacesFixture.openFileMenu(app, "Blame")
         XCTAssertTrue(app.descendants(matching: .any)["blame-view"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.descendants(matching: .any)["blame-revision"].waitForExistence(timeout: 10))
-        let line = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "Line 12,")).firstMatch
+        let revision = app.descendants(matching: .any)["blame-revision"]
+        XCTAssertTrue(revision.waitForExistence(timeout: 10))
+        XCTAssertEqual(PlacesFixture.text(revision), "Blame at HEAD")
+        let line = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", "Line 24,")).firstMatch
         XCTAssertTrue(line.waitForExistence(timeout: 10))
         PlacesFixture.attach(self, app, "places-blame-light")
         line.click()
         let before = app.buttons["blame-before"]
         XCTAssertTrue(PlacesFixture.eventually { before.isEnabled })
         before.click()
-        XCTAssertTrue(PlacesFixture.eventually { (app.descendants(matching: .any)["blame-revision"].label).hasPrefix("Blame at ") && !(app.descendants(matching: .any)["blame-revision"].label).hasSuffix("HEAD") })
+        XCTAssertTrue(PlacesFixture.eventually { PlacesFixture.text(revision).hasPrefix("Blame at ") && !PlacesFixture.text(revision).hasSuffix("HEAD") })
         PlacesFixture.attach(self, app, "places-blame-before-light")
         app.terminate()
     }
@@ -212,8 +218,8 @@ final class PlacesFlowTests: XCTestCase {
                 let window = app.windows.firstMatch
                 PlacesFixture.revealSidebar(app)
                 PlacesFixture.expand(app, "worktrees")
-                let release = app.buttons["vrai-release"]
-                if release.waitForExistence(timeout: 10) {
+                let release = PlacesFixture.sidebarItem(app, "vrai-release")
+                if release.exists {
                     release.click()
                     let detail = app.descendants(matching: .any)["worktree-detail"]
                     let list = app.descendants(matching: .any)["worktree-row-vrai-release"]
@@ -224,8 +230,8 @@ final class PlacesFlowTests: XCTestCase {
                 }
                 PlacesFixture.revealSidebar(app)
                 PlacesFixture.expand(app, "submodules")
-                let module = app.buttons["libgit2"]
-                if module.waitForExistence(timeout: 10) {
+                let module = PlacesFixture.sidebarItem(app, "libgit2")
+                if module.exists {
                     module.click()
                     Thread.sleep(forTimeInterval: 0.8)
                     PlacesFixture.attach(self, app, "places-submodules-\(name)-\(appearance)")
@@ -254,16 +260,16 @@ final class PlacesFlowTests: XCTestCase {
                 let app = PlacesFixture.launch(Sandbox.fixture("everyday"), appearance: appearance, size: size)
                 PlacesFixture.revealSidebar(app)
                 let toggled = PlacesFixture.expert(app)
-                let reflog = app.buttons["Reflog"]
-                if reflog.waitForExistence(timeout: 10) {
+                let reflog = PlacesFixture.sidebarItem(app, "Reflog")
+                if reflog.exists {
                     reflog.click()
                     XCTAssertTrue(app.descendants(matching: .any)["reflog-view"].waitForExistence(timeout: 10))
                     Thread.sleep(forTimeInterval: 0.8)
                     PlacesFixture.attach(self, app, "places-reflog-\(name)-\(appearance)")
                 }
                 PlacesFixture.revealSidebar(app)
-                let refs = app.buttons["Refs"]
-                if refs.waitForExistence(timeout: 10) {
+                let refs = PlacesFixture.sidebarItem(app, "Refs")
+                if refs.exists {
                     refs.click()
                     let console = app.buttons["refs-console"]
                     XCTAssertTrue(console.waitForExistence(timeout: 10))
@@ -271,7 +277,7 @@ final class PlacesFlowTests: XCTestCase {
                     Thread.sleep(forTimeInterval: 0.8)
                     PlacesFixture.attach(self, app, "places-refs-\(name)-\(appearance)")
                 }
-                if toggled { app.typeKey("e", modifierFlags: [.command, .option]) }
+                if toggled { PlacesFixture.expertOff(app) }
                 app.terminate()
             }
         }
@@ -349,10 +355,57 @@ struct PlacesFixture {
     }
 
     @MainActor
+    static func sidebar(_ app: XCUIApplication) -> XCUIElement {
+        app.groups.matching(NSPredicate(format: "label == %@", "Repository")).firstMatch
+    }
+
+    @MainActor
+    static func sidebarItem(_ app: XCUIApplication, _ label: String) -> XCUIElement {
+        let item = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+        if item.waitForExistence(timeout: 10) { reveal(app, item) }
+        return item
+    }
+
+    @MainActor
+    static func reveal(_ app: XCUIApplication, _ element: XCUIElement) {
+        let scroll = sidebar(app).scrollViews.firstMatch
+        guard scroll.exists, element.exists else { return }
+        var sign: CGFloat = -1
+        for _ in 0..<10 {
+            let visible = scroll.frame.insetBy(dx: 0, dy: 2)
+            let frame = element.frame
+            if frame.minY >= visible.minY, frame.maxY <= visible.maxY { return }
+            let distance = frame.maxY > visible.maxY ? frame.maxY - visible.maxY + 12 : frame.minY - visible.minY - 12
+            scroll.scroll(byDeltaX: 0, deltaY: sign * distance)
+            Thread.sleep(forTimeInterval: 0.3)
+            let moved = frame.minY - element.frame.minY
+            if distance > 0 ? moved <= 0 : moved >= 0 { sign = -sign }
+        }
+    }
+
+    @MainActor
     static func expand(_ app: XCUIApplication, _ key: String) {
         let header = app.buttons["sidebar-section-" + key]
         guard header.waitForExistence(timeout: 10) else { return }
+        reveal(app, header)
         if header.value as? String == "Collapsed" { header.click() }
+        _ = eventually(3) { header.value as? String == "Expanded" }
+    }
+
+    @MainActor
+    static func alertButton(_ app: XCUIApplication, _ label: String) -> XCUIElement {
+        app.windows.firstMatch.sheets.buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+    }
+
+    @MainActor
+    static func windowButton(_ app: XCUIApplication, _ label: String) -> XCUIElement {
+        app.windows.firstMatch.buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+    }
+
+    @MainActor
+    static func text(_ element: XCUIElement) -> String {
+        let value = element.value as? String ?? ""
+        return value.isEmpty ? element.label : value
     }
 
     @MainActor
@@ -362,12 +415,37 @@ struct PlacesFixture {
         Thread.sleep(forTimeInterval: 0.6)
     }
 
+    @MainActor
+    static func focus(_ app: XCUIApplication) {
+        let commits = app.descendants(matching: .any)["commits"]
+        if commits.exists, commits.isHittable { commits.click() }
+    }
+
     @MainActor @discardableResult
     static func expert(_ app: XCUIApplication) -> Bool {
-        if app.buttons["Reflog"].waitForExistence(timeout: 2) { return false }
-        app.typeKey("e", modifierFlags: [.command, .option])
-        Thread.sleep(forTimeInterval: 0.8)
+        let reflog = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", "Reflog")).firstMatch
+        if reflog.waitForExistence(timeout: 2) { return false }
+        for _ in 0..<2 {
+            focus(app)
+            app.typeKey("e", modifierFlags: [.command, .option])
+            if reflog.waitForExistence(timeout: 4) { return true }
+        }
+        XCTFail("Expert mode didn't turn on")
         return true
+    }
+
+    @MainActor
+    static func expertOff(_ app: XCUIApplication) {
+        revealSidebar(app)
+        let reflog = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", "Reflog")).firstMatch
+        guard reflog.waitForExistence(timeout: 2) else {
+            app.typeKey("e", modifierFlags: [.command, .option])
+            return
+        }
+        for _ in 0..<2 where reflog.exists {
+            app.typeKey("e", modifierFlags: [.command, .option])
+            _ = eventually(3) { !reflog.exists }
+        }
     }
 
     @MainActor

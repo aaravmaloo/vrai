@@ -55,6 +55,7 @@ struct SubmodulesView: View {
                 }
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("submodules-view")
     }
 

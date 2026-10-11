@@ -54,7 +54,7 @@ extension AppModel {
     }
 
     public func initCommand(at folder: URL, initialBranch: String?) -> GitCommand {
-        LongTailCommands.initRepository(at: folder.path(percentEncoded: false), initialBranch: initialBranch)
+        LongTailCommands.initRepository(at: folder.path(percentEncoded: false).trimmingTrailingSlashes(), initialBranch: initialBranch)
     }
 
     @discardableResult

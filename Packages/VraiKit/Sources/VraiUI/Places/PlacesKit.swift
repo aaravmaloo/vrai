@@ -8,30 +8,35 @@ struct PlacesPane<ListContent: View, Detail: View>: View {
     var back: () -> Void
     @ViewBuilder let list: () -> ListContent
     @ViewBuilder let detail: () -> Detail
-    @Environment(\.widthClass) private var widthClass
 
     var body: some View {
-        ChangesFittedFrame {
-            if widthClass == .compact {
-                if showDetail {
-                    VStack(spacing: 0) {
-                        PlacesBackBar(label: backLabel, action: back)
+        GeometryReader { geometry in
+            let width = WidthClass(width: geometry.size.width)
+            Group {
+                if width.isNarrow {
+                    if showDetail {
+                        VStack(spacing: 0) {
+                            PlacesBackBar(label: backLabel, action: back)
+                            detail()
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                    } else {
+                        list()
+                    }
+                } else {
+                    HStack(spacing: 0) {
+                        list()
+                            .frame(width: Vrai.Size.inspector + Vrai.Space.s40)
+                            .hairline(.trailing)
                         detail()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                } else {
-                    list()
-                }
-            } else {
-                HStack(spacing: 0) {
-                    list()
-                        .frame(width: widthClass.isNarrow ? Vrai.Size.filelist + Vrai.Space.s8 : Vrai.Size.inspector + Vrai.Space.s40)
-                        .hairline(.trailing)
-                    detail()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .environment(\.widthClass, width)
         }
+        .clipped()
         .background(Color.Vrai.bg)
     }
 }

@@ -44,6 +44,7 @@ struct RefsView: View {
         }
         .background(Color.Vrai.bg)
         .task(id: key) { await load() }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("refs-view")
     }
 

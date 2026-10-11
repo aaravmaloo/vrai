@@ -7,7 +7,6 @@ struct WorktreesView: View {
     @Environment(WindowModel.self) private var window
     @Environment(AppModel.self) private var app
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.expert) private var expert
     @State private var showDetail = false
 
     var body: some View {
@@ -16,12 +15,6 @@ struct WorktreesView: View {
         PlacesPane(showDetail: showDetail, backLabel: String(localized: "Worktrees", bundle: .module), back: { showDetail = false }) {
             VStack(spacing: 0) {
                 PlacesListHeader(title: String(localized: "Worktrees", bundle: .module), caption: String(localized: "Branches checked out side by side", bundle: .module)) {
-                    if expert {
-                        IconButton(icon: "trash", label: String(localized: "Prune stale worktrees", bundle: .module), small: false) {
-                            PlacesActions.prune(window)
-                        }
-                        .disabled(store.busy.contains("pruneWorktrees"))
-                    }
                     IconButton(icon: "plus", label: String(localized: "Add worktree", bundle: .module)) {
                         PlacesActions.openAddWorktree(window)
                     }
@@ -53,6 +46,7 @@ struct WorktreesView: View {
                 PlacesEmpty(icon: "rectangle.on.rectangle", title: String(localized: "No worktree selected", bundle: .module), small: true)
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("worktrees-view")
     }
 
@@ -90,6 +84,13 @@ struct WorktreeDetail: View {
     @Environment(RepositoryStore.self) private var store
     @Environment(WindowModel.self) private var window
     @Environment(\.expert) private var expert
+    @State private var counted: Int?
+    @State private var checked = false
+
+    struct CountKey: Hashable {
+        var worktree: Worktree
+        var head: OID?
+    }
 
     var body: some View {
         let name = PlacesCopy.name(worktree.path)
@@ -162,11 +163,18 @@ struct WorktreeDetail: View {
                 RewriteCommandPreview(command: worktree.isMain ? PlacesCommands.listWorktrees : store.lockWorktreeCommand(path: worktree.path, locked: !worktree.locked))
             }
         }
+        .task(id: CountKey(worktree: worktree, head: store.snapshot?.headOID)) {
+            guard !worktree.isMain, worktree.prunable == nil else { return }
+            counted = await store.worktreeChanges(path: worktree.path)
+            checked = true
+        }
     }
 
     var changes: String {
-        let count = worktree.isMain ? (store.snapshot?.working.count ?? 0) : (worktree.changes ?? 0)
         if worktree.prunable != nil { return String(localized: "Unknown", bundle: .module) }
+        guard let count = worktree.isMain ? store.snapshot?.working.count : (counted ?? worktree.changes) else {
+            return checked ? String(localized: "Unknown", bundle: .module) : String(localized: "Checking\u{2026}", bundle: .module)
+        }
         return count > 0 ? n(count, "uncommitted change") : String(localized: "Clean", bundle: .module)
     }
 }

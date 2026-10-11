@@ -174,6 +174,7 @@ struct CloneTests {
         #expect(status.empty)
         #expect(status.changes == 2)
         #expect(lab.app.initCommand(at: folder, initialBranch: "trunk").display.hasPrefix("git init --initial-branch=trunk /"))
+        #expect(lab.app.initCommand(at: folder, initialBranch: "trunk").display.hasSuffix("/pocket-notes"))
     }
 
     @Test func inspectFindsRootsAndOffersInit() async throws {
@@ -187,6 +188,15 @@ struct CloneTests {
         let gone = lab.app.developerFolder.appending(path: "gone", directoryHint: .isDirectory)
         #expect(await lab.app.inspect(path: gone.path(percentEncoded: false)) == .missing(gone.standardizedFileURL))
         #expect(await lab.app.inspect(path: "~/Developer/plain") == .notARepository(plain.standardizedFileURL))
+    }
+
+    @Test func displayPathTidiesHomeAndTrailingSlashes() throws {
+        let lab = try CloneLab.make()
+        defer { lab.remove() }
+        #expect(lab.app.displayPath(lab.app.homeFolder) == "~")
+        #expect(lab.app.displayPath(lab.app.developerFolder) == "~/Developer")
+        #expect(lab.app.displayPath(URL(filePath: "/tmp/elsewhere/", directoryHint: .isDirectory)) == "/tmp/elsewhere")
+        #expect(lab.app.displayPath(URL(filePath: "/", directoryHint: .isDirectory)) == "/")
     }
 
     @Test func recentStatusAndNearbyRepositories() async throws {

@@ -163,13 +163,19 @@ struct WelcomeContent: View {
             .background(Color.Vrai.bgSubtle)
             .hairline(.leading)
         }
-        .frame(width: LongTailMetrics.welcomeWidth, height: LongTailMetrics.welcomeHeight)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.Vrai.bg)
         .ignoresSafeArea()
-        .sheet(item: $model.sheet) { kind in
+        .frame(width: LongTailMetrics.welcomeWidth, height: LongTailMetrics.welcomeContentHeight)
+        .sheet(item: $model.sheet, onDismiss: {
+            guard model.closeAfterSheet else { return }
+            model.closeAfterSheet = false
+            dismissWindow(id: "welcome")
+        }) { kind in
             AppSheetView(kind: kind, context: context)
                 .environment(app)
                 .environment(app.preferences)
+                .environment(\.longTailRoom, LongTailMetrics.welcomeSheetRoom)
                 .tint(Color.Vrai.accent)
         }
         .alert(
@@ -277,7 +283,7 @@ struct RepoRowView: View {
             }
             .frame(minWidth: LongTailMetrics.repoText, maxWidth: .infinity, alignment: .leading)
             meta
-                .layoutPriority(-1)
+                .layoutPriority(1)
             Text(RelativeDate.ago(recent.lastOpened, now: now))
                 .font(Font.Vrai.caption)
                 .foregroundStyle(Color.Vrai.textTertiary)
@@ -403,9 +409,10 @@ struct OnboardingView: View {
             .padding(.top, Vrai.Space.s8)
         }
         .padding(Vrai.Space.s32)
-        .frame(width: LongTailMetrics.welcomeWidth, height: LongTailMetrics.welcomeHeight)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.Vrai.bg)
         .ignoresSafeArea()
+        .frame(width: LongTailMetrics.welcomeWidth, height: LongTailMetrics.welcomeContentHeight)
     }
 
     var title: String {

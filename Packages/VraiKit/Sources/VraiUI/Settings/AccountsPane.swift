@@ -101,18 +101,6 @@ struct AccountsForm: View {
                 }
             }
             CredentialHelperSection(context: context, git: git)
-            SettingsSection(String(localized: "Identity", bundle: .module), description: String(localized: "Every commit you make records this name and email.", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.userName, ConfigKeys.userEmail])) {
-                SettingsRow(String(localized: "Name", bundle: .module)) {
-                    CommitField(value: git.identity.name ?? "", label: String(localized: "Name", bundle: .module), placeholder: "Avery Chen", id: "settings.userName", validate: { $0.isEmpty ? String(localized: "Enter a name.", bundle: .module) : nil }) { name in
-                        context.run { try await git.setName(name) }
-                    }
-                }
-                SettingsRow(String(localized: "Email", bundle: .module)) {
-                    CommitField(value: git.identity.email ?? "", label: String(localized: "Email", bundle: .module), placeholder: "avery@vrai.app", id: "settings.userEmail", validate: { Identity.isValidEmail($0) ? nil : String(localized: "Enter an email address.", bundle: .module) }) { email in
-                        context.run { try await git.setEmail(email) }
-                    }
-                }
-            }
             SettingsSection(String(localized: "SSH keys", bundle: .module), footer: String(localized: "Keys live in \(sshFolder). ssh-agent loads them from your keychain.", bundle: .module)) {
                 if context.sshKeys.isEmpty {
                     SettingsRow(String(localized: "No SSH keys yet", bundle: .module), description: String(localized: "Create one in Terminal with ssh-keygen -t ed25519.", bundle: .module), icon: "key")
@@ -143,6 +131,18 @@ struct AccountsForm: View {
                 SigningKeyRow(context: context, git: git, signing: signing)
                 SettingsRow(String(localized: "Your commits show as", bundle: .module)) {
                     SignatureBadge(state: signing.commits ? .verified : .unsigned, signer: git.identity.name, keyType: signing.format.keyType)
+                }
+            }
+            SettingsSection(String(localized: "Identity", bundle: .module), description: String(localized: "Every commit you make records this name and email.", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.userName, ConfigKeys.userEmail])) {
+                SettingsRow(String(localized: "Name", bundle: .module)) {
+                    CommitField(value: git.identity.name ?? "", label: String(localized: "Name", bundle: .module), placeholder: "Avery Chen", id: "settings.userName", validate: { $0.isEmpty ? String(localized: "Enter a name.", bundle: .module) : nil }) { name in
+                        context.run { try await git.setName(name) }
+                    }
+                }
+                SettingsRow(String(localized: "Email", bundle: .module)) {
+                    CommitField(value: git.identity.email ?? "", label: String(localized: "Email", bundle: .module), placeholder: "avery@vrai.app", id: "settings.userEmail", validate: { Identity.isValidEmail($0) ? nil : String(localized: "Enter an email address.", bundle: .module) }) { email in
+                        context.run { try await git.setEmail(email) }
+                    }
                 }
             }
         }

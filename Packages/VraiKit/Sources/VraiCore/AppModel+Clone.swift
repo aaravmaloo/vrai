@@ -94,7 +94,7 @@ extension AppModel {
     public var downloadsFolder: URL { homeFolder.appending(path: "Downloads", directoryHint: .isDirectory) }
 
     public func displayPath(_ url: URL) -> String {
-        let path = url.standardizedFileURL.path(percentEncoded: false)
+        let path = url.standardizedFileURL.path(percentEncoded: false).trimmingTrailingSlashes()
         let home = homeFolder.standardizedFileURL.path(percentEncoded: false).trimmingTrailingSlashes()
         if path == home { return "~" }
         if path.hasPrefix(home + "/") { return "~" + path.dropFirst(home.count) }

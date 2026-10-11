@@ -40,7 +40,7 @@ struct VraiApp: App {
             SettingsView()
                 .environment(app)
         }
-        .windowResizability(.contentMinSize)
+        .windowResizability(.contentSize)
     }
 }
 

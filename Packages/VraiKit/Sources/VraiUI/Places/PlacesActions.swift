@@ -100,15 +100,25 @@ enum PlacesActions {
             ))
             return
         }
+        let store = window.store
+        Task {
+            let changes = await store.worktreeChanges(path: worktree.path) ?? worktree.changes ?? 0
+            presentRemoveWorktree(window, worktree: worktree, changes: changes)
+        }
+    }
+
+    static func presentRemoveWorktree(_ window: WindowModel, worktree: Worktree, changes: Int) {
+        let name = PlacesCopy.name(worktree.path)
         var message = String(localized: "This deletes the folder \(PathText.abbreviated(worktree.path)).", bundle: .module)
         if let branch = worktree.branch {
             message += " " + String(localized: "The branch \(branch) and its commits stay in the repository.", bundle: .module)
         } else {
             message += " " + String(localized: "Its commits stay in the repository.", bundle: .module)
         }
-        let changes = worktree.changes ?? 0
-        if changes > 0 {
-            message += " " + String(localized: "Its \(n(changes, "uncommitted change")) are deleted with it. A copy stays in Undo history for 14 days.", bundle: .module)
+        if changes == 1 {
+            message += " " + String(localized: "Its uncommitted change is deleted with it. A copy stays in Undo history for 14 days.", bundle: .module)
+        } else if changes > 1 {
+            message += " " + String(localized: "Its \(changes) uncommitted changes are deleted with it. A copy stays in Undo history for 14 days.", bundle: .module)
         }
         if worktree.locked {
             message += " " + (worktree.lockReason.map { String(localized: "It's locked (\($0)); removing it unlocks it first.", bundle: .module) } ?? String(localized: "It's locked; removing it unlocks it first.", bundle: .module))
@@ -129,9 +139,11 @@ enum PlacesActions {
         let store = window.store
         Task {
             do {
+                let before = await store.undo.entries.first?.id
                 let summary = try await store.removeWorktree(path: worktree.path, force: force)
                 if store.sidebarSelection == worktreeKey(worktree.path) { store.sidebarSelection = nil }
-                if force, (worktree.changes ?? 0) > 0 {
+                let latest = await store.undo.entries.first
+                if force, let latest, latest.kind == .worktreeRemove, latest.id != before {
                     window.toasts.show(RewriteActions.undoToast(window, message: summary.message, detail: summary.detail, icon: "trash"))
                 } else {
                     window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "trash"))

@@ -26,6 +26,7 @@ struct BlameView: View {
         }
         .background(Color.Vrai.bg)
         .task(id: LoadKey(focus: store.fileFocus, head: store.fileFocus?.revision == nil ? store.snapshot?.headOID : nil, attempt: attempt)) { await load() }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("blame-view")
     }
 
@@ -70,7 +71,7 @@ struct BlameView: View {
                 PathBar(path: focus.path)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .clipped()
-                if widthClass > .narrow {
+                if widthClass > .compact {
                     Text(revisionLabel)
                         .font(Font.Vrai.caption)
                         .foregroundStyle(Color.Vrai.textTertiary)
