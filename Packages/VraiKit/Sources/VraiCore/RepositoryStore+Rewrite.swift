@@ -73,7 +73,15 @@ extension RepositoryStore {
     public func merge(source: String, mode: MergeMode = .auto, message: String? = nil, strategyOption: String? = nil) async throws -> MergeOutcome {
         try await perform("merge") {
             let before = try await rewriteRefs()
-            let result = try await git.run(RewriteCommands.merge(source: source, mode: mode, message: message, strategyOption: strategyOption))
+            var command = RewriteCommands.merge(source: source, mode: mode, message: message, strategyOption: strategyOption)
+            let trace = HookTrace.attach(to: &command)
+            defer { HookTrace.remove(trace) }
+            let result: GitResult
+            do {
+                result = try await git.run(command)
+            } catch let error as GitError {
+                throw HookTrace.refine(error, trace: trace)
+            }
             if result.output.contains("Already up to date") { return .upToDate }
             if mode == .squash { return .squashed }
             let after = try await rewriteRefs()
@@ -323,7 +331,9 @@ extension RepositoryStore {
             let name = rebaseState.headName.map { $0.hasPrefix("refs/heads/") ? String($0.dropFirst("refs/heads/".count)) : $0 } ?? "HEAD"
             let onto = rebaseState.onto?.short ?? ""
             let detail = rebaseState.origHead.map { String(localized: "ORIG_HEAD \($0.short)", bundle: .module) }
-            try await undo.record(UndoEntry(kind: .rebase, label: String(localized: "Rebased \(name) onto \(onto)", bundle: .module), detail: detail, head: rebaseState.head, refsBefore: rebaseState.refsBefore))
+            let entry = UndoEntry(kind: .rebase, label: String(localized: "Rebased \(name) onto \(onto)", bundle: .module), detail: detail, head: rebaseState.head, refsBefore: rebaseState.refsBefore)
+            try await undo.record(entry)
+            try? await undo.complete(entry.id)
         case .merge:
             let after = try await rewriteRefs()
             let label = mergeSource.map { String(localized: "Merged \($0) into \(before.name)", bundle: .module) } ?? String(localized: "Merged into \(before.name)", bundle: .module)
@@ -386,7 +396,9 @@ extension RepositoryStore {
     func recordRewrite(_ kind: UndoEntry.Kind, label: String, detail: String?, before: RewriteRefs, after: RewriteRefs, stashCommit: OID? = nil, always: Bool = false) async throws {
         let changed = before.changes(comparedTo: after)
         guard always || !changed.isEmpty || before.headOID != after.headOID else { return }
-        try await undo.record(UndoEntry(kind: kind, label: label, detail: detail, head: before.head, refsBefore: before.refsBefore(changed: changed), stashCommit: stashCommit))
+        let entry = UndoEntry(kind: kind, label: label, detail: detail, head: before.head, refsBefore: before.refsBefore(changed: changed), stashCommit: stashCommit)
+        try await undo.record(entry)
+        try? await undo.complete(entry.id)
     }
 
     func rewriteRefs() async throws -> RewriteRefs {

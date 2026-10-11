@@ -147,7 +147,14 @@ extension RepositoryStore {
             let before = try await resolve("HEAD")
             var tracking: Tracking?
             if let current { tracking = try await upstream(of: current) }
-            try await runNetwork(SyncCommands.pull(mode: mode, autostash: autostash, remote: remote, branch: branch), progress: progress)
+            var command = SyncCommands.pull(mode: mode, autostash: autostash, remote: remote, branch: branch)
+            let trace = HookTrace.attach(to: &command)
+            defer { HookTrace.remove(trace) }
+            do {
+                try await runNetwork(command, progress: progress)
+            } catch let error as GitError {
+                throw HookTrace.refine(error, trace: trace)
+            }
             let after = try await resolve("HEAD")
             let upstreamRef: String
             let upstreamName: String
@@ -168,7 +175,9 @@ extension RepositoryStore {
             if let before, before != after, let current {
                 let label = String(localized: "Pulled \(n(pulled, "commit")) into \(current)", bundle: .module)
                 let detail = mode == .rebase ? String(localized: "Rebased onto \(upstreamName)", bundle: .module) : String(localized: "Merged \(upstreamName)", bundle: .module)
-                try await undo.record(UndoEntry(kind: .pull, label: label, detail: detail, head: "refs/heads/" + current, refsBefore: ["refs/heads/" + current: before]))
+                let entry = UndoEntry(kind: .pull, label: label, detail: detail, head: "refs/heads/" + current, refsBefore: ["refs/heads/" + current: before])
+                try await undo.record(entry)
+                try? await undo.complete(entry.id)
             }
             return result
         }

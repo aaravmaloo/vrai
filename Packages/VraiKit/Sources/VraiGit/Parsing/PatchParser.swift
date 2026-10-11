@@ -25,7 +25,7 @@ public enum PatchParser {
             current = nil
         }
 
-        let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+        let lines = text.unicodeScalars.split(separator: "\n", omittingEmptySubsequences: false).map { Substring(String(String.UnicodeScalarView($0))) }
         for (position, raw) in lines.enumerated() {
             let line = raw
             if line.hasPrefix("diff --git ") {
@@ -47,8 +47,8 @@ public enum PatchParser {
             guard current != nil else { continue }
 
             if hunk != nil {
-                if let first = line.first, first == " " || first == "+" || first == "-" || first == "\\" {
-                    let text = String(line.dropFirst())
+                if let first = line.unicodeScalars.first, first == " " || first == "+" || first == "-" || first == "\\" {
+                    let text = String(String.UnicodeScalarView(line.unicodeScalars.dropFirst()))
                     switch first {
                     case " ":
                         hunk?.lines.append(DiffLine(kind: .context, text: text, oldNumber: oldLine, newNumber: newLine))

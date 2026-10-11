@@ -1,6 +1,39 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ has everything on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ has everything on %2$@."
+          }
+        }
+      }
+    },
+    "%@ no longer tracks a remote branch" : {
+
+    },
+    "%@ now tracks %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ now tracks %2$@"
+          }
+        }
+      }
+    },
+    "%@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ on %2$@"
+          }
+        }
+      }
+    },
     "%lldd ago" : {
 
     },
@@ -10,7 +43,308 @@
     "%lldm ago" : {
 
     },
+    "A copy stays in Undo history for 14 days" : {
+
+    },
+    "Added remote %@" : {
+
+    },
+    "Already up to date" : {
+
+    },
+    "Amended %@" : {
+
+    },
+    "and" : {
+
+    },
+    "Cherry-picked %@ onto %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cherry-picked %1$@ onto %2$@"
+          }
+        }
+      }
+    },
+    "Committed %@" : {
+
+    },
+    "Created and switched to %@" : {
+
+    },
+    "Created branch %@" : {
+
+    },
+    "Deleted %@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Deleted %1$@ on %2$@"
+          }
+        }
+      }
+    },
+    "Deleted branch %@" : {
+
+    },
+    "Deleted tag %@" : {
+
+    },
+    "Discarded %@ in %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Discarded %1$@ in %2$@"
+          }
+        }
+      }
+    },
+    "Discarded %@; a copy stays in Undo history" : {
+
+    },
+    "Discarded changes to %@" : {
+
+    },
+    "Dropped stash %@" : {
+
+    },
+    "Everything is up to date" : {
+
+    },
+    "Fast-forward" : {
+
+    },
+    "Fast-forwarded %@." : {
+
+    },
+    "Fetched %@" : {
+
+    },
+    "Fetched %@." : {
+
+    },
+    "Force pushed %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Force pushed %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "From %@." : {
+
+    },
+    "It pointed at %@." : {
+
+    },
     "just now" : {
+
+    },
+    "Merge commit %@" : {
+
+    },
+    "Merged %@" : {
+
+    },
+    "Merged %@ into %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Merged %1$@ into %2$@"
+          }
+        }
+      }
+    },
+    "Merged into %@" : {
+
+    },
+    "Merged with your %@." : {
+
+    },
+    "Not on a branch. Create one to keep commits you make here." : {
+
+    },
+    "On %@" : {
+
+    },
+    "ORIG_HEAD %@" : {
+
+    },
+    "Pulled %@ from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pulled %1$@ from %2$@"
+          }
+        }
+      }
+    },
+    "Pulled %@ into %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pulled %1$@ into %2$@"
+          }
+        }
+      }
+    },
+    "Pushed %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pushed %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Pushed tag %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pushed tag %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Rebased %@ interactively" : {
+
+    },
+    "Rebased %@ onto %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rebased %1$@ onto %2$@"
+          }
+        }
+      }
+    },
+    "Rebased onto %@" : {
+
+    },
+    "Removed remote %@" : {
+
+    },
+    "Renamed %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Renamed %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Replaced the remote branch; nobody else had pushed to it." : {
+
+    },
+    "Reset %@ to %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reset %1$@ to %2$@ (%3$@)"
+          }
+        }
+      }
+    },
+    "Restored %@ from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Restored %1$@ from %2$@"
+          }
+        }
+      }
+    },
+    "Reverted %@" : {
+
+    },
+    "Saved remote %@" : {
+
+    },
+    "Set %@ as the upstream." : {
+
+    },
+    "Set %@/%@ as the upstream." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Set %1$@/%2$@ as the upstream."
+          }
+        }
+      }
+    },
+    "Switched to %@" : {
+
+    },
+    "Tagged %@ as %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tagged %1$@ as %2$@"
+          }
+        }
+      }
+    },
+    "The first step can't be squash or fixup. There's no earlier commit in the list to fold it into." : {
+
+    },
+    "The previous version is %@" : {
+
+    },
+    "There's nothing to rebase." : {
+
+    },
+    "Tracking %@." : {
+
+    },
+    "vrai-editor is missing, so Vrai can't hand the rebase plan to git. Reinstall Vrai." : {
+
+    },
+    "Was at %@" : {
+
+    },
+    "Was at %@, also deleted on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Was at %1$@, also deleted on %2$@."
+          }
+        }
+      }
+    },
+    "Was at %@." : {
+
+    },
+    "You're looking at %@" : {
+
+    },
+    "Your %@ now sit on top." : {
+
+    },
+    "Your changes are in stash@{0}." : {
+
+    },
+    "Your changes came along." : {
+
+    },
+    "Your earlier version stays in Undo history for 14 days" : {
 
     }
   },

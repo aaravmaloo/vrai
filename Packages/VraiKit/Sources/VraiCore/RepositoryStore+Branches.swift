@@ -97,12 +97,14 @@ extension RepositoryStore {
             } catch let error as GitError {
                 throw try await refineDeleteError(error, name: name)
             }
-            try await undo.record(UndoEntry(
+            let entry = UndoEntry(
                 kind: .branchDelete,
                 label: String(localized: "Deleted branch \(name)", bundle: .module),
                 detail: String(localized: "Was at \(tip.short)", bundle: .module),
                 refsBefore: ["refs/heads/" + name: tip]
-            ))
+            )
+            try await undo.record(entry)
+            try? await undo.complete(entry.id)
             var deletedOn: String?
             if alsoOnRemote, let tracking {
                 try await runNetwork(SyncCommands.deleteRemoteBranch(remote: tracking.remote, name: tracking.branch), progress: nil)
@@ -151,7 +153,22 @@ extension RepositoryStore {
     @discardableResult
     public func deleteTag(name: String, alsoOnRemote: Bool = false, remote: String? = nil) async throws -> ActionSummary {
         try await perform("deleteTag") {
-            try await git.run(BranchCommands.deleteTag(name: name))
+            let ref = "refs/tags/" + name
+            let object = try await git.runAllowingFailure(.read(["rev-parse", "--verify", "--quiet", ref]), background: true)
+            var entry: UndoEntry?
+            if object.exitCode == 0, let value = OID(object.output.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                let target = try await resolve(ref) ?? value
+                let recorded = UndoEntry(kind: .tagDelete, label: String(localized: "Deleted tag \(name)", bundle: .module), detail: String(localized: "Was at \(target.short)", bundle: .module), refsBefore: [ref: value])
+                try await undo.record(recorded)
+                entry = recorded
+            }
+            do {
+                try await git.run(BranchCommands.deleteTag(name: name))
+            } catch {
+                if let entry { try? await undo.forget(entry.id) }
+                throw error
+            }
+            if let entry { try? await undo.complete(entry.id) }
             if alsoOnRemote {
                 let names = try await remoteNames()
                 guard let target = remote ?? defaultRemoteName(among: names) else { throw GitError(.remoteNotFound) }

@@ -21,6 +21,7 @@ public struct UndoEntry: Sendable, Hashable, Codable, Identifiable {
         public static let discardLines = Kind(rawValue: "discardLines")
         public static let restoreFile = Kind(rawValue: "restoreFile")
         public static let branchDelete = Kind(rawValue: "branchDelete")
+        public static let tagDelete = Kind(rawValue: "tagDelete")
         public static let stashDrop = Kind(rawValue: "stashDrop")
     }
 
@@ -36,6 +37,8 @@ public struct UndoEntry: Sendable, Hashable, Codable, Identifiable {
     public var stashCommit: OID?
     public var patch: OID?
     public var message: String?
+    public var refsAfter: [String: OID]?
+    public var filesAfter: [String: OID]?
 
     public init(
         id: UUID = UUID(),
@@ -49,7 +52,9 @@ public struct UndoEntry: Sendable, Hashable, Codable, Identifiable {
         files: [String: OID] = [:],
         stashCommit: OID? = nil,
         patch: OID? = nil,
-        message: String? = nil
+        message: String? = nil,
+        refsAfter: [String: OID]? = nil,
+        filesAfter: [String: OID]? = nil
     ) {
         self.id = id
         self.kind = kind
@@ -63,5 +68,7 @@ public struct UndoEntry: Sendable, Hashable, Codable, Identifiable {
         self.stashCommit = stashCommit
         self.patch = patch
         self.message = message
+        self.refsAfter = refsAfter
+        self.filesAfter = filesAfter
     }
 }

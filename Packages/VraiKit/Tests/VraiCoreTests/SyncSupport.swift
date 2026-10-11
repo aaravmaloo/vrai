@@ -99,7 +99,7 @@ struct ScenarioCopy {
 }
 
 enum AuthServer {
-    static let state = Mutex<(count: Int, process: Process?)>((0, nil))
+    static let state = Mutex<(count: Int, process: Process?, port: Int)>((0, nil, 0))
 
     static var script: URL {
         URL(filePath: #filePath).deletingLastPathComponent().appending(path: "../../../../Scripts/auth-server.py").standardizedFileURL
@@ -132,6 +132,7 @@ enum AuthServer {
     static func acquire(port: Int) async throws {
         let needsStart = state.withLock { state -> Bool in
             state.count += 1
+            state.port = port
             return state.process == nil
         }
         guard needsStart else {
@@ -151,15 +152,16 @@ enum AuthServer {
     }
 
     static func release() {
-        let stopping = state.withLock { state -> Process? in
+        let stopping = state.withLock { state -> (Process, Int)? in
             state.count -= 1
             guard state.count == 0, let process = state.process else { return nil }
             state.process = nil
-            return process
+            return (process, state.port)
         }
-        if let stopping {
-            stopping.terminate()
-            stopping.waitUntilExit()
+        guard let (process, port) = stopping else { return }
+        process.terminate()
+        for _ in 0..<100 where canConnect(port: port) {
+            usleep(50_000)
         }
     }
 

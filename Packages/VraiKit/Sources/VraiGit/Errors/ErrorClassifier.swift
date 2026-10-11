@@ -13,6 +13,11 @@ public enum ErrorClassifier {
 
         if all.contains("not a git repository") { return .notARepository }
         if let path = firstMatch(all, /Unable to create '([^']+\.lock)': File exists/) { return .lockFileExists(path: path) }
+        if subcommand == "apply", all.contains("patch does not apply") || all.contains("patch failed") || all.contains("corrupt patch") || all.contains("does not exist in index")
+            || all.contains("already exists in index") || all.contains("already exists in working directory") || all.contains("does not match index")
+            || all.contains("No valid patches in input") || all.contains("patch with only garbage") || all.contains("No such file or directory") {
+            return .patchDoesNotApply
+        }
 
         if all.contains("Authentication failed for") || all.contains("could not read Username") || all.contains("could not read Password")
             || all.contains("Permission denied (publickey") || all.contains("HTTP Basic: Access denied") || all.contains("The requested URL returned error: 401")
@@ -66,12 +71,19 @@ public enum ErrorClassifier {
         if all.contains("leftover conflict marker") { return .conflictMarkersRemain }
         if subcommand == "commit" || subcommand == "merge" || subcommand == "rebase" {
             if all.contains("nothing to commit") || all.contains("no changes added to commit") { return .nothingToCommit }
+            if all.contains("nothing added to commit") || all.contains("You have nothing to amend") { return .nothingToCommit }
             if all.contains("Aborting commit due to empty commit message") { return .emptyMessage }
         }
         if all.contains("No local changes to save") { return .nothingToStash }
         if all.contains("The previous cherry-pick is now empty") || all.contains("nothing to commit") && subcommand == "cherry-pick" { return .emptyCommit }
+        if all.contains("Couldn't load public key") || all.contains("Couldn't sign") || all.contains("gpg failed to sign") || all.contains("failed to write commit object") || all.contains("failed to write tag object") {
+            return .signingFailed(detail: stderr.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
         if let hook = firstMatch(all, /hint: The '[^']*hooks\/([a-z-]+)' hook/) ?? firstMatch(all, /([a-z-]+) hook (?:declined|failed)/) {
             return .hookFailed(name: hook, output: stderr)
+        }
+        if subcommand == "commit", result.exitCode == 1, stdout.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return .hookFailed(name: result.command.arguments.contains("--no-verify") ? "prepare-commit-msg" : "pre-commit", output: stderr)
         }
         if all.contains("gpg failed to sign") || all.contains("failed to write commit object") && all.contains("sign") || all.contains("ssh-keygen") && all.contains("sign") {
             return .signingFailed(detail: stderr.trimmingCharacters(in: .whitespacesAndNewlines))
