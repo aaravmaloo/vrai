@@ -1,0 +1,118 @@
+import CoreGraphics
+import Metal
+import SwiftUI
+
+/// Places each commit of the graph in a lane and draws the lines between them.
+/// Lanes are transit lines: a branch keeps its lane and its color from
+/// its tip down, merges are interchanges and HEAD wears a halo.
+///
+/// The layout is incremental: each page of history extends the lanes of
+/// the page before it, so scrolling never lays out the whole graph again.
+///
+struct LaneLayout {
+    var laneWidth: CGFloat = 14
+    var nodeSize: CGFloat = 9
+<<<<<<< HEAD
+    var haloSize: CGFloat = 16
+
+    func x(for lane: Int) -> CGFloat {
+        CGFloat(lane) * laneWidth + laneWidth / 2 + inset
+=======
+    var instanceBuffer: MTLBuffer?
+    var usesMetal: Bool { instanceBuffer != nil }
+
+    func x(for lane: Int) -> CGFloat {
+        (CGFloat(lane) + 0.5) * laneWidth
+>>>>>>> mira/spike/metal-graph
+    }
+
+    func point(for lane: Lane, y: CGFloat) -> CGPoint {
+        CGPoint(x: x(for: lane.index), y: y)
+    }
+
+    func color(for row: GraphRow, at lane: Int) -> Int {
+        row.tipColor[lane] ?? colors.next(for: lane)
+    }
+
+    func width(for lanes: Int) -> CGFloat {
+        CGFloat(lanes) * laneWidth
+    }
+
+    func lanes(in row: GraphRow) -> Range<Int> {
+        0..<max(row.lane + 1, row.top.count, row.bottom.count)
+    }
+
+    func isVisible(_ segment: GraphRow.Segment, in rect: CGRect) -> Bool {
+        let from = x(for: segment.from)
+        let to = x(for: segment.to)
+        return max(from, to) >= rect.minX && min(from, to) <= rect.maxX
+    }
+
+    /// Joins two lanes across one row with a curve through the row's middle.
+    func path(from a: Lane, to b: Lane, in row: CGRect) -> Path {
+        var path = Path()
+        path.move(to: point(for: a, y: row.minY))
+        let mid = row.midY
+        path.addCurve(
+            to: point(for: b, y: row.maxY),
+            control1: point(for: a, y: mid),
+            control2: point(for: b, y: mid)
+        )
+        return path
+    }
+
+    /// Lanes keep their color from the branch tip down.
+    var colors: [LaneColor] = LaneColor.palette
+
+    func elbow(from a: Lane, to b: Lane, in row: CGRect) -> Path {
+        var path = Path()
+        let start = point(for: a, y: row.minY)
+        let end = point(for: b, y: row.maxY)
+        path.move(to: start)
+        path.addLine(to: CGPoint(x: start.x, y: row.midY))
+        path.addLine(to: end)
+        return path
+    }
+
+<<<<<<< HEAD
+    func halo(at lane: Int, in rect: CGRect, radius: CGFloat) -> Path {
+        let center = CGPoint(x: x(for: lane), y: rect.midY)
+        return Path(ellipseIn: CGRect(x: center.x - radius / 2, y: center.y - radius / 2, width: radius, height: radius))
+    }
+
+    /// Space before the first lane, so the halo never clips.
+    var inset: CGFloat { (haloSize - nodeSize) / 2 }
+
+    func node(at lane: Int, in rect: CGRect, merge: Bool = false) -> Path {
+=======
+    func node(at lane: Int, in rect: CGRect, merge: Bool = false, instanced: Bool = false) -> Path {
+>>>>>>> mira/spike/metal-graph
+        let size = merge ? nodeSize - 0.5 : nodeSize
+        return Path(ellipseIn: CGRect(x: x(for: lane) - size / 2, y: rect.midY - size / 2, width: size, height: size))
+    }
+}
+
+extension LaneLayout {
+    struct Lane: Hashable {
+        var index: Int
+        var color: Int
+    }
+
+    struct LaneColor: Hashable {
+        var index: Int
+
+        static let palette = (0..<8).map(LaneColor.init(index:))
+
+        func next(for lane: Int) -> Int {
+            (index + lane) % LaneColor.palette.count
+        }
+    }
+
+    static let standard = LaneLayout()
+    static let compact = LaneLayout(laneWidth: 12, nodeSize: 8)
+    static let comfortable = LaneLayout(laneWidth: 16, nodeSize: 10)
+
+    static let laneWidth: CGFloat = 14
+    static let nodeSize: CGFloat = 9
+    static let headHalo: CGFloat = 16
+}

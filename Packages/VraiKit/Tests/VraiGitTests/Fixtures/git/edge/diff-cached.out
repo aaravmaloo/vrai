@@ -1,0 +1,14 @@
+* Unmerged path both-added.txt
+diff --git a/a b.txt b/c d.txt
+similarity index 100%
+rename from a b.txt
+rename to c d.txt
+* Unmerged path conflict.txt
+* Unmerged path deleted-by-them.txt
+diff --git a/staged new.txt b/staged new.txt
+new file mode 100644
+index 0000000..19d9cc8
+--- /dev/null
++++ b/staged new.txt	
+@@ -0,0 +1 @@
++staged

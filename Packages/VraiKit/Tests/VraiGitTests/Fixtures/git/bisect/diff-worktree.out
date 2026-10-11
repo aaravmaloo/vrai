@@ -1,0 +1,7 @@
+diff --git a/Vendor/libgit2 b/Vendor/libgit2
+index 130f280..fa0a501 160000
+--- a/Vendor/libgit2
++++ b/Vendor/libgit2
+@@ -1 +1 @@
+-Subproject commit 130f280e04aa7809165fff70223c95fb5f2ce3ce
++Subproject commit fa0a501e369670703e5ce2cf9a5e45d8ba657b42

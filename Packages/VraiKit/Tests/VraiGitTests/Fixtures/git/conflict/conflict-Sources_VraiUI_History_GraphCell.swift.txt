@@ -1,0 +1,74 @@
+import SwiftUI
+import VraiGit
+
+/// One row of the commit graph: the lanes passing through it, the
+/// segments that join them and the node for the row's own commit.
+struct GraphCell: View {
+    let row: GraphRow
+    let lanes: Int
+    var height: CGFloat = Vrai.Size.row
+    var isHead = false
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    init(row: GraphRow, lanes: Int, height: CGFloat = Vrai.Size.row, isHead: Bool = false) {
+        self.row = row
+        self.lanes = lanes
+        self.height = height
+        self.isHead = isHead
+    }
+
+    var width: CGFloat { CGFloat(lanes) * Vrai.Size.lane + 12 }
+    var isEmpty: Bool { lanes == 0 }
+
+    var body: some View {
+<<<<<<< HEAD
+        Canvas { context, size in
+            let rect = CGRect(origin: .zero, size: size)
+            if isHead {
+                let halo = layout.halo(at: row.lane, in: rect, radius: HeadHalo.radius)
+                context.stroke(halo, with: .color(Color.Vrai.lane(row.color).opacity(0.5)), lineWidth: 1.5)
+            }
+            for segment in row.segments {
+                let path = layout.path(from: segment.from, to: segment.to, in: rect)
+                context.stroke(path, with: .color(Color.Vrai.lane(segment.color)), style: StrokeStyle(lineWidth: Vrai.Size.line, lineCap: .round))
+            }
+            let node = layout.node(at: row.lane, in: rect, merge: row.isMerge)
+            row.isMerge ? context.stroke(node, with: .color(Color.Vrai.lane(row.color)), lineWidth: Vrai.Size.line) : context.fill(node, with: .color(Color.Vrai.lane(row.color)))
+        }
+        .frame(width: CGFloat(lanes) * Vrai.Size.lane + 12, height: height)
+=======
+        MetalGraphView(row: row, lanes: lanes)
+        .frame(width: width, height: height)
+>>>>>>> mira/spike/metal-graph
+        .accessibilityHidden(true)
+    }
+
+    func segments(crossing lane: Int) -> [GraphRow.Segment] {
+        row.segments.filter { $0.from == lane || $0.to == lane }
+    }
+
+    func hasNode(at lane: Int) -> Bool {
+        row.lane == lane
+    }
+
+    var accessibilityText: Text {
+        Text(row.isMerge ? "Merge commit" : "Commit")
+    }
+
+    var haloAnimation: Animation { reduceMotion ? .Vrai.standardFast : .Vrai.springGraph }
+    var showsHalo: Bool { isHead && !isEmpty }
+
+    private var layout: LaneLayout { LaneLayout(laneWidth: Vrai.Size.lane, nodeSize: Vrai.Size.node) }
+}
+
+#Preview("Head on a merge") {
+    GraphCell(row: .preview(merge: true), lanes: 3, isHead: true)
+        .padding()
+}
+
+extension GraphRow {
+    static func preview(merge: Bool = false) -> GraphRow {
+        GraphRow(lane: 0, color: 0, top: [], bottom: [], isMerge: merge)
+    }
+}

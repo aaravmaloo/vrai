@@ -1,0 +1,121 @@
+name: Vrai
+options:
+  bundleIdPrefix: com.aaravmaloo
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ARCHS: "$(ARCHS_STANDARD)"
+    ONLY_ACTIVE_ARCH: NO
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+    DEAD_CODE_STRIPPING: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+  configs:
+    Debug:
+      ONLY_ACTIVE_ARCH: YES
+    Release:
+      OTHER_CODE_SIGN_FLAGS: "--options=runtime"
+packages:
+  VraiKit:
+    path: Packages/VraiKit
+targets:
+  Vrai:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+    settings:
+      base:
+        PRODUCT_NAME: Vrai
+        PRODUCT_BUNDLE_IDENTIFIER: com.aaravmaloo.vrai
+        INFOPLIST_FILE: App/Info.plist
+        CODE_SIGN_ENTITLEMENTS: App/Vrai.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOLS: NO
+        ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: NO
+        ENABLE_PREVIEWS: YES
+    dependencies:
+      - package: VraiKit
+        product: VraiGit
+      - package: VraiKit
+        product: VraiCore
+      - package: VraiKit
+        product: VraiUI
+      - target: vrai-askpass
+        copy:
+          destination: executables
+        codeSign: true
+      - target: vrai-editor
+        copy:
+          destination: executables
+        codeSign: true
+  vrai-askpass:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Helpers/vrai-askpass
+    settings:
+      base:
+        PRODUCT_NAME: vrai-askpass
+        PRODUCT_BUNDLE_IDENTIFIER: com.aaravmaloo.vrai.askpass
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        GENERATE_INFOPLIST_FILE: YES
+        SKIP_INSTALL: YES
+  vrai-editor:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Helpers/vrai-editor
+    settings:
+      base:
+        PRODUCT_NAME: vrai-editor
+        PRODUCT_BUNDLE_IDENTIFIER: com.aaravmaloo.vrai.editor
+        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
+        GENERATE_INFOPLIST_FILE: YES
+        SKIP_INSTALL: YES
+  VraiFlowTests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: Vrai
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aaravmaloo.vrai.flowtests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Vrai
+        SWIFT_STRICT_CONCURRENCY: complete
+        ENABLE_HARDENED_RUNTIME: NO
+        OTHER_CODE_SIGN_FLAGS: ""
+schemes:
+  Vrai:
+    build:
+      targets:
+        Vrai: all
+        vrai-askpass: all
+        vrai-editor: all
+    run:
+      config: Debug
+      commandLineArguments:
+        "-VraiSandbox $(TMPDIR)vrai-sandbox": true
+    test:
+      config: Debug
+      targets:
+        - VraiFlowTests
+    archive:
+      config: Release

@@ -1,0 +1,1525 @@
+{
+ "now": 1791720000,
+ "plural": [
+  {
+   "count": 0,
+   "word": "file",
+   "plural": null,
+   "out": "0 files"
+  },
+  {
+   "count": 1,
+   "word": "file",
+   "plural": null,
+   "out": "1 file"
+  },
+  {
+   "count": 2,
+   "word": "file",
+   "plural": null,
+   "out": "2 files"
+  },
+  {
+   "count": 1234,
+   "word": "commit",
+   "plural": null,
+   "out": "1,234 commits"
+  },
+  {
+   "count": 1,
+   "word": "branch",
+   "plural": null,
+   "out": "1 branch"
+  },
+  {
+   "count": 3,
+   "word": "branch",
+   "plural": null,
+   "out": "3 branches"
+  },
+  {
+   "count": 2,
+   "word": "fix",
+   "plural": null,
+   "out": "2 fixes"
+  },
+  {
+   "count": 5,
+   "word": "patch",
+   "plural": null,
+   "out": "5 patches"
+  },
+  {
+   "count": 4,
+   "word": "entry",
+   "plural": null,
+   "out": "4 entries"
+  },
+  {
+   "count": 2,
+   "word": "day",
+   "plural": null,
+   "out": "2 days"
+  },
+  {
+   "count": 7,
+   "word": "key",
+   "plural": null,
+   "out": "7 keys"
+  },
+  {
+   "count": 2,
+   "word": "status",
+   "plural": null,
+   "out": "2 statuses"
+  },
+  {
+   "count": 1000000,
+   "word": "line",
+   "plural": null,
+   "out": "1,000,000 lines"
+  },
+  {
+   "count": 3,
+   "word": "person",
+   "plural": "people",
+   "out": "3 people"
+  },
+  {
+   "count": 12,
+   "word": "change",
+   "plural": null,
+   "out": "12 changes"
+  }
+ ],
+ "ago": [
+  {
+   "seconds": 0,
+   "out": "just now"
+  },
+  {
+   "seconds": 10,
+   "out": "just now"
+  },
+  {
+   "seconds": 44,
+   "out": "just now"
+  },
+  {
+   "seconds": 45,
+   "out": "1m ago"
+  },
+  {
+   "seconds": 60,
+   "out": "1m ago"
+  },
+  {
+   "seconds": 89,
+   "out": "1m ago"
+  },
+  {
+   "seconds": 90,
+   "out": "2m ago"
+  },
+  {
+   "seconds": 1799,
+   "out": "30m ago"
+  },
+  {
+   "seconds": 3540,
+   "out": "59m ago"
+  },
+  {
+   "seconds": 3599,
+   "out": "60m ago"
+  },
+  {
+   "seconds": 3600,
+   "out": "1h ago"
+  },
+  {
+   "seconds": 5399,
+   "out": "1h ago"
+  },
+  {
+   "seconds": 5400,
+   "out": "2h ago"
+  },
+  {
+   "seconds": 7200,
+   "out": "2h ago"
+  },
+  {
+   "seconds": 86399,
+   "out": "24h ago"
+  },
+  {
+   "seconds": 86400,
+   "out": "1d ago"
+  },
+  {
+   "seconds": 129600,
+   "out": "2d ago"
+  },
+  {
+   "seconds": 172800,
+   "out": "2d ago"
+  },
+  {
+   "seconds": 518400,
+   "out": "6d ago"
+  },
+  {
+   "seconds": 604799,
+   "out": "7d ago"
+  },
+  {
+   "seconds": 604800,
+   "out": "Oct 4"
+  },
+  {
+   "seconds": 2592000,
+   "out": "Sep 11"
+  },
+  {
+   "seconds": 17280000,
+   "out": "Mar 25"
+  },
+  {
+   "seconds": 24537600,
+   "out": "Dec 31, 2025"
+  },
+  {
+   "seconds": 34560000,
+   "out": "Sep 6, 2025"
+  },
+  {
+   "seconds": 86400000,
+   "out": "Jan 15, 2024"
+  },
+  {
+   "seconds": -30,
+   "out": "just now"
+  }
+ ],
+ "parseCommand": [
+  {
+   "input": "git push --force origin main",
+   "out": {
+    "sub": "push",
+    "args": [
+     "--force",
+     "origin",
+     "main"
+    ],
+    "risk": "destructive",
+    "text": "git push --force origin main"
+   }
+  },
+  {
+   "input": "git push -f",
+   "out": {
+    "sub": "push",
+    "args": [
+     "-f"
+    ],
+    "risk": "destructive",
+    "text": "git push -f"
+   }
+  },
+  {
+   "input": "git push --force-with-lease origin main",
+   "out": {
+    "sub": "push",
+    "args": [
+     "--force-with-lease",
+     "origin",
+     "main"
+    ],
+    "risk": "rewrites",
+    "text": "git push --force-with-lease origin main"
+   }
+  },
+  {
+   "input": "git push origin --delete feature/x",
+   "out": {
+    "sub": "push",
+    "args": [
+     "origin",
+     "--delete",
+     "feature/x"
+    ],
+    "risk": "destructive",
+    "text": "git push origin --delete feature/x"
+   }
+  },
+  {
+   "input": "git push",
+   "out": {
+    "sub": "push",
+    "args": [],
+    "risk": "safe",
+    "text": "git push"
+   }
+  },
+  {
+   "input": "git reset --hard HEAD~1",
+   "out": {
+    "sub": "reset",
+    "args": [
+     "--hard",
+     "HEAD~1"
+    ],
+    "risk": "destructive",
+    "text": "git reset --hard HEAD~1"
+   }
+  },
+  {
+   "input": "git reset --soft HEAD~1",
+   "out": {
+    "sub": "reset",
+    "args": [
+     "--soft",
+     "HEAD~1"
+    ],
+    "risk": "rewrites",
+    "text": "git reset --soft HEAD~1"
+   }
+  },
+  {
+   "input": "git reset HEAD~2",
+   "out": {
+    "sub": "reset",
+    "args": [
+     "HEAD~2"
+    ],
+    "risk": "rewrites",
+    "text": "git reset HEAD~2"
+   }
+  },
+  {
+   "input": "git reset -- Sources/App.swift",
+   "out": {
+    "sub": "reset",
+    "args": [
+     "--",
+     "Sources/App.swift"
+    ],
+    "risk": "safe",
+    "text": "git reset -- Sources/App.swift"
+   }
+  },
+  {
+   "input": "git reset",
+   "out": {
+    "sub": "reset",
+    "args": [],
+    "risk": "safe",
+    "text": "git reset"
+   }
+  },
+  {
+   "input": "git reset HEAD -- a/b.txt",
+   "out": {
+    "sub": "reset",
+    "args": [
+     "HEAD",
+     "--",
+     "a/b.txt"
+    ],
+    "risk": "rewrites",
+    "text": "git reset HEAD -- a/b.txt"
+   }
+  },
+  {
+   "input": "git clean -fd",
+   "out": {
+    "sub": "clean",
+    "args": [
+     "-fd"
+    ],
+    "risk": "destructive",
+    "text": "git clean -fd"
+   }
+  },
+  {
+   "input": "git clean -n",
+   "out": {
+    "sub": "clean",
+    "args": [
+     "-n"
+    ],
+    "risk": "safe",
+    "text": "git clean -n"
+   }
+  },
+  {
+   "input": "git branch -D topic",
+   "out": {
+    "sub": "branch",
+    "args": [
+     "-D",
+     "topic"
+    ],
+    "risk": "destructive",
+    "text": "git branch -D topic"
+   }
+  },
+  {
+   "input": "git branch -d --force topic",
+   "out": {
+    "sub": "branch",
+    "args": [
+     "-d",
+     "--force",
+     "topic"
+    ],
+    "risk": "destructive",
+    "text": "git branch -d --force topic"
+   }
+  },
+  {
+   "input": "git branch -d topic",
+   "out": {
+    "sub": "branch",
+    "args": [
+     "-d",
+     "topic"
+    ],
+    "risk": "safe",
+    "text": "git branch -d topic"
+   }
+  },
+  {
+   "input": "git filter-branch --tree-filter x",
+   "out": {
+    "sub": "filter-branch",
+    "args": [
+     "--tree-filter",
+     "x"
+    ],
+    "risk": "destructive",
+    "text": "git filter-branch --tree-filter x"
+   }
+  },
+  {
+   "input": "git checkout -- file.txt",
+   "out": {
+    "sub": "checkout",
+    "args": [
+     "--",
+     "file.txt"
+    ],
+    "risk": "destructive",
+    "text": "git checkout -- file.txt"
+   }
+  },
+  {
+   "input": "git checkout -f main",
+   "out": {
+    "sub": "checkout",
+    "args": [
+     "-f",
+     "main"
+    ],
+    "risk": "destructive",
+    "text": "git checkout -f main"
+   }
+  },
+  {
+   "input": "git checkout main",
+   "out": {
+    "sub": "checkout",
+    "args": [
+     "main"
+    ],
+    "risk": "safe",
+    "text": "git checkout main"
+   }
+  },
+  {
+   "input": "git restore file.txt",
+   "out": {
+    "sub": "restore",
+    "args": [
+     "file.txt"
+    ],
+    "risk": "destructive",
+    "text": "git restore file.txt"
+   }
+  },
+  {
+   "input": "git restore --staged file.txt",
+   "out": {
+    "sub": "restore",
+    "args": [
+     "--staged",
+     "file.txt"
+    ],
+    "risk": "safe",
+    "text": "git restore --staged file.txt"
+   }
+  },
+  {
+   "input": "git restore -S file.txt",
+   "out": {
+    "sub": "restore",
+    "args": [
+     "-S",
+     "file.txt"
+    ],
+    "risk": "safe",
+    "text": "git restore -S file.txt"
+   }
+  },
+  {
+   "input": "git stash drop",
+   "out": {
+    "sub": "stash",
+    "args": [
+     "drop"
+    ],
+    "risk": "destructive",
+    "text": "git stash drop"
+   }
+  },
+  {
+   "input": "git stash clear",
+   "out": {
+    "sub": "stash",
+    "args": [
+     "clear"
+    ],
+    "risk": "destructive",
+    "text": "git stash clear"
+   }
+  },
+  {
+   "input": "git stash pop",
+   "out": {
+    "sub": "stash",
+    "args": [
+     "pop"
+    ],
+    "risk": "safe",
+    "text": "git stash pop"
+   }
+  },
+  {
+   "input": "git worktree remove --force ../wt",
+   "out": {
+    "sub": "worktree",
+    "args": [
+     "remove",
+     "--force",
+     "../wt"
+    ],
+    "risk": "destructive",
+    "text": "git worktree remove --force ../wt"
+   }
+  },
+  {
+   "input": "git worktree remove ../wt",
+   "out": {
+    "sub": "worktree",
+    "args": [
+     "remove",
+     "../wt"
+    ],
+    "risk": "safe",
+    "text": "git worktree remove ../wt"
+   }
+  },
+  {
+   "input": "git tag -d v1",
+   "out": {
+    "sub": "tag",
+    "args": [
+     "-d",
+     "v1"
+    ],
+    "risk": "destructive",
+    "text": "git tag -d v1"
+   }
+  },
+  {
+   "input": "git rebase main",
+   "out": {
+    "sub": "rebase",
+    "args": [
+     "main"
+    ],
+    "risk": "rewrites",
+    "text": "git rebase main"
+   }
+  },
+  {
+   "input": "git rebase --continue",
+   "out": {
+    "sub": "rebase",
+    "args": [
+     "--continue"
+    ],
+    "risk": "safe",
+    "text": "git rebase --continue"
+   }
+  },
+  {
+   "input": "git rebase --abort",
+   "out": {
+    "sub": "rebase",
+    "args": [
+     "--abort"
+    ],
+    "risk": "safe",
+    "text": "git rebase --abort"
+   }
+  },
+  {
+   "input": "git history reword HEAD",
+   "out": {
+    "sub": "history",
+    "args": [
+     "reword",
+     "HEAD"
+    ],
+    "risk": "rewrites",
+    "text": "git history reword HEAD"
+   }
+  },
+  {
+   "input": "git replay --onto main topic",
+   "out": {
+    "sub": "replay",
+    "args": [
+     "--onto",
+     "main",
+     "topic"
+    ],
+    "risk": "rewrites",
+    "text": "git replay --onto main topic"
+   }
+  },
+  {
+   "input": "git commit --amend",
+   "out": {
+    "sub": "commit",
+    "args": [
+     "--amend"
+    ],
+    "risk": "rewrites",
+    "text": "git commit --amend"
+   }
+  },
+  {
+   "input": "git commit --fixup=amend:HEAD",
+   "out": {
+    "sub": "commit",
+    "args": [
+     "--fixup=amend:HEAD"
+    ],
+    "risk": "rewrites",
+    "text": "git commit --fixup=amend:HEAD"
+   }
+  },
+  {
+   "input": "git commit --fixup=HEAD",
+   "out": {
+    "sub": "commit",
+    "args": [
+     "--fixup=HEAD"
+    ],
+    "risk": "safe",
+    "text": "git commit --fixup=HEAD"
+   }
+  },
+  {
+   "input": "git commit -m \"Fix the thing\"",
+   "out": {
+    "sub": "commit",
+    "args": [
+     "-m",
+     "\"Fix the thing\""
+    ],
+    "risk": "safe",
+    "text": "git commit -m \"Fix the thing\""
+   }
+  },
+  {
+   "input": "$ git log --oneline",
+   "out": {
+    "sub": "log",
+    "args": [
+     "--oneline"
+    ],
+    "risk": "safe",
+    "text": "git log --oneline"
+   }
+  },
+  {
+   "input": "  git status  ",
+   "out": {
+    "sub": "status",
+    "args": [],
+    "risk": "safe",
+    "text": "git status"
+   }
+  },
+  {
+   "input": "status",
+   "out": null
+  },
+  {
+   "input": "",
+   "out": null
+  },
+  {
+   "input": "git log; rm -rf x",
+   "out": {
+    "sub": "log;",
+    "args": [
+     "rm",
+     "-rf",
+     "x"
+    ],
+    "risk": "safe",
+    "text": "git log; rm -rf x"
+   }
+  },
+  {
+   "input": "git commit -m 'single quoted message' --no-verify",
+   "out": {
+    "sub": "commit",
+    "args": [
+     "-m",
+     "'single quoted message'",
+     "--no-verify"
+    ],
+    "risk": "safe",
+    "text": "git commit -m 'single quoted message' --no-verify"
+   }
+  },
+  {
+   "input": "git cherry-pick --quit",
+   "out": {
+    "sub": "cherry-pick",
+    "args": [
+     "--quit"
+    ],
+    "risk": "safe",
+    "text": "git cherry-pick --quit"
+   }
+  },
+  {
+   "input": "git merge --no-ff -m \"Merge it\" topic",
+   "out": {
+    "sub": "merge",
+    "args": [
+     "--no-ff",
+     "-m",
+     "\"Merge it\"",
+     "topic"
+    ],
+    "risk": "safe",
+    "text": "git merge --no-ff -m \"Merge it\" topic"
+   }
+  }
+ ],
+ "tokenize": [
+  {
+   "input": "git push --force-with-lease origin main",
+   "out": [
+    {
+     "t": "git",
+     "k": "git"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "push",
+     "k": "sub"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "--force-with-lease",
+     "k": "flag"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "origin",
+     "k": "arg"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "main",
+     "k": "arg"
+    }
+   ]
+  },
+  {
+   "input": "git commit -m \"Fix the thing\" --signoff",
+   "out": [
+    {
+     "t": "git",
+     "k": "git"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "commit",
+     "k": "sub"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "-m",
+     "k": "flag"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "\"Fix the thing\"",
+     "k": "str"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "--signoff",
+     "k": "flag"
+    }
+   ]
+  },
+  {
+   "input": "git log --format='%H %s' -n 5",
+   "out": [
+    {
+     "t": "git",
+     "k": "git"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "log",
+     "k": "sub"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "--format='%H",
+     "k": "flag"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "%s'",
+     "k": "arg"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "-n",
+     "k": "flag"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "5",
+     "k": "arg"
+    }
+   ]
+  },
+  {
+   "input": "git  switch   main",
+   "out": [
+    {
+     "t": "git",
+     "k": "git"
+    },
+    {
+     "t": "  ",
+     "k": null
+    },
+    {
+     "t": "switch",
+     "k": "sub"
+    },
+    {
+     "t": "   ",
+     "k": null
+    },
+    {
+     "t": "main",
+     "k": "arg"
+    }
+   ]
+  },
+  {
+   "input": "-c core.quotepath=false status",
+   "out": [
+    {
+     "t": "-c",
+     "k": "flag"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "core.quotepath=false",
+     "k": "arg"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "status",
+     "k": "arg"
+    }
+   ]
+  },
+  {
+   "input": "git",
+   "out": [
+    {
+     "t": "git",
+     "k": "git"
+    }
+   ]
+  }
+ ],
+ "highlight": [
+  {
+   "lang": "swift",
+   "text": "    func path(from a: Lane, to b: Lane, in row: CGRect) -> Path {",
+   "out": [
+    {
+     "t": "    ",
+     "k": null
+    },
+    {
+     "t": "func",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "path",
+     "k": "function"
+    },
+    {
+     "t": "(from a: ",
+     "k": null
+    },
+    {
+     "t": "Lane",
+     "k": "type"
+    },
+    {
+     "t": ", to b: ",
+     "k": null
+    },
+    {
+     "t": "Lane",
+     "k": "type"
+    },
+    {
+     "t": ", ",
+     "k": null
+    },
+    {
+     "t": "in",
+     "k": "keyword"
+    },
+    {
+     "t": " row: ",
+     "k": null
+    },
+    {
+     "t": "CGRect",
+     "k": "type"
+    },
+    {
+     "t": ") -> ",
+     "k": null
+    },
+    {
+     "t": "Path",
+     "k": "type"
+    },
+    {
+     "t": " {",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "        let mid = row.midY // the middle",
+   "out": [
+    {
+     "t": "        ",
+     "k": null
+    },
+    {
+     "t": "let",
+     "k": "keyword"
+    },
+    {
+     "t": " mid = row.midY ",
+     "k": null
+    },
+    {
+     "t": "// the middle",
+     "k": "comment"
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "    @Environment(\\.accessibilityReduceMotion) private var reduceMotion",
+   "out": [
+    {
+     "t": "    ",
+     "k": null
+    },
+    {
+     "t": "@Environment",
+     "k": "attribute"
+    },
+    {
+     "t": "(\\.accessibilityReduceMotion) ",
+     "k": null
+    },
+    {
+     "t": "private",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "var",
+     "k": "keyword"
+    },
+    {
+     "t": " reduceMotion",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "        Text(\"Push \\(ahead) commits\").font(.Vrai.body)",
+   "out": [
+    {
+     "t": "        ",
+     "k": null
+    },
+    {
+     "t": "Text",
+     "k": "type"
+    },
+    {
+     "t": "(",
+     "k": null
+    },
+    {
+     "t": "\"Push \\(ahead) commits\"",
+     "k": "string"
+    },
+    {
+     "t": ").",
+     "k": null
+    },
+    {
+     "t": "font",
+     "k": "function"
+    },
+    {
+     "t": "(.",
+     "k": null
+    },
+    {
+     "t": "Vrai",
+     "k": "type"
+    },
+    {
+     "t": ".body)",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "    static let laneWidth: CGFloat = 14.5_0",
+   "out": [
+    {
+     "t": "    ",
+     "k": null
+    },
+    {
+     "t": "static",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "let",
+     "k": "keyword"
+    },
+    {
+     "t": " laneWidth: ",
+     "k": null
+    },
+    {
+     "t": "CGFloat",
+     "k": "type"
+    },
+    {
+     "t": " = ",
+     "k": null
+    },
+    {
+     "t": "14.5_0",
+     "k": "number"
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "let a1 = 1abc + 2. + 3.14 + x2",
+   "out": [
+    {
+     "t": "let",
+     "k": "keyword"
+    },
+    {
+     "t": " a1 = 1abc + ",
+     "k": null
+    },
+    {
+     "t": "2",
+     "k": "number"
+    },
+    {
+     "t": ". + ",
+     "k": null
+    },
+    {
+     "t": "3.14",
+     "k": "number"
+    },
+    {
+     "t": " + x2",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "/* block */ let s = 'x' + `y` /* open",
+   "out": [
+    {
+     "t": "/* block */",
+     "k": "comment"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "let",
+     "k": "keyword"
+    },
+    {
+     "t": " s = ",
+     "k": null
+    },
+    {
+     "t": "'x'",
+     "k": "string"
+    },
+    {
+     "t": " + ",
+     "k": null
+    },
+    {
+     "t": "`y`",
+     "k": "string"
+    },
+    {
+     "t": " /* ",
+     "k": null
+    },
+    {
+     "t": "open",
+     "k": "keyword"
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "#if DEBUG",
+   "out": [
+    {
+     "t": "#",
+     "k": null
+    },
+    {
+     "t": "if",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "DEBUG",
+     "k": "type"
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "let café = \"béziers\" // ünïcode",
+   "out": [
+    {
+     "t": "let",
+     "k": "keyword"
+    },
+    {
+     "t": " café = ",
+     "k": null
+    },
+    {
+     "t": "\"béziers\"",
+     "k": "string"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "// ünïcode",
+     "k": "comment"
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "let s = \"unterminated",
+   "out": [
+    {
+     "t": "let",
+     "k": "keyword"
+    },
+    {
+     "t": " s = \"unterminated",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "a\nb // comment after newline",
+   "out": [
+    {
+     "t": "a\nb ",
+     "k": null
+    },
+    {
+     "t": "// comment after newline",
+     "k": "comment"
+    }
+   ]
+  },
+  {
+   "lang": "js",
+   "text": "export function n(count, word) { return count + \" \" + word; }",
+   "out": [
+    {
+     "t": "export",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "function",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "n",
+     "k": "function"
+    },
+    {
+     "t": "(count, word) { ",
+     "k": null
+    },
+    {
+     "t": "return",
+     "k": "keyword"
+    },
+    {
+     "t": " count + ",
+     "k": null
+    },
+    {
+     "t": "\" \"",
+     "k": "string"
+    },
+    {
+     "t": " + word; }",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "js",
+   "text": "const x = await fetch(url) // go",
+   "out": [
+    {
+     "t": "const",
+     "k": "keyword"
+    },
+    {
+     "t": " x = ",
+     "k": null
+    },
+    {
+     "t": "await",
+     "k": "keyword"
+    },
+    {
+     "t": " ",
+     "k": null
+    },
+    {
+     "t": "fetch",
+     "k": "function"
+    },
+    {
+     "t": "(url) ",
+     "k": null
+    },
+    {
+     "t": "// go",
+     "k": "comment"
+    }
+   ]
+  },
+  {
+   "lang": "ts",
+   "text": "type A = { a: number }",
+   "out": [
+    {
+     "t": "type ",
+     "k": null
+    },
+    {
+     "t": "A",
+     "k": "type"
+    },
+    {
+     "t": " = { a: number }",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "yaml",
+   "text": "name: vrai # comment",
+   "out": [
+    {
+     "t": "name: vrai ",
+     "k": null
+    },
+    {
+     "t": "# comment",
+     "k": "comment"
+    }
+   ]
+  },
+  {
+   "lang": "sh",
+   "text": "echo hi # say hi",
+   "out": [
+    {
+     "t": "echo hi ",
+     "k": null
+    },
+    {
+     "t": "# say hi",
+     "k": "comment"
+    }
+   ]
+  },
+  {
+   "lang": "md",
+   "text": "# Title with `code`",
+   "out": [
+    {
+     "t": "# Title with `code`",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "text",
+   "text": "plain text",
+   "out": [
+    {
+     "t": "plain text",
+     "k": null
+    }
+   ]
+  },
+  {
+   "lang": "swift",
+   "text": "",
+   "out": []
+  },
+  {
+   "lang": "swift",
+   "text": "\t\tspaces and tabs  ",
+   "out": [
+    {
+     "t": "\t\tspaces and tabs  ",
+     "k": null
+    }
+   ]
+  }
+ ],
+ "paths": [
+  {
+   "path": "Sources/VraiGit/Graph/LaneLayout.swift",
+   "lang": "swift",
+   "icon": "swift",
+   "split": [
+    "Sources/VraiGit/Graph/",
+    "LaneLayout.swift"
+   ]
+  },
+  {
+   "path": "README.md",
+   "lang": "md",
+   "icon": "doc.text",
+   "split": [
+    "",
+    "README.md"
+   ]
+  },
+  {
+   "path": "Package.json",
+   "lang": "js",
+   "icon": "curlybraces",
+   "split": [
+    "",
+    "Package.json"
+   ]
+  },
+  {
+   "path": "image.PNG",
+   "lang": "text",
+   "icon": "photo",
+   "split": [
+    "",
+    "image.PNG"
+   ]
+  },
+  {
+   "path": "script.sh",
+   "lang": "sh",
+   "icon": "curlybraces",
+   "split": [
+    "",
+    "script.sh"
+   ]
+  },
+  {
+   "path": "Makefile",
+   "lang": "text",
+   "icon": "doc",
+   "split": [
+    "",
+    "Makefile"
+   ]
+  },
+  {
+   "path": "a/b/c.yml",
+   "lang": "yaml",
+   "icon": "curlybraces",
+   "split": [
+    "a/b/",
+    "c.yml"
+   ]
+  },
+  {
+   "path": "notes.txt",
+   "lang": "text",
+   "icon": "doc.text",
+   "split": [
+    "",
+    "notes.txt"
+   ]
+  },
+  {
+   "path": "x.tsx",
+   "lang": "ts",
+   "icon": "curlybraces",
+   "split": [
+    "",
+    "x.tsx"
+   ]
+  },
+  {
+   "path": "noext",
+   "lang": "text",
+   "icon": "doc",
+   "split": [
+    "",
+    "noext"
+   ]
+  }
+ ]
+}

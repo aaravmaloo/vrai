@@ -1,0 +1,131 @@
+* Unmerged path Sources/VraiGit/Graph/LaneLayout.swift
+* Unmerged path Sources/VraiUI/History/GraphCell.swift
+diff --git a/Sources/VraiUI/History/GraphRenderer.metal b/Sources/VraiUI/History/GraphRenderer.metal
+new file mode 100644
+index 0000000..25f7979
+--- /dev/null
++++ b/Sources/VraiUI/History/GraphRenderer.metal
+@@ -0,0 +1,46 @@
++    LaneInstance lane = lanes[iid];
++    return out;
++    float2 dir = normalize(lane.to - lane.from);
++    LaneInstance lane = lanes[iid];
++}
++    float2 dir = normalize(lane.to - lane.from);
++}
++    out.position = float4(corner, 0, 1);
++                                constant LaneInstance *lanes [[buffer(0)]]) {
++    float2 dir = normalize(lane.to - lane.from);
++    float2 normal = float2(-dir.y, dir.x) * lane.width * 0.5;
++    float2 dir = normalize(lane.to - lane.from);
++    return out;
++                                constant LaneInstance *lanes [[buffer(0)]]) {
++    LaneInstance lane = lanes[iid];
++    out.position = float4(corner, 0, 1);
++    return out;
++struct LaneInstance { float2 from; float2 to; float4 color; float width; };
++    return out;
++    float2 dir = normalize(lane.to - lane.from);
++    float2 normal = float2(-dir.y, dir.x) * lane.width * 0.5;
++    out.position = float4(corner, 0, 1);
++    float2 dir = normalize(lane.to - lane.from);
++fragment float4 laneFragment(LaneVertexOut in [[stage_in]]) { return in.color; }
++    float2 dir = normalize(lane.to - lane.from);
++vertex LaneVertexOut laneVertex(uint vid [[vertex_id]], uint iid [[instance_id]],
++    LaneInstance lane = lanes[iid];
++    out.position = float4(corner, 0, 1);
++fragment float4 laneFragment(LaneVertexOut in [[stage_in]]) { return in.color; }
++                                constant LaneInstance *lanes [[buffer(0)]]) {
++    out.position = float4(corner, 0, 1);
++    out.position = float4(corner, 0, 1);
++fragment float4 laneFragment(LaneVertexOut in [[stage_in]]) { return in.color; }
++                                constant LaneInstance *lanes [[buffer(0)]]) {
++struct LaneInstance { float2 from; float2 to; float4 color; float width; };
++    return out;
++}
++    float2 dir = normalize(lane.to - lane.from);
++                                constant LaneInstance *lanes [[buffer(0)]]) {
++                                constant LaneInstance *lanes [[buffer(0)]]) {
++    float2 normal = float2(-dir.y, dir.x) * lane.width * 0.5;
++fragment float4 laneFragment(LaneVertexOut in [[stage_in]]) { return in.color; }
++    out.position = float4(corner, 0, 1);
++fragment float4 laneFragment(LaneVertexOut in [[stage_in]]) { return in.color; }
++struct LaneInstance { float2 from; float2 to; float4 color; float width; };
++vertex LaneVertexOut laneVertex(uint vid [[vertex_id]], uint iid [[instance_id]],
+diff --git a/Sources/VraiUI/History/MetalGraphView.swift b/Sources/VraiUI/History/MetalGraphView.swift
+new file mode 100644
+index 0000000..b071d60
+--- /dev/null
++++ b/Sources/VraiUI/History/MetalGraphView.swift
+@@ -0,0 +1,71 @@
++        try FileManager.default.createDirectory(at: undoDirectory, withIntermediateDirectories: true)
++    @Environment(\.expertMode) private var expertMode
++        for (index, entry) in entries.enumerated() where entry.isVisible {
++        isBusy = true
++    let maximumAge: TimeInterval = 14 * 24 * 60 * 60
++    init(git: GitProcess) { self.git = git }
++        defer { isBusy = false }
++        defer { isBusy = false }
++        continuation.yield(String(decoding: chunk, as: UTF8.self))
++        if let index = rows.firstIndex(where: { $0.id == id }) { scrollTarget = index }
++        return rows
++    func cancel() { task?.cancel(); task = nil }
++        try await git.run(arguments, progress: progress)
++        for (index, entry) in entries.enumerated() where entry.isVisible {
++    private var task: Task<Void, Never>?
++    func cancel() { task?.cancel(); task = nil }
++        let output = try await git.run(["status", "--porcelain=v2", "-z"])
++        HStack(spacing: Vrai.Space.s8) {
++        state = .loaded(try StatusParser.parse(output))
++        continuation.yield(String(decoding: chunk, as: UTF8.self))
++        if let index = rows.firstIndex(where: { $0.id == id }) { scrollTarget = index }
++    }
++        let url = try XCTUnwrap(submodule.url)
++        .help("Push \(ahead) commits")
++            Image(systemName: "arrow.triangle.branch")
++        try await git.run(arguments, progress: progress)
++        let url = try XCTUnwrap(submodule.url)
++    private let git: GitProcess
++        try FileManager.default.createDirectory(at: undoDirectory, withIntermediateDirectories: true)
++    var body: some View {
++    enum MetalGraphViewState { case idle, loading, loaded([Entry]), failed(GitError) }
++    }
++    enum MetalGraphViewState { case idle, loading, loaded([Entry]), failed(GitError) }
++        let url = try XCTUnwrap(submodule.url)
++        if let index = rows.firstIndex(where: { $0.id == id }) { scrollTarget = index }
++            Image(systemName: "arrow.triangle.branch")
++            Image(systemName: "arrow.triangle.branch")
++        withAnimation(.Vrai.outBase) { isPresented = true }
++    func cancel() { task?.cancel(); task = nil }
++        isBusy = true
++    var body: some View {
++        guard let repository else { return }
++        if expertMode { CommandPreview(command: command) }
++        let arguments = ["push", remote.name, branch.name]
++        let lines = output.split(separator: "\n", omittingEmptySubsequences: false)
++        let output = try await git.run(["status", "--porcelain=v2", "-z"])
++        let arguments = ["push", remote.name, branch.name]
++    }
++    init(git: GitProcess) { self.git = git }
++    init(git: GitProcess) { self.git = git }
++        if expertMode { CommandPreview(command: command) }
++        .keyboardShortcut("p", modifiers: [.command, .shift])
++            Text(branch.name).font(.Vrai.body)
++        .padding(.horizontal, Vrai.Space.s10)
++    static let defaultLimit = 2_000
++            Image(systemName: "arrow.triangle.branch")
++    nonisolated func stream(_ arguments: [String]) -> AsyncThrowingStream<String, Error> {
++        try await git.run(arguments, progress: progress)
++    }
++    init(git: GitProcess) { self.git = git }
++        HStack(spacing: Vrai.Space.s8) {
++    private var task: Task<Void, Never>?
++        }
++        withAnimation(.Vrai.outBase) { isPresented = true }
++        state = .loaded(try StatusParser.parse(output))
++        progress.completedUnitCount = Int64(received)
++    @Published private(set) var state: MetalGraphViewState = .idle
++        .accessibilityLabel(Text("\(n) commits to push"))
++        let url = try XCTUnwrap(submodule.url)
++    func select(_ id: Commit.ID) { selection = [id] }
++        if expertMode { CommandPreview(command: command) }

@@ -1,0 +1,84 @@
+diff --cc both-added.txt
+index 7683c25,99b761a..0000000
+--- a/both-added.txt
++++ b/both-added.txt
+@@@ -1,1 -1,1 +1,6 @@@
+++<<<<<<< HEAD
+ +added on main
+++||||||| 9fb36a1
+++=======
++ added on other
+++>>>>>>> other
+diff --cc conflict.txt
+index 60297be,c83804a..0000000
+--- a/conflict.txt
++++ b/conflict.txt
+@@@ -1,9 -1,9 +1,21 @@@
+  line 1
+++<<<<<<< HEAD
+ +line 2 from main
+++||||||| 9fb36a1
+++line 2
+++=======
++ line 2 from other
+++>>>>>>> other
+  line 3
+  line 4
+  line 5
+  line 6
+  line 7
+++<<<<<<< HEAD
+ +line 8 from main
+++||||||| 9fb36a1
+++line 8
+++=======
++ line 8 from other
+++>>>>>>> other
+  line 9
+diff --git a/Résumé.md b/Résumé.md
+index 73b320f..fcc04c9 100644
+--- a/Résumé.md
++++ b/Résumé.md
+@@ -1,3 +1,3 @@
+ # Résumé
+ 
+-Naïve café notes.
++Naïve café notes, edited.
+diff --git a/c d.txt b/c d.txt
+index b566061..2019eda 100644
+--- a/c d.txt	
++++ b/c d.txt	
+@@ -4,3 +4,4 @@ three
+ four
+ five
+ six
++seven
+* Unmerged path deleted-by-them.txt
+diff --git a/image.png b/image.png
+index ef7de10..e74377b 100644
+Binary files a/image.png and b/image.png differ
+diff --git a/link-target.txt b/link-target.txt
+deleted file mode 100644
+index 8c2d2ba..0000000
+--- a/link-target.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-plain file that becomes a symlink
+diff --git a/link-target.txt b/link-target.txt
+new file mode 120000
+index 0000000..7422b33
+--- /dev/null
++++ b/link-target.txt
+@@ -0,0 +1 @@
++Résumé.md
+\ No newline at end of file
+diff --git a/script.sh b/script.sh
+old mode 100644
+new mode 100755
+diff --git a/staged new.txt b/staged new.txt
+index 19d9cc8..9b445d4 100644
+--- a/staged new.txt	
++++ b/staged new.txt	
+@@ -1 +1,2 @@
+ staged
++then changed

@@ -1,0 +1,224 @@
+b0adaff0d6902f075f783140464c0f78dff41c2d 1 1 22
+author Mira Okafor
+author-mail <mira@vrai.app>
+author-time 1787832000
+author-tz +0000
+committer Mira Okafor
+committer-mail <mira@vrai.app>
+committer-time 1787832000
+committer-tz +0000
+summary Graph: first lane layout
+filename Sources/VraiGit/Graph/LaneLayout.swift
+	import CoreGraphics
+b0adaff0d6902f075f783140464c0f78dff41c2d 2 2
+	import SwiftUI
+b0adaff0d6902f075f783140464c0f78dff41c2d 3 3
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 4 4
+	/// Places each commit of the graph in a lane and draws the lines between them.
+b0adaff0d6902f075f783140464c0f78dff41c2d 5 5
+	/// Lanes are transit lines: a branch keeps its lane and its color from
+b0adaff0d6902f075f783140464c0f78dff41c2d 6 6
+	/// its tip down, merges are interchanges and HEAD wears a halo.
+b0adaff0d6902f075f783140464c0f78dff41c2d 7 7
+	///
+b0adaff0d6902f075f783140464c0f78dff41c2d 8 8
+	/// The layout is incremental: each page of history extends the lanes of
+b0adaff0d6902f075f783140464c0f78dff41c2d 9 9
+	/// the page before it, so scrolling never lays out the whole graph again.
+b0adaff0d6902f075f783140464c0f78dff41c2d 10 10
+	///
+b0adaff0d6902f075f783140464c0f78dff41c2d 11 11
+	struct LaneLayout {
+b0adaff0d6902f075f783140464c0f78dff41c2d 12 12
+	    var laneWidth: CGFloat = 14
+b0adaff0d6902f075f783140464c0f78dff41c2d 13 13
+	    var nodeSize: CGFloat = 9
+b0adaff0d6902f075f783140464c0f78dff41c2d 14 14
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 15 15
+	    func x(for lane: Int) -> CGFloat {
+b0adaff0d6902f075f783140464c0f78dff41c2d 16 16
+	        CGFloat(lane) * laneWidth + laneWidth / 2
+b0adaff0d6902f075f783140464c0f78dff41c2d 17 17
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 18 18
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 19 19
+	    func point(for lane: Lane, y: CGFloat) -> CGPoint {
+b0adaff0d6902f075f783140464c0f78dff41c2d 20 20
+	        CGPoint(x: x(for: lane.index), y: y)
+b0adaff0d6902f075f783140464c0f78dff41c2d 21 21
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 22 22
+	
+81912496150e91b5410618543a0af948b5f39320 23 23 18
+author Mira Okafor
+author-mail <mira@vrai.app>
+author-time 1791608400
+author-tz +0000
+committer Mira Okafor
+committer-mail <mira@vrai.app>
+committer-time 1791608400
+committer-tz +0000
+summary Graph: assign lane colors from branch tips
+previous 69362666047781144308c2c16ac6a592af942245 Sources/VraiGit/Graph/LaneLayout.swift
+filename Sources/VraiGit/Graph/LaneLayout.swift
+	    func color(for row: GraphRow, at lane: Int) -> Int {
+81912496150e91b5410618543a0af948b5f39320 24 24
+	        row.tipColor[lane] ?? colors.next(for: lane)
+81912496150e91b5410618543a0af948b5f39320 25 25
+	    }
+81912496150e91b5410618543a0af948b5f39320 26 26
+	
+81912496150e91b5410618543a0af948b5f39320 27 27
+	    func width(for lanes: Int) -> CGFloat {
+81912496150e91b5410618543a0af948b5f39320 28 28
+	        CGFloat(lanes) * laneWidth
+81912496150e91b5410618543a0af948b5f39320 29 29
+	    }
+81912496150e91b5410618543a0af948b5f39320 30 30
+	
+81912496150e91b5410618543a0af948b5f39320 31 31
+	    func lanes(in row: GraphRow) -> Range<Int> {
+81912496150e91b5410618543a0af948b5f39320 32 32
+	        0..<max(row.lane + 1, row.top.count, row.bottom.count)
+81912496150e91b5410618543a0af948b5f39320 33 33
+	    }
+81912496150e91b5410618543a0af948b5f39320 34 34
+	
+81912496150e91b5410618543a0af948b5f39320 35 35
+	    func isVisible(_ segment: GraphRow.Segment, in rect: CGRect) -> Bool {
+81912496150e91b5410618543a0af948b5f39320 36 36
+	        let from = x(for: segment.from)
+81912496150e91b5410618543a0af948b5f39320 37 37
+	        let to = x(for: segment.to)
+81912496150e91b5410618543a0af948b5f39320 38 38
+	        return max(from, to) >= rect.minX && min(from, to) <= rect.maxX
+81912496150e91b5410618543a0af948b5f39320 39 39
+	    }
+81912496150e91b5410618543a0af948b5f39320 40 40
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 23 41 4
+	    /// Joins two lanes across one row with a curve through the row's middle.
+b0adaff0d6902f075f783140464c0f78dff41c2d 24 42
+	    func path(from a: Lane, to b: Lane, in row: CGRect) -> Path {
+b0adaff0d6902f075f783140464c0f78dff41c2d 25 43
+	        var path = Path()
+b0adaff0d6902f075f783140464c0f78dff41c2d 26 44
+	        path.move(to: point(for: a, y: row.minY))
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 45 45 6
+author Avery Chen
+author-mail <avery@vrai.app>
+author-time 1791712800
+author-tz +0000
+committer Avery Chen
+committer-mail <avery@vrai.app>
+committer-time 1791712800
+committer-tz +0000
+summary Graph: draw merge curves with cubic béziers
+previous 7ce572296be9ac408bc8867b73c8e893fc601036 Sources/VraiGit/Graph/LaneLayout.swift
+filename Sources/VraiGit/Graph/LaneLayout.swift
+	        let mid = row.midY
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 46 46
+	        path.addCurve(
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 47 47
+	            to: point(for: b, y: row.maxY),
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 48 48
+	            control1: point(for: a, y: mid),
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 49 49
+	            control2: point(for: b, y: mid)
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 50 50
+	        )
+b0adaff0d6902f075f783140464c0f78dff41c2d 28 51 3
+	        return path
+b0adaff0d6902f075f783140464c0f78dff41c2d 29 52
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 30 53
+	
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 54 54 1
+	    /// Lanes keep their color from the branch tip down.
+b0adaff0d6902f075f783140464c0f78dff41c2d 32 55 40
+	    var colors: [LaneColor] = LaneColor.palette
+b0adaff0d6902f075f783140464c0f78dff41c2d 33 56
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 34 57
+	    func elbow(from a: Lane, to b: Lane, in row: CGRect) -> Path {
+b0adaff0d6902f075f783140464c0f78dff41c2d 35 58
+	        var path = Path()
+b0adaff0d6902f075f783140464c0f78dff41c2d 36 59
+	        let start = point(for: a, y: row.minY)
+b0adaff0d6902f075f783140464c0f78dff41c2d 37 60
+	        let end = point(for: b, y: row.maxY)
+b0adaff0d6902f075f783140464c0f78dff41c2d 38 61
+	        path.move(to: start)
+b0adaff0d6902f075f783140464c0f78dff41c2d 39 62
+	        path.addLine(to: CGPoint(x: start.x, y: row.midY))
+b0adaff0d6902f075f783140464c0f78dff41c2d 40 63
+	        path.addLine(to: end)
+b0adaff0d6902f075f783140464c0f78dff41c2d 41 64
+	        return path
+b0adaff0d6902f075f783140464c0f78dff41c2d 42 65
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 43 66
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 44 67
+	    func node(at lane: Int, in rect: CGRect, merge: Bool = false) -> Path {
+b0adaff0d6902f075f783140464c0f78dff41c2d 45 68
+	        let size = merge ? nodeSize - 0.5 : nodeSize
+b0adaff0d6902f075f783140464c0f78dff41c2d 46 69
+	        return Path(ellipseIn: CGRect(x: x(for: lane) - size / 2, y: rect.midY - size / 2, width: size, height: size))
+b0adaff0d6902f075f783140464c0f78dff41c2d 47 70
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 48 71
+	}
+b0adaff0d6902f075f783140464c0f78dff41c2d 49 72
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 50 73
+	extension LaneLayout {
+b0adaff0d6902f075f783140464c0f78dff41c2d 51 74
+	    struct Lane: Hashable {
+b0adaff0d6902f075f783140464c0f78dff41c2d 52 75
+	        var index: Int
+b0adaff0d6902f075f783140464c0f78dff41c2d 53 76
+	        var color: Int
+b0adaff0d6902f075f783140464c0f78dff41c2d 54 77
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 55 78
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 56 79
+	    struct LaneColor: Hashable {
+b0adaff0d6902f075f783140464c0f78dff41c2d 57 80
+	        var index: Int
+b0adaff0d6902f075f783140464c0f78dff41c2d 58 81
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 59 82
+	        static let palette = (0..<8).map(LaneColor.init(index:))
+b0adaff0d6902f075f783140464c0f78dff41c2d 60 83
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 61 84
+	        func next(for lane: Int) -> Int {
+b0adaff0d6902f075f783140464c0f78dff41c2d 62 85
+	            (index + lane) % LaneColor.palette.count
+b0adaff0d6902f075f783140464c0f78dff41c2d 63 86
+	        }
+b0adaff0d6902f075f783140464c0f78dff41c2d 64 87
+	    }
+b0adaff0d6902f075f783140464c0f78dff41c2d 65 88
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 66 89
+	    static let standard = LaneLayout()
+b0adaff0d6902f075f783140464c0f78dff41c2d 67 90
+	    static let compact = LaneLayout(laneWidth: 12, nodeSize: 8)
+b0adaff0d6902f075f783140464c0f78dff41c2d 68 91
+	    static let comfortable = LaneLayout(laneWidth: 16, nodeSize: 10)
+b0adaff0d6902f075f783140464c0f78dff41c2d 69 92
+	
+b0adaff0d6902f075f783140464c0f78dff41c2d 70 93
+	    static let laneWidth: CGFloat = 14
+b0adaff0d6902f075f783140464c0f78dff41c2d 71 94
+	    static let nodeSize: CGFloat = 9
+9eb0cce32029dc11166a4d37091afbef9d50d9bc 95 95 1
+	    static let headHalo: CGFloat = 16
+b0adaff0d6902f075f783140464c0f78dff41c2d 72 96 1
+	}

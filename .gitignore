@@ -1,0 +1,10 @@
+Vrai.xcodeproj/
+.build/
+DerivedData/
+*.xcresult
+build/
+.sandbox/
+prototype_ui/
+.DS_Store
+.swiftpm/
+PROGRESS.md

@@ -1,0 +1,21 @@
+line 1
+<<<<<<< HEAD
+line 2 from main
+||||||| 9fb36a1
+line 2
+=======
+line 2 from other
+>>>>>>> other
+line 3
+line 4
+line 5
+line 6
+line 7
+<<<<<<< HEAD
+line 8 from main
+||||||| 9fb36a1
+line 8
+=======
+line 8 from other
+>>>>>>> other
+line 9

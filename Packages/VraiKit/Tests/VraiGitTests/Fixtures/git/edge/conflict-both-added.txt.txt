@@ -1,0 +1,6 @@
+<<<<<<< HEAD
+added on main
+||||||| 9fb36a1
+=======
+added on other
+>>>>>>> other

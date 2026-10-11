@@ -1,0 +1,3 @@
+fatal: 'bad..name' is not a valid branch name
+hint: See 'git help check-ref-format'
+hint: Disable this message with "git config set advice.refSyntax false"

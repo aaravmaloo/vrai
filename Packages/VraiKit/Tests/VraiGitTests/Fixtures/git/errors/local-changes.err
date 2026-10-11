@@ -1,0 +1,6 @@
+error: Your local changes to the following files would be overwritten by checkout:
+	Sources/VraiGit/Graph/LaneLayout.swift
+	Sources/VraiUI/History/GraphCell.swift
+	Sources/VraiUI/History/Palette.swift
+Please commit your changes or stash them before you switch branches.
+Aborting

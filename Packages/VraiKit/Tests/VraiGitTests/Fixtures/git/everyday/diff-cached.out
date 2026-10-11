@@ -1,0 +1,74 @@
+diff --git a/Sources/VraiGit/Graph/LaneLayout.swift b/Sources/VraiGit/Graph/LaneLayout.swift
+index ccbb59f..d526bb3 100644
+--- a/Sources/VraiGit/Graph/LaneLayout.swift
++++ b/Sources/VraiGit/Graph/LaneLayout.swift
+@@ -11,9 +11,10 @@ import SwiftUI
+ struct LaneLayout {
+     var laneWidth: CGFloat = 14
+     var nodeSize: CGFloat = 9
++    var haloSize: CGFloat = 16
+ 
+     func x(for lane: Int) -> CGFloat {
+-        CGFloat(lane) * laneWidth + laneWidth / 2
++        CGFloat(lane) * laneWidth + laneWidth / 2 + inset
+     }
+ 
+     func point(for lane: Lane, y: CGFloat) -> CGPoint {
+diff --git a/Sources/VraiUI/History/GraphCell.swift b/Sources/VraiUI/History/GraphCell.swift
+index 00f3794..0ce438d 100644
+--- a/Sources/VraiUI/History/GraphCell.swift
++++ b/Sources/VraiUI/History/GraphCell.swift
+@@ -24,10 +24,16 @@ struct GraphCell: View {
+     var body: some View {
+         Canvas { context, size in
+             let rect = CGRect(origin: .zero, size: size)
++            if isHead {
++                let halo = layout.halo(at: row.lane, in: rect, radius: HeadHalo.radius)
++                context.stroke(halo, with: .color(Color.Vrai.lane(row.color).opacity(0.5)), lineWidth: 1.5)
++            }
+             for segment in row.segments {
+-                context.stroke(layout.path(from: segment.from, to: segment.to, in: rect), with: .color(Color.Vrai.lane(segment.color)))
++                let path = layout.path(from: segment.from, to: segment.to, in: rect)
++                context.stroke(path, with: .color(Color.Vrai.lane(segment.color)), style: StrokeStyle(lineWidth: Vrai.Size.line, lineCap: .round))
+             }
+-            context.fill(layout.node(at: row.lane, in: rect), with: .color(Color.Vrai.lane(row.color)))
++            let node = layout.node(at: row.lane, in: rect, merge: row.isMerge)
++            row.isMerge ? context.stroke(node, with: .color(Color.Vrai.lane(row.color)), lineWidth: Vrai.Size.line) : context.fill(node, with: .color(Color.Vrai.lane(row.color)))
+         }
+         .frame(width: CGFloat(lanes) * Vrai.Size.lane + 12, height: height)
+         .accessibilityHidden(true)
+@@ -51,6 +57,11 @@ struct GraphCell: View {
+     private var layout: LaneLayout { LaneLayout(laneWidth: Vrai.Size.lane, nodeSize: Vrai.Size.node) }
+ }
+ 
++#Preview("Head on a merge") {
++    GraphCell(row: .preview(merge: true), lanes: 3, isHead: true)
++        .padding()
++}
++
+ extension GraphRow {
+     static func preview(merge: Bool = false) -> GraphRow {
+         GraphRow(lane: 0, color: 0, top: [], bottom: [], isMerge: merge)
+diff --git a/Sources/VraiUI/History/Palette.swift b/Sources/VraiUI/History/LaneColors.swift
+similarity index 64%
+rename from Sources/VraiUI/History/Palette.swift
+rename to Sources/VraiUI/History/LaneColors.swift
+index 99e56e9..14c776a 100644
+--- a/Sources/VraiUI/History/Palette.swift
++++ b/Sources/VraiUI/History/LaneColors.swift
+@@ -1,12 +1,12 @@
+ import SwiftUI
+ 
+-/// Graph palette, in lane order.
+-enum Palette {
++/// Lane colors, in lane order. A branch keeps its color for its whole life.
++enum LaneColors {
+     static func color(for lane: Int) -> Color {
+         Color.Vrai.lane(lane)
+     }
+ 
+-    static let names = ["blue", "orange", "green", "pink", "cyan", "yellow", "purple", "red"]
++    static let names = ["ultramarine", "tangerine", "jade", "magenta", "teal", "mustard", "violet", "red"]
+ }
+ 
+ /// Colors repeat after eight lanes. The graph, branch pills and the

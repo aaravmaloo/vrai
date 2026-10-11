@@ -1,0 +1,97 @@
+diff --cc Sources/VraiGit/Graph/LaneLayout.swift
+index a0ed363,290fd1e..0000000
+--- a/Sources/VraiGit/Graph/LaneLayout.swift
++++ b/Sources/VraiGit/Graph/LaneLayout.swift
+@@@ -11,10 -12,11 +12,18 @@@ import SwiftU
+  struct LaneLayout {
+      var laneWidth: CGFloat = 14
+      var nodeSize: CGFloat = 9
+++<<<<<<< HEAD
+ +    var haloSize: CGFloat = 16
+ +
+ +    func x(for lane: Int) -> CGFloat {
+ +        CGFloat(lane) * laneWidth + laneWidth / 2 + inset
+++=======
++     var instanceBuffer: MTLBuffer?
++     var usesMetal: Bool { instanceBuffer != nil }
++ 
++     func x(for lane: Int) -> CGFloat {
++         (CGFloat(lane) + 0.5) * laneWidth
+++>>>>>>> mira/spike/metal-graph
+      }
+  
+      func point(for lane: Lane, y: CGFloat) -> CGPoint {
+@@@ -65,15 -44,7 +74,19 @@@
+          return path
+      }
+  
+++<<<<<<< HEAD
+ +    func halo(at lane: Int, in rect: CGRect, radius: CGFloat) -> Path {
+ +        let center = CGPoint(x: x(for: lane), y: rect.midY)
+ +        return Path(ellipseIn: CGRect(x: center.x - radius / 2, y: center.y - radius / 2, width: radius, height: radius))
+ +    }
+ +
+ +    /// Space before the first lane, so the halo never clips.
+ +    var inset: CGFloat { (haloSize - nodeSize) / 2 }
+ +
+ +    func node(at lane: Int, in rect: CGRect, merge: Bool = false) -> Path {
+++=======
++     func node(at lane: Int, in rect: CGRect, merge: Bool = false, instanced: Bool = false) -> Path {
+++>>>>>>> mira/spike/metal-graph
+          let size = merge ? nodeSize - 0.5 : nodeSize
+          return Path(ellipseIn: CGRect(x: x(for: lane) - size / 2, y: rect.midY - size / 2, width: size, height: size))
+      }
+diff --cc Sources/VraiUI/History/GraphCell.swift
+index 0ce438d,6cb849c..0000000
+--- a/Sources/VraiUI/History/GraphCell.swift
++++ b/Sources/VraiUI/History/GraphCell.swift
+@@@ -6,36 -5,13 +6,41 @@@ import VraiGi
+  struct GraphCell: View {
+      let row: GraphRow
+      let lanes: Int
+ -    var height: CGFloat = 28
+ +    var height: CGFloat = Vrai.Size.row
+ +    var isHead = false
+ +
+ +    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+ +
+ +    init(row: GraphRow, lanes: Int, height: CGFloat = Vrai.Size.row, isHead: Bool = false) {
+ +        self.row = row
+ +        self.lanes = lanes
+ +        self.height = height
+ +        self.isHead = isHead
+ +    }
+  
+      var width: CGFloat { CGFloat(lanes) * Vrai.Size.lane + 12 }
+ +    var isEmpty: Bool { lanes == 0 }
+  
+      var body: some View {
+++<<<<<<< HEAD
+ +        Canvas { context, size in
+ +            let rect = CGRect(origin: .zero, size: size)
+ +            if isHead {
+ +                let halo = layout.halo(at: row.lane, in: rect, radius: HeadHalo.radius)
+ +                context.stroke(halo, with: .color(Color.Vrai.lane(row.color).opacity(0.5)), lineWidth: 1.5)
+ +            }
+ +            for segment in row.segments {
+ +                let path = layout.path(from: segment.from, to: segment.to, in: rect)
+ +                context.stroke(path, with: .color(Color.Vrai.lane(segment.color)), style: StrokeStyle(lineWidth: Vrai.Size.line, lineCap: .round))
+ +            }
+ +            let node = layout.node(at: row.lane, in: rect, merge: row.isMerge)
+ +            row.isMerge ? context.stroke(node, with: .color(Color.Vrai.lane(row.color)), lineWidth: Vrai.Size.line) : context.fill(node, with: .color(Color.Vrai.lane(row.color)))
+ +        }
+ +        .frame(width: CGFloat(lanes) * Vrai.Size.lane + 12, height: height)
+++=======
++         MetalGraphView(row: row, lanes: lanes)
++         .frame(width: width, height: height)
+++>>>>>>> mira/spike/metal-graph
+          .accessibilityHidden(true)
+      }
+  
+diff --git a/Vendor/libgit2 b/Vendor/libgit2
+index 130f280..fa0a501 160000
+--- a/Vendor/libgit2
++++ b/Vendor/libgit2
+@@ -1 +1 @@
+-Subproject commit 130f280e04aa7809165fff70223c95fb5f2ce3ce
++Subproject commit fa0a501e369670703e5ce2cf9a5e45d8ba657b42

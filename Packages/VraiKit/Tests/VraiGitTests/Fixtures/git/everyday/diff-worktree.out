@@ -1,0 +1,44 @@
+diff --git a/Resources/Graph.xcassets/Contents.json b/Resources/Graph.xcassets/Contents.json
+deleted file mode 100644
+index 7c399c6..0000000
+--- a/Resources/Graph.xcassets/Contents.json
++++ /dev/null
+@@ -1,12 +0,0 @@
+-{
+-  "colors" : [
+-    {
+-      "color" : {
+-        "color-space" : "srgb",
+-        "components" : { "red" : "0.212", "green" : "0.357", "blue" : "0.949", "alpha" : "1.000" }
+-      },
+-      "idiom" : "universal"
+-    }
+-  ],
+-  "info" : { "author" : "xcode", "version" : 1 }
+-}
+diff --git a/Sources/VraiGit/Graph/LaneLayout.swift b/Sources/VraiGit/Graph/LaneLayout.swift
+index d526bb3..a0ed363 100644
+--- a/Sources/VraiGit/Graph/LaneLayout.swift
++++ b/Sources/VraiGit/Graph/LaneLayout.swift
+@@ -65,6 +65,14 @@ struct LaneLayout {
+         return path
+     }
+ 
++    func halo(at lane: Int, in rect: CGRect, radius: CGFloat) -> Path {
++        let center = CGPoint(x: x(for: lane), y: rect.midY)
++        return Path(ellipseIn: CGRect(x: center.x - radius / 2, y: center.y - radius / 2, width: radius, height: radius))
++    }
++
++    /// Space before the first lane, so the halo never clips.
++    var inset: CGFloat { (haloSize - nodeSize) / 2 }
++
+     func node(at lane: Int, in rect: CGRect, merge: Bool = false) -> Path {
+         let size = merge ? nodeSize - 0.5 : nodeSize
+         return Path(ellipseIn: CGRect(x: x(for: lane) - size / 2, y: rect.midY - size / 2, width: size, height: size))
+diff --git a/Vendor/libgit2 b/Vendor/libgit2
+index 130f280..fa0a501 160000
+--- a/Vendor/libgit2
++++ b/Vendor/libgit2
+@@ -1 +1 @@
+-Subproject commit 130f280e04aa7809165fff70223c95fb5f2ce3ce
++Subproject commit fa0a501e369670703e5ce2cf9a5e45d8ba657b42
