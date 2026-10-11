@@ -23,6 +23,7 @@ public struct RecentStatus: Sendable, Hashable {
     public var behind: Int
     public var missing: Bool
     public var empty: Bool
+    public var tag: String?
 
     public static let missingFolder = RecentStatus(branch: nil, detached: false, changes: 0, ahead: 0, behind: 0, missing: true, empty: false)
 }
@@ -110,7 +111,12 @@ extension AppModel {
             return .missingFolder
         }
         let report = StatusParser.parse(result.stdout)
-        return RecentStatus(branch: report.branch, detached: report.branch == nil, changes: report.files.count + report.conflicts.count, ahead: report.ahead, behind: report.behind, missing: false, empty: report.isInitial)
+        var status = RecentStatus(branch: report.branch, detached: report.branch == nil, changes: report.files.count + report.conflicts.count, ahead: report.ahead, behind: report.behind, missing: false, empty: report.isInitial)
+        if status.detached, !status.empty, let described = try? await git.runAllowingFailure(SharedCommands.exactTag(), background: true), described.exitCode == 0 {
+            let tag = described.output.trimmingCharacters(in: .whitespacesAndNewlines)
+            status.tag = tag.isEmpty ? nil : tag
+        }
+        return status
     }
 
     public func recentStatuses() async -> [String: RecentStatus] {

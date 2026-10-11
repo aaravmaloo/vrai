@@ -84,7 +84,10 @@ extension CoverageSamples {
             SharedCommands.mergeTool(path: "README.md"),
             SharedCommands.blob(id),
             SharedCommands.verifyCommit(id),
-            SharedCommands.verifyTag("v1.0.0")
+            SharedCommands.verifyTag("v1.0.0"),
+            PackCommands.packLoose(into: path + "/.git/objects/pack/pack"),
+            PackCommands.unpack(Data()),
+            PackCommands.redundant()
         ] + MaintenanceTask.allCases.map(\.command)
     }
 }

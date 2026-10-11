@@ -114,11 +114,14 @@ struct WelcomeContent: View {
                                 ForEach(Array(list.enumerated()), id: \.element.id) { offset, recent in
                                     RepoRowView(recent: recent, status: model.statuses[recent.path], selected: offset == min(model.selected, list.count - 1), now: app.now)
                                         .id(recent.id)
-                                        .onTapGesture(count: 2) { open(recent) }
-                                        .simultaneousGesture(TapGesture().onEnded {
+                                        .onTapGesture {
                                             model.selected = offset
                                             open(recent)
-                                        })
+                                        }
+                                        .accessibilityAction {
+                                            model.selected = offset
+                                            open(recent)
+                                        }
                                         .contextMenu { rowMenu(recent) }
                                 }
                             }
@@ -327,6 +330,8 @@ struct RepoRowView: View {
     @ViewBuilder func pill(_ status: RecentStatus) -> some View {
         if let branch = status.branch {
             RefPill(model: RefPillModel(kind: .branch, name: branch, lane: app.branchLane(for: recent.path, branch: branch) ?? RepoRowView.branchLane(branch), current: true))
+        } else if let tag = status.tag {
+            RefPill(model: RefPillModel(kind: .tag, name: tag, lane: RepoRowView.branchLane(tag), current: true))
         } else {
             RefPill(model: RefPillModel(kind: .head, name: String(localized: "detached", bundle: .module)))
         }

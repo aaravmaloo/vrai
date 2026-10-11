@@ -315,10 +315,13 @@ public final class ChangesModel {
         guard mergeMessageFor != key, subject.isEmpty, !amend else { return }
         mergeMessageFor = key
         guard let text = try? String(contentsOf: snapshot.gitDir.appending(path: "MERGE_MSG"), encoding: .utf8) else { return }
-        let kept = text.split(separator: "\n", omittingEmptySubsequences: false).filter { !$0.hasPrefix("#") }.joined(separator: "\n")
-        let message = CommitMessage(text: kept)
-        subject = message.subject
-        body = message.body
+        Task { [weak self] in
+            let cleaned = await store.cleanMessage(text)
+            guard let self, self.mergeMessageFor == key, self.subject.isEmpty, self.body.isEmpty, !self.amend else { return }
+            let message = CommitMessage(text: cleaned)
+            self.subject = message.subject
+            self.body = message.body
+        }
     }
 
     func present(_ diff: FileDiff, for pick: ChangesPick) {

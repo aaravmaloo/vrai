@@ -70,7 +70,7 @@ enum Metrics {
     static let welcomeMark = Vrai.Space.s64 + Vrai.Space.s16
     static let headlineLine = Vrai.Space.s16 + Vrai.Space.s2
     static let calloutLine = Vrai.Space.s16
-    static let compactTitle = Vrai.Space.s64 * 2 + Vrai.Space.s12
+    static let compactTitle = Vrai.Space.s64 + Vrai.Space.s48
 }
 
 public enum WidthClass: Int, Comparable, Sendable {

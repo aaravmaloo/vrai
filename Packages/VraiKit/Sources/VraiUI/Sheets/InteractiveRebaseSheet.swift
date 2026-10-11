@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 import VraiCore
@@ -28,6 +27,7 @@ struct InteractiveRebaseSheet: View {
     @State private var dropTarget: Int?
     @State private var started = false
     @FocusState private var listFocused: Bool
+    @State private var editing: Int?
 
     var body: some View {
         let head = window.headName
@@ -103,13 +103,16 @@ struct InteractiveRebaseSheet: View {
                         RebaseStepRow(
                             step: $steps[index],
                             index: index,
-                            selected: selected == index
+                            selected: selected == index,
+                            onEditing: { now in
+                                if now { editing = index } else if editing == index { editing = nil }
+                            }
                         ) {
                             selected = index
-                            listFocused = true
+                            if editing != index { listFocused = true }
                         }
                         .draggable(step.commit.rawValue) {
-                            RebaseStepRow(step: .constant(step), index: index, selected: true) {}
+                            RebaseStepRow(step: .constant(step), index: index, selected: true, onEditing: { _ in }) {}
                                 .frame(width: Vrai.Size.sheetWide - Vrai.Space.s48)
                         }
                         .dropDestination(for: String.self) { items, _ in
@@ -136,7 +139,7 @@ struct InteractiveRebaseSheet: View {
     }
 
     func handle(_ press: KeyPress) -> KeyPress.Result {
-        if NSApp.keyWindow?.firstResponder is NSTextView { return .ignored }
+        if editing != nil { return .ignored }
         guard let current = selected, steps.indices.contains(current) else { return .ignored }
         if press.key == .upArrow || press.key == .downArrow {
             let delta = press.key == .upArrow ? -1 : 1
@@ -220,6 +223,7 @@ struct RebaseStepRow: View {
     @Binding var step: EditableStep
     let index: Int
     let selected: Bool
+    let onEditing: (Bool) -> Void
     let select: () -> Void
     @State private var hovering = false
     @Environment(\.expert) private var expert
@@ -279,9 +283,9 @@ struct RebaseStepRow: View {
     @ViewBuilder var subjectView: some View {
         switch step.action {
         case .reword:
-            StepField(text: $step.subject, placeholder: step.original, label: String(localized: "New commit message", bundle: .module), identifier: "reword-\(index + 1)")
+            StepField(text: $step.subject, placeholder: step.original, label: String(localized: "New commit message", bundle: .module), identifier: "reword-\(index + 1)", onEditing: onEditing)
         case .squash:
-            StepField(text: $step.squashMessage, placeholder: String(localized: "Keep both messages", bundle: .module), label: String(localized: "Message for the combined commit", bundle: .module), identifier: "squash-\(index + 1)")
+            StepField(text: $step.squashMessage, placeholder: String(localized: "Keep both messages", bundle: .module), label: String(localized: "Message for the combined commit", bundle: .module), identifier: "squash-\(index + 1)", onEditing: onEditing)
         default:
             Text(step.original)
                 .font(Font.Vrai.body)
@@ -390,6 +394,7 @@ struct StepField: View {
     let placeholder: String
     let label: String
     let identifier: String
+    let onEditing: (Bool) -> Void
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -399,7 +404,7 @@ struct StepField: View {
         .textFieldStyle(.plain)
         .font(Font.Vrai.body)
         .focused($focused)
-        .onTapGesture { focused = true }
+        .onChange(of: focused) { _, now in onEditing(now) }
         .padding(.horizontal, Vrai.Space.s6)
         .frame(height: Vrai.Size.controlSm)
         .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))

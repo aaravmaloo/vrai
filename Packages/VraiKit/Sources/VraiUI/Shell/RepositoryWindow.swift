@@ -38,7 +38,12 @@ public struct RepositoryWindowRoot: View {
         .frame(minWidth: WidthClass.compactBelow - Vrai.Space.s24, minHeight: Vrai.Size.sheet - Vrai.Space.s64)
         .background(WindowConfigurator(launch: app.launch))
         .task(id: reference) { await load() }
-        .onAppear { AppSheets.register(app: app, openWindow: openWindow) }
+        .onAppear {
+            AppSheets.register(app: app, openWindow: openWindow)
+            SettingsHub.shared.editTextFile = { window, name in
+                if let kind = TextFileKind(rawValue: name) { LongTailActions.openTextFile(window, kind) }
+            }
+        }
         .onDisappear {
             if let reference { app.release(reference) }
         }

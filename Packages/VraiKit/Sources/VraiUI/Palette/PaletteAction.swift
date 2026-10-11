@@ -32,6 +32,6 @@ struct PaletteAction: Identifiable {
 
 enum PaletteCatalog {
     @MainActor static func actions(_ window: WindowModel) -> [PaletteAction] {
-        PlacesPaletteActions.actions(window) + LongTailPaletteActions.actions(window) + SettingsPaletteActions.actions(window)
+        PlacesPaletteActions.actions(window) + LongTailPaletteActions.actions(window) + SettingsPaletteActions.actions(window) + CoveragePaletteActions.actions(window)
     }
 }

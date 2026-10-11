@@ -209,7 +209,7 @@ public struct RepositoryCommands: Commands {
         Menu(String(localized: "Maintenance", bundle: .module)) {
             Button(String(localized: "Clean up", bundle: .module)) { if let window { LongTailActions.maintenance(window, .gc) } }.disabled(window == nil)
             Button(String(localized: "Verify integrity", bundle: .module)) { if let window { LongTailActions.verifyIntegrity(window) } }.disabled(window == nil)
-            Button(String(localized: "Run background maintenance now", bundle: .module)) {}.disabled(true)
+            Button(String(localized: "Run background maintenance now", bundle: .module)) { if let window { MaintenanceFlow.run(window, auto: true) } }.disabled(window?.store.snapshot == nil)
             if expert {
                 Divider()
                 Button(String(localized: "Clean up thoroughly", bundle: .module)) { if let window { LongTailActions.maintenance(window, .gcAggressive) } }.disabled(window == nil)
@@ -218,6 +218,9 @@ public struct RepositoryCommands: Commands {
                 Button(String(localized: "Prune unreachable objects", bundle: .module)) { if let window { LongTailActions.maintenance(window, .prune) } }.disabled(window == nil)
                 Button(String(localized: "Repack", bundle: .module)) { if let window { LongTailActions.maintenance(window, .repack) } }.disabled(window == nil)
                 Button(String(localized: "Write commit graph", bundle: .module)) { if let window { LongTailActions.maintenance(window, .commitGraph) } }.disabled(window == nil)
+                Button(String(localized: "Pack loose objects", bundle: .module)) { if let window { CoverageActions.packLooseObjects(window) } }.disabled(window == nil)
+                Button(String(localized: "Find redundant packs", bundle: .module)) { if let window { CoverageActions.findRedundantPacks(window) } }.disabled(window == nil)
+                Button(String(localized: "Recover objects from a pack file\u{2026}", bundle: .module)) { if let window { CoverageActions.recoverObjects(window) } }.disabled(window == nil)
                 if window?.store.hasPromisorPacks == true {
                     Button(String(localized: "Download missing files", bundle: .module)) { if let window { LongTailActions.maintenance(window, .backfill) } }
                 }

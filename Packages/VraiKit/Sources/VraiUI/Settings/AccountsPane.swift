@@ -100,6 +100,7 @@ struct AccountsForm: View {
                     }
                 }
             }
+            CredentialHelperSection(context: context, git: git)
             SettingsSection(String(localized: "Identity", bundle: .module), description: String(localized: "Every commit you make records this name and email.", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.userName, ConfigKeys.userEmail])) {
                 SettingsRow(String(localized: "Name", bundle: .module)) {
                     CommitField(value: git.identity.name ?? "", label: String(localized: "Name", bundle: .module), placeholder: "Avery Chen", id: "settings.userName", validate: { $0.isEmpty ? String(localized: "Enter a name.", bundle: .module) : nil }) { name in

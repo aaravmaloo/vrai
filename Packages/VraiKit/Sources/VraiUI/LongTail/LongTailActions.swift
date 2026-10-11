@@ -145,6 +145,25 @@ enum LongTailActions {
         }
     }
 
+    static func skipWorktree(_ window: WindowModel, path: String, on: Bool = true) {
+        let store = window.store
+        let name = PathParts.split(path).name
+        Task {
+            do {
+                try await store.setSkipWorktree(paths: [path], on: on)
+                if on {
+                    window.toasts.show(Toast(message: String(localized: "Git skips \(name) in this checkout", bundle: .module), detail: String(localized: "Your local edits stay put through pulls and switches until you undo this.", bundle: .module), icon: "lock", action: String(localized: "Undo", bundle: .module)) {
+                        skipWorktree(window, path: path, on: false)
+                    })
+                } else {
+                    window.toasts.show(Toast(message: String(localized: "Git watches \(name) again", bundle: .module), icon: "eye"))
+                }
+            } catch {
+                RewriteActions.report(error, window, failure: String(localized: "The index flag wasn't changed", bundle: .module))
+            }
+        }
+    }
+
     static func intentToAdd(_ window: WindowModel, path: String) {
         let store = window.store
         let name = PathParts.split(path).name

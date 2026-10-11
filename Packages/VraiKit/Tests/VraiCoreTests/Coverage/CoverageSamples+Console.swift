@@ -18,6 +18,7 @@ extension CoverageSamples {
             ConsoleCommands.resolveCommit(":/Graph"),
             ConsoleCommands.recentCheckouts,
             TypedCommand(command: .read(["log", "--oneline"])).command,
+            RangeDiffCommands.beforeRebase(branch: "feature/x"),
         ]
         let typed = [
             "git fast-export --all",

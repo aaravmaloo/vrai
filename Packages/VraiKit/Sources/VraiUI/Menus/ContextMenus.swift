@@ -145,6 +145,7 @@ struct BranchMenu: View {
         MenuItem(title: String(localized: "Copy name", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(branch.name) }
         if window.preferences.expert {
             MenuItem(title: String(localized: "Copy pull request summary", bundle: .module), icon: "envelope", enabled: true) { LongTailActions.copyPullRequestSummary(window, branch: branch.name) }
+            MenuItem(title: String(localized: "Compare with before rebase", bundle: .module), icon: "arrow.left.arrow.right", enabled: true) { CoverageActions.compareWithBeforeRebase(window, branch: branch.name) }
         }
     }
 }
@@ -234,6 +235,9 @@ struct WorkingFileMenu: View {
             MenuItem(title: file.staged == .full ? String(localized: "Unstage", bundle: .module) : String(localized: "Stage", bundle: .module), icon: file.staged == .full ? "minus" : "plus", enabled: true) { window.toggleStage(file) }
             MenuItem(title: String(localized: "Discard changes\u{2026}", bundle: .module), icon: "arrow.uturn.backward", enabled: true, destructive: true) { window.confirmDiscard([file.path]) }
             MenuItem(title: String(localized: "Stash this file\u{2026}", bundle: .module), icon: "tray.and.arrow.down", enabled: true) { RewriteActions.openStash(window, paths: [file.path]) }
+            if file.status != .untracked {
+                MenuItem(title: String(localized: "Open in diff tool", bundle: .module), icon: "plusminus", enabled: true) { CoverageActions.openDiffTool(window, file: file) }
+            }
         }
         Divider()
         if file.status != .untracked {
@@ -247,6 +251,7 @@ struct WorkingFileMenu: View {
         }
         if window.preferences.expert, file.status == .modified {
             MenuItem(title: String(localized: "Assume unchanged", bundle: .module), icon: "lock", enabled: true) { LongTailActions.assumeUnchanged(window, path: file.path) }
+            MenuItem(title: String(localized: "Skip worktree", bundle: .module), icon: "lock", enabled: true) { LongTailActions.skipWorktree(window, path: file.path) }
         }
         if window.preferences.expert, file.status == .untracked {
             MenuItem(title: String(localized: "Intent to add", bundle: .module), icon: "plus", enabled: true) { LongTailActions.intentToAdd(window, path: file.path) }

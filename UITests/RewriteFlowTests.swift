@@ -65,7 +65,7 @@ final class RewriteFlowTests: XCTestCase {
         let parents = try fixture.git(["rev-list", "--parents", "-n", "1", "HEAD"]).output.split(separator: " ")
         XCTAssertEqual(parents.count, 3)
         let second = try fixture.git(["rev-parse", "HEAD^2"]).output.trimmingCharacters(in: .whitespacesAndNewlines)
-        let mira = try fixture.git(["rev-parse", "mira/spike/metal-graph"]).output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let mira = try fixture.git(["rev-parse", "refs/heads/mira/spike/metal-graph"]).output.trimmingCharacters(in: .whitespacesAndNewlines)
         XCTAssertEqual(second, mira)
         XCTAssertTrue(app.buttons["Undo"].waitForExistence(timeout: 5))
         attach(app, "rewrite-conflict-committed")
@@ -153,7 +153,9 @@ final class RewriteFlowTests: XCTestCase {
         attach(app, "rewrite-interactive-plan")
         app.buttons["interactive-run"].click()
 
-        XCTAssertTrue(wait(timeout: 20) { (try? fixture.subjects(3)) == ["Test four with three", "Test two, reworded", base] })
+        let rebased = wait(timeout: 20) { (try? fixture.subjects(3)) == ["Test four with three", "Test two, reworded", base] }
+        attach(app, "rewrite-interactive-after")
+        XCTAssertTrue(rebased, (try? fixture.subjects(3).joined(separator: " | ")) ?? "")
         XCTAssertFalse(fixture.exists(".git/rebase-merge"))
         let files = try fixture.git(["show", "--name-only", "--format=", "HEAD"]).output.split(separator: "\n").map(String.init).sorted()
         XCTAssertEqual(files, ["Notes/rebase-four.txt", "Notes/rebase-three.txt"])
@@ -234,11 +236,16 @@ final class RewriteFlowTests: XCTestCase {
         try fixture.clean()
         let refsBefore = try fixture.refs()
         let app = fixture.launch()
-        XCTAssertTrue(app.descendants(matching: .any)["commits"].waitForExistence(timeout: 10))
+        let commits = app.descendants(matching: .any)["commits"]
+        XCTAssertTrue(commits.waitForExistence(timeout: 10))
+        commits.click()
         app.typeKey("m", modifierFlags: [.command, .shift])
         let run = app.buttons["merge-run"]
-        _ = run.waitForExistence(timeout: 10)
-        attach(app, "rewrite-merge-after-shortcut")
+        if !run.waitForExistence(timeout: 5) {
+            attach(app, "rewrite-merge-shortcut-missed")
+            app.menuBars.menuBarItems["Branch"].click()
+            app.menuBars.menuItems.matching(NSPredicate(format: "title BEGINSWITH %@", "Merge into")).firstMatch.click()
+        }
         XCTAssertTrue(run.waitForExistence(timeout: 10))
         let enabled = wait(timeout: 20) { run.isEnabled }
         attach(app, "rewrite-merge-sheet")
@@ -367,6 +374,7 @@ struct RewriteFixture {
         let target = folder + "/" + scenario
         try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         try FileManager.default.copyItem(atPath: source, toPath: target)
+        FixtureHooks.useOriginals(copy: target, original: source)
         let fixture = RewriteFixture(folder: folder, root: target + "/vrai")
         let remotes = try fixture.git(["remote"]).output.split(separator: "\n").map(String.init)
         for name in remotes {

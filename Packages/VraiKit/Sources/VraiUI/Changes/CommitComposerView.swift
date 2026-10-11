@@ -31,6 +31,7 @@ struct CommitComposerView: View {
                     ComposerSwitch(title: String(localized: "Sign off", bundle: .module), isOn: $changes.signoff)
                     ComposerSwitch(title: String(localized: "Skip hooks", bundle: .module), isOn: $changes.noVerify)
                         .accessibilityIdentifier("commit-skip-hooks")
+                    CoAuthorMenu()
                 }
             }
             .padding(.horizontal, Vrai.Space.s2)

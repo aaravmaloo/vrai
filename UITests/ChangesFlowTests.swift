@@ -165,6 +165,7 @@ struct ChangesFixtureCopy {
         let source = Sandbox.root + "/fixtures/everyday"
         let target = folder + "/everyday"
         try FileManager.default.copyItem(atPath: source, toPath: target)
+        FixtureHooks.useOriginals(copy: target, original: source)
         let copy = ChangesFixtureCopy(folder: folder, repo: target + "/vrai")
         for name in try copy.git(["remote"]).split(separator: "\n").map(String.init) {
             let url = try copy.git(["remote", "get-url", name])

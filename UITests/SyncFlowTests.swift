@@ -12,6 +12,7 @@ final class SyncFlowTests: XCTestCase {
             try FileManager.default.createDirectory(atPath: Sandbox.root + "/tests", withIntermediateDirectories: true)
             let copy = Copy(folder: Sandbox.root + "/tests/" + UUID().uuidString)
             try FileManager.default.copyItem(atPath: Sandbox.root + "/fixtures/" + scenario, toPath: copy.folder)
+            FixtureHooks.useOriginals(copy: copy.folder, original: Sandbox.root + "/fixtures/" + scenario)
             for name in ["origin", "mira"] where FileManager.default.fileExists(atPath: copy.remote(name)) {
                 let current = try Sandbox.git(["remote", "get-url", name], in: copy.repo)
                 guard current.status == 0, current.output.contains("file://") else { continue }
@@ -143,7 +144,9 @@ final class SyncFlowTests: XCTestCase {
 
         button(app, "Fetch").click()
         let title = text(app, "127.0.0.1 didn't accept your credentials for vrai.")
-        XCTAssertTrue(title.waitForExistence(timeout: 20), "the auth alert did not appear; is Scripts/auth-server.py running on port \(Self.authPort)?")
+        let shown = title.waitForExistence(timeout: 20)
+        if !shown { attach(app, "sync-auth-missing") }
+        XCTAssertTrue(shown, "the auth alert did not appear; is Scripts/auth-server.py running on port \(Self.authPort)?")
         let again = button(app, "Sign in again\u{2026}")
         XCTAssertTrue(again.exists)
         attach(app, "sync-auth-alert-light")
@@ -343,7 +346,7 @@ final class SyncFlowTests: XCTestCase {
             let group = app.toolbars.firstMatch.descendants(matching: .any).matching(NSPredicate(format: "label == %@", name)).firstMatch
             return group.exists ? (name, group.frame) : nil
         }
-        let field = app.toolbars.firstMatch.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Search actions, branches, commits")).firstMatch
+        let field = app.toolbars.firstMatch.descendants(matching: .any).matching(identifier: "toolbar-palette-field").firstMatch
         if !narrow, field.exists { frames.append(("Field", field.frame)) }
         frames.sort { $0.1.minX < $1.1.minX }
         var report = ["window " + String(describing: window)]

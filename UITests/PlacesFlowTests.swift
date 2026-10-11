@@ -288,6 +288,7 @@ struct PlacesFixture {
         let target = folder + "/everyday"
         try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         try FileManager.default.copyItem(atPath: source, toPath: target)
+        FixtureHooks.useOriginals(copy: target, original: source)
         let fixture = PlacesFixture(folder: folder, root: target + "/vrai")
         for name in try fixture.git(["remote"]).output.split(separator: "\n").map(String.init) {
             let url = try fixture.value(["remote", "get-url", name])

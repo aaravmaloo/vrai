@@ -25,7 +25,8 @@ extension CoverageSamples {
             PlacesCommands.listRefs,
             PlacesCommands.pseudoRef("ORIG_HEAD"),
             PlacesCommands.symbolicHead,
-            PlacesCommands.removeReplacement("9eb0cce32029dc11166a4d37091afbef9d50d9bc")
+            PlacesCommands.removeReplacement("9eb0cce32029dc11166a4d37091afbef9d50d9bc"),
+            PlacesCommands.annotate(path: "README.md", at: "HEAD")
         ]
     }
 }

@@ -13,6 +13,7 @@ struct MergeSheet: View {
     @State private var message = ""
     @State private var strategy = ""
     @State private var preview: MergePreview?
+    @State private var suggested: String?
     @State private var started = false
 
     var body: some View {
@@ -33,7 +34,7 @@ struct MergeSheet: View {
             RewriteRadioCards(selection: $mode, options: modes(head: head), label: String(localized: "How to merge", bundle: .module))
             RewriteOptions(command: command, detail: mode == .squash ? nil : String(localized: "Message, strategy", bundle: .module)) {
                 if mode != .squash {
-                    RewriteTextField(label: String(localized: "Merge commit message", bundle: .module), text: $message, placeholder: defaultMessage(head: head))
+                    RewriteTextField(label: String(localized: "Merge commit message", bundle: .module), text: $message, placeholder: suggested?.components(separatedBy: "\n").first ?? defaultMessage(head: head))
                 }
                 if preferences.expert {
                     RewriteField(label: String(localized: "When both sides changed the same lines", bundle: .module)) {
@@ -60,8 +61,10 @@ struct MergeSheet: View {
         }
         .task(id: source) {
             guard !source.isEmpty else { return }
+            suggested = nil
             let loaded = await store.mergePreview(source: source)
             preview = loaded
+            suggested = await store.defaultMergeMessage(source: source)
         }
     }
 

@@ -135,15 +135,9 @@ enum CorePaletteActions {
 
         let reference = String(localized: "Git reference", bundle: .module)
         for command in gitReference {
-            out.append(PaletteAction(id: "a:help:ref:" + command, title: reference + " \u{203A} git " + command, icon: "doc.text", detail: help) { GitReference.open(command) })
+            out.append(PaletteAction(id: "a:help:ref:" + command, title: reference + " \u{203A} git " + command, icon: "doc.text", detail: help) { AppSheets.present(.reference(command), window: window) })
         }
         return out
     }
 }
 
-enum GitReference {
-    @MainActor static func open(_ command: String) {
-        guard let url = URL(string: "https://git-scm.com/docs/git-" + command) else { return }
-        NSWorkspace.shared.open(url)
-    }
-}

@@ -83,6 +83,12 @@ public enum PlacesCommands {
         BlameParser.command(path: path, at: revision)
     }
 
+    public static func annotate(path: String, at revision: String?) -> GitCommand {
+        var arguments = ["annotate"]
+        if let revision, !revision.isEmpty { arguments.append(revision) }
+        return .read(arguments + ["--", path])
+    }
+
     public static func fileHistory(path: String, renameThreshold: Int = 50, limit: Int? = nil) -> GitCommand {
         FileHistoryParser.command(path: path, renameThreshold: renameThreshold, limit: limit)
     }

@@ -17,6 +17,7 @@ extension CoverageSamples {
             ConfigCommands.write(ConfigWrite("rerere.enabled", "true"), scope: .global)
         ]
         + GitSettings.commands(PullMode.fastForwardOnly.writes + GitSettings.autostashWrites(true) + SigningSettings.writes(signing: true))
+        + CredentialHelperCommands.choose(.cache)
         + GitSettings.commands(RepositoryStore.localIdentityWrites(Identity(name: "Avery Chen", email: "avery@vrai.app")), scope: .local)
         + [
             MaintenanceCommands.register,
@@ -24,6 +25,13 @@ extension CoverageSamples {
             MaintenanceCommands.run(),
             MaintenanceCommands.run(auto: true),
             MaintenanceCommands.registered,
+            MaintenanceCommands.runEverywhere(),
+            SharedCommands.diffTool(path: "README.md", staged: true),
+            ConflictRestart.rerereEnabled,
+            ConflictRestart.rerereRemaining,
+            CredentialHelperCommands.configured,
+            CredentialHelperCommands.forgetCached(),
+            CredentialHelperCommands.eraseStored(file: "/tmp/vrai-coverage/git-credentials", scheme: "https"),
             HookCommands.run("pre-commit"),
             HookCommands.run("commit-msg", arguments: ["COMMIT_EDITMSG"]),
             LFSCommands.env,

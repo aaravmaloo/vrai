@@ -73,6 +73,6 @@ struct ExpertRiskTests {
         let covered = Set(CoverageSamples.console.compactMap(\.subcommand))
         #expect(consoleOnly.filter { !covered.contains($0) }.isEmpty)
         #expect(covered.isSuperset(of: ["cat-file", "notes", "ls-files", "grep", "log", "rev-parse"]))
-        #expect(CoverageSamples.console.count == 50)
+        #expect(CoverageSamples.console.count == 51)
     }
 }

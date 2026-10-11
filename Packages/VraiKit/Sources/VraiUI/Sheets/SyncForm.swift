@@ -590,7 +590,6 @@ extension SyncForm {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
                     .accessibilityLabel(command.display)
                     .accessibilityIdentifier("command-preview")
                 if let tag = Self.riskTag(RiskTag.level(command)) {

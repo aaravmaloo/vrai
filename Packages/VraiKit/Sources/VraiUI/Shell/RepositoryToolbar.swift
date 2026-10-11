@@ -10,8 +10,11 @@ struct RepositoryToolbar: ToolbarContent {
             ToolbarTitle(window: window)
         }
         .sharedBackgroundVisibility(.hidden)
-        ToolbarSpacer(.flexible)
         if window.widthClass.isNarrow {
+            ToolbarItem {
+                Spacer(minLength: 0)
+            }
+            .sharedBackgroundVisibility(.hidden)
             ToolbarItem {
                 ToolbarCapsule(label: String(localized: "Actions", bundle: .module)) {
                     NarrowActions(window: window)
@@ -20,6 +23,10 @@ struct RepositoryToolbar: ToolbarContent {
             }
             .sharedBackgroundVisibility(.hidden)
         } else {
+            ToolbarItem {
+                Spacer(minLength: 0)
+            }
+            .sharedBackgroundVisibility(.hidden)
             ToolbarItem {
                 ToolbarCapsule(label: String(localized: "Sync", bundle: .module)) {
                     SyncButtons(window: window)
@@ -295,6 +302,13 @@ struct ToolbarField: View {
     let window: WindowModel
 
     var body: some View {
+        HStack(spacing: 0) {
+            field
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder var field: some View {
         let showText = window.widthClass == .wide
         HStack(spacing: Vrai.Space.s8) {
             Symbol("magnifyingglass", font: Font.Vrai.body)

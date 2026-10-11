@@ -9,6 +9,17 @@ public enum MaintenanceCommands {
         GitCommand(["maintenance", "run"] + (auto ? ["--auto"] : []), access: .write)
     }
 
+    public static func runEverywhere(keepGoing: Bool = true) -> GitCommand {
+        let arguments = ["for-each-repo", "--config=" + ConfigKeys.maintenanceRepo] + (keepGoing ? ["--keep-going"] : []) + ["maintenance", "run"]
+        return GitCommand(arguments, access: .write, acceptedExitCodes: keepGoing ? [0, 1, 129] : [0])
+    }
+
+    public static func unreachable(_ errorOutput: String) -> [String] {
+        errorOutput.components(separatedBy: "\n").compactMap { line in
+            line.firstMatch(of: /fatal: cannot change to '(.+)':/).map { String($0.output.1) }
+        }
+    }
+
     public static func isRegistered(_ paths: [String], repository: URL) -> Bool {
         let wanted = canonical(repository.path(percentEncoded: false))
         return paths.contains { canonical($0) == wanted }

@@ -24,6 +24,7 @@ struct SettingsSandbox {
         let sandbox = SettingsSandbox(root: root)
         for scenario in scenarios {
             try fm.copyItem(atPath: Sandbox.root + "/fixtures/" + scenario, toPath: root + "/fixtures/" + scenario)
+            FixtureHooks.useOriginals(copy: root + "/fixtures/" + scenario, original: Sandbox.root + "/fixtures/" + scenario)
             let repo = sandbox.repository(scenario)
             let remotes = try sandbox.git(["remote"], in: repo)
             for name in remotes.output.split(separator: "\n").map(String.init) where !name.isEmpty {

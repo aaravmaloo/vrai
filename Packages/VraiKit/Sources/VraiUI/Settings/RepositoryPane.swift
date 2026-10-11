@@ -200,6 +200,7 @@ struct RepositoryPaneForm: View {
                     .accessibilityIdentifier("settings.maintenance.run")
                 }
             }
+            MaintenanceEverywhereRow(context: context, store: store, registered: registered)
         }
     }
 

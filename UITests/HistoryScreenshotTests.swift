@@ -90,6 +90,7 @@ final class HistoryScreenshotTests: XCTestCase {
         let copy = folder + "/vrai"
         try FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         try FileManager.default.copyItem(atPath: Sandbox.fixture("everyday"), toPath: copy)
+        FixtureHooks.useOriginals(copy: copy, original: Sandbox.fixture("everyday"))
         defer {
             try? FileManager.default.removeItem(atPath: folder)
             Sandbox.forgetRecent(copy)

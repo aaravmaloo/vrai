@@ -53,7 +53,10 @@ enum CoverageSamples {
             StagingService.applyCommand(Data(), cached: true, reverse: false),
             StagingService.diffCommand(path: "README.md", oldPath: nil, staged: false, untracked: false),
             SubmoduleParser.stageCommand(paths: ["Vendor/cmark-gfm"]),
-            CommitService.command(CommitMessage(subject: "Coverage"))
+            CommitService.command(CommitMessage(subject: "Coverage")),
+            MessageCommands.mergeMessage([MergeHead(oid: oid, name: "feature/x", kind: .branch)]),
+            MessageCommands.cleanup("Merge branch 'feature/x'\n\n# Conflicts:\n"),
+            MessageCommands.addTrailers([.coAuthor(name: "Mira", email: "mira@vrai.app")], to: "Coverage\n")
         ]
     }
 
@@ -116,7 +119,10 @@ enum CoverageSamples {
             RewriteCommands.branchFromStash(index: 0, name: "from-stash"),
             RewriteCommands.startBisect(bad: "HEAD", good: oid.rawValue),
             RewriteCommands.markBisect(.good),
-            RewriteCommands.endBisect
+            RewriteCommands.endBisect,
+            ConflictRestart.mergeOneFile(path: "README.md", stages: UnmergedStages(base: .init(oid: other, mode: "100644"), ours: .init(oid: oid, mode: "100644"), theirs: .init(oid: oid, mode: "100644"))),
+            ConflictRestart.mergeIndex(paths: ["README.md"]),
+            ConflictRestart.mergedBlob(path: "README.md")
         ]
         for operation in [OperationInProgress.merge, .rebase, .applyingPatches, .cherryPick, .revert] {
             if let command = RewriteCommands.continueOperation(operation) { out.append(command) }

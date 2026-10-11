@@ -8,6 +8,7 @@ struct ConflictsPane: View {
     @Environment(WindowModel.self) private var window
     @Environment(\.expert) private var expert
     @State private var session = ConflictSession()
+    @State private var replayed: Set<String> = []
 
     init(path: String? = nil) {
         self.path = path
@@ -31,11 +32,15 @@ struct ConflictsPane: View {
             VStack(spacing: 0) {
                 bar(current)
                 head(current, kind: kind)
+                if replayed.contains(current) {
+                    ReplayedResolutionNote()
+                }
                 content(current, kind: kind)
             }
             .background(Color.Vrai.bg)
             .task(id: ReloadKey(path: current, working: store.snapshot?.working ?? [], expert: expert)) {
                 await session.load(path: current, store: store, expert: expert)
+                replayed = await store.replayedResolutions()
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("conflicts-pane")
@@ -63,6 +68,15 @@ struct ConflictsPane: View {
                 }
                 Button(String(localized: "Accept incoming for the whole file", bundle: .module), systemImage: "checkmark.circle") {
                     session.resolveFile(path, with: .theirs, window: window)
+                }
+                Button(String(localized: "Start over", bundle: .module), systemImage: "arrow.counterclockwise") {
+                    CoverageActions.confirmStartOver(window, path: path, everyFile: false) { session.startOver(path, everyFile: false, window: window) }
+                }
+                .disabled(!(store.snapshot?.conflicts.first { $0.path == path }?.kind ?? .bothModified).hasMarkers)
+                .modifierKeyAlternate(.option) {
+                    Button(String(localized: "Start over with every file", bundle: .module), systemImage: "arrow.counterclockwise") {
+                        CoverageActions.confirmStartOver(window, path: path, everyFile: true) { session.startOver(path, everyFile: true, window: window) }
+                    }
                 }
                 Divider()
                 Button(String(localized: "Open in merge tool", bundle: .module), systemImage: "arrow.triangle.merge") {
@@ -285,6 +299,40 @@ final class ConflictSession {
                 }
             } catch {
                 RewriteActions.report(error, window, failure: String(localized: "The file wasn't resolved", bundle: .module))
+            }
+        }
+    }
+
+    func startOver(_ path: String, everyFile: Bool, window: WindowModel) {
+        guard working == nil else { return }
+        let store = window.store
+        let expert = window.preferences.expert
+        let name = PathParts.split(path).name
+        working = 0
+        Task {
+            var failure: Error?
+            var conflicted = true
+            var count = 1
+            do {
+                if everyFile {
+                    count = try await store.startOverEveryFile().count
+                } else {
+                    conflicted = try await store.startOver(path: path)
+                }
+            } catch {
+                failure = error
+            }
+            working = nil
+            expected = nil
+            await load(path: path, store: store, expert: expert)
+            if let failure {
+                RewriteActions.report(failure, window, failure: String(localized: "The conflict didn't come back", bundle: .module))
+            } else if everyFile {
+                window.toasts.show(Toast(message: String(localized: "Started over with \(n(count, "file"))", bundle: .module), detail: String(localized: "Every conflict is back as the merge left it.", bundle: .module), icon: "arrow.counterclockwise"))
+            } else if conflicted {
+                window.toasts.show(Toast(message: String(localized: "Started over with \(name)", bundle: .module), detail: String(localized: "Every conflict is back as the merge left it.", bundle: .module), icon: "arrow.counterclockwise"))
+            } else {
+                window.toasts.show(Toast(tone: .success, message: String(localized: "\(name) merged cleanly this time", bundle: .module), detail: String(localized: "git staged the merged file.", bundle: .module), icon: "checkmark.circle"))
             }
         }
     }

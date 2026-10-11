@@ -30,13 +30,12 @@ struct RepositoryInfoSheet: View {
                         .foregroundStyle(Color.Vrai.textSecondary)
                 }
             }
-        } footerStart: {
+        } actions: {
             VraiButton(title: "count-objects", icon: "terminal") {
                 window.sheets.dismiss()
                 window.console.open = true
             }
             .help(String(localized: "Open the console, where every command Vrai runs is logged", bundle: .module))
-        } actions: {
             LongTailDone { window.sheets.dismiss() }
         }
         .task {

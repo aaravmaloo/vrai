@@ -81,6 +81,12 @@ struct BlameView: View {
             } else {
                 Spacer(minLength: 0)
             }
+            if expert, let focus = store.fileFocus {
+                IconButton(icon: "terminal", label: String(localized: "Run git annotate in the console", bundle: .module), small: true) {
+                    CoverageActions.annotate(window, path: focus.path, revision: focus.revision)
+                }
+                .accessibilityIdentifier("blame-annotate")
+            }
             Button {
                 stepBack()
             } label: {
