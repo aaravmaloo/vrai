@@ -124,6 +124,7 @@ struct RepositoryShell: View {
             window.alerts.present(error) { Task { try? await store.refresh() } }
         }
         .onAppear { applyTheme() }
+        .task { window.changes.listen(store) }
         .onChange(of: preferences.theme) { _, _ in applyTheme() }
     }
 
@@ -267,6 +268,9 @@ struct WindowConfigurator: NSViewRepresentable {
         func configure() {
             guard launch.isSandboxed, let window else { return }
             if launch.capture, window.level != .floating { window.level = .floating }
+            if launch.capture, let screen = window.screen ?? NSScreen.main, !screen.frame.contains(window.frame) {
+                window.setFrameTopLeftPoint(NSPoint(x: screen.visibleFrame.minX, y: screen.visibleFrame.maxY))
+            }
             WindowPersistence.disable(window)
         }
     }

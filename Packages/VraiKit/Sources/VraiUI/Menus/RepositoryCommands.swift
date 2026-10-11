@@ -40,9 +40,8 @@ public struct RepositoryCommands: Commands {
             Button(String(localized: "Welcome window", bundle: .module)) { openWindow(id: "welcome") }
                 .keyboardShortcut("1", modifiers: [.command, .shift])
         }
-        CommandGroup(after: .undoRedo) {
-            Button(String(localized: "Undo history\u{2026}", bundle: .module)) {}
-                .disabled(true)
+        CommandGroup(replacing: .undoRedo) {
+            UndoCommandItems(window: window)
         }
         CommandGroup(after: .pasteboard) {
             Divider()
@@ -256,24 +255,7 @@ public struct RepositoryCommands: Commands {
 
     @ViewBuilder var commitItems: some View {
         let head = window?.headName ?? ""
-        Button(String(localized: "Commit", bundle: .module)) {}
-            .keyboardShortcut(.return)
-            .disabled(true)
-            .modifierKeyAlternate(.option) {
-                Button(String(localized: "Commit and push", bundle: .module)) {}
-                    .keyboardShortcut(.return, modifiers: [.command, .option])
-                    .disabled(true)
-            }
-        Button(String(localized: "Amend last commit", bundle: .module)) {}.disabled(true)
-        Divider()
-        Button(String(localized: "Stage all", bundle: .module)) {}
-            .keyboardShortcut("a", modifiers: [.command, .shift])
-            .disabled(true)
-            .modifierKeyAlternate(.option) {
-                Button(String(localized: "Stage all, including untracked", bundle: .module)) {}.disabled(true)
-            }
-        Button(String(localized: "Unstage all", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Discard all changes\u{2026}", bundle: .module)) {}.disabled(true)
+        CommitChangesItems(window: window)
         Divider()
         Button(String(localized: "Cherry-pick selected", bundle: .module)) {}.disabled(true)
         Button(String(localized: "Revert selected", bundle: .module)) {}.disabled(true)

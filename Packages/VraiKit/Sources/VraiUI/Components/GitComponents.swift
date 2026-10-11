@@ -415,30 +415,61 @@ struct PathBar: View {
 
     var body: some View {
         let parts = path.split(separator: "/").map(String.init)
-        HStack(spacing: Vrai.Space.s2) {
-            ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
-                let last = index == parts.count - 1
-                HStack(spacing: Vrai.Space.s4) {
-                    if !last {
-                        Symbol("folder", font: Font.Vrai.callout)
-                            .foregroundStyle(Color.Vrai.textTertiary)
-                    }
-                    Text(part)
-                        .font(last ? Font.Vrai.headline : Font.Vrai.callout)
-                        .foregroundStyle(last ? Color.Vrai.text : Color.Vrai.textSecondary)
-                        .lineLimit(1)
-                }
-                .padding(.horizontal, Vrai.Space.s6)
-                .frame(height: Vrai.Size.controlSm)
-                .layoutPriority(last ? 1 : 0)
-                if !last {
-                    Symbol("chevron.right", font: Font.Vrai.overline)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                }
+        let folders = Array(parts.dropLast())
+        let file = parts.last ?? path
+        ViewThatFits(in: .horizontal) {
+            ForEach(0...folders.count, id: \.self) { dropped in
+                PathBarRow(folders: Array(folders.dropFirst(dropped)), elided: dropped > 0, file: file, truncates: false)
+                    .fixedSize()
             }
+            PathBarRow(folders: [], elided: !folders.isEmpty, file: file, truncates: true)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(path)
+    }
+}
+
+struct PathBarRow: View {
+    let folders: [String]
+    let elided: Bool
+    let file: String
+    let truncates: Bool
+
+    var body: some View {
+        HStack(spacing: Vrai.Space.s2) {
+            if elided {
+                segment(Text(verbatim: "\u{2026}").font(Font.Vrai.callout).foregroundStyle(Color.Vrai.textSecondary))
+                separator
+            }
+            ForEach(Array(folders.enumerated()), id: \.offset) { _, folder in
+                segment(HStack(spacing: Vrai.Space.s4) {
+                    Symbol("folder", font: Font.Vrai.callout)
+                        .foregroundStyle(Color.Vrai.textTertiary)
+                    Text(folder)
+                        .font(Font.Vrai.callout)
+                        .foregroundStyle(Color.Vrai.textSecondary)
+                        .lineLimit(1)
+                })
+                separator
+            }
+            segment(Text(file)
+                .font(Font.Vrai.headline)
+                .foregroundStyle(Color.Vrai.text)
+                .lineLimit(1)
+                .truncationMode(.middle))
+                .layoutPriority(1)
+        }
+    }
+
+    func segment(_ content: some View) -> some View {
+        content
+            .padding(.horizontal, Vrai.Space.s6)
+            .frame(height: Vrai.Size.controlSm)
+    }
+
+    var separator: some View {
+        Symbol("chevron.right", font: Font.Vrai.overline)
+            .foregroundStyle(Color.Vrai.textTertiary)
     }
 }
 

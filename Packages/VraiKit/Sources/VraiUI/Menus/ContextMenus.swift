@@ -92,7 +92,7 @@ struct WipMenu: View {
     var body: some View {
         MenuItem(title: String(localized: "Open Changes", bundle: .module), icon: "square.and.pencil", enabled: true) { window.show(.changes) }
         MenuItem(title: String(localized: "Stash changes\u{2026}", bundle: .module), icon: "tray.and.arrow.down")
-        MenuItem(title: String(localized: "Discard all changes\u{2026}", bundle: .module), icon: "arrow.uturn.backward", destructive: true)
+        MenuItem(title: String(localized: "Discard all changes\u{2026}", bundle: .module), icon: "arrow.uturn.backward", enabled: true, destructive: true) { window.confirmDiscardAll() }
     }
 }
 
@@ -227,8 +227,8 @@ struct WorkingFileMenu: View {
         if file.status == .conflicted {
             MenuItem(title: String(localized: "Open in merge tool", bundle: .module), icon: "arrow.triangle.merge")
         } else {
-            MenuItem(title: file.staged == .full ? String(localized: "Unstage", bundle: .module) : String(localized: "Stage", bundle: .module), icon: file.staged == .full ? "minus" : "plus")
-            MenuItem(title: String(localized: "Discard changes\u{2026}", bundle: .module), icon: "arrow.uturn.backward", destructive: true)
+            MenuItem(title: file.staged == .full ? String(localized: "Unstage", bundle: .module) : String(localized: "Stage", bundle: .module), icon: file.staged == .full ? "minus" : "plus", enabled: true) { window.toggleStage(file) }
+            MenuItem(title: String(localized: "Discard changes\u{2026}", bundle: .module), icon: "arrow.uturn.backward", enabled: true, destructive: true) { window.confirmDiscard([file.path]) }
             MenuItem(title: String(localized: "Stash this file\u{2026}", bundle: .module), icon: "tray.and.arrow.down")
         }
         Divider()
@@ -263,7 +263,7 @@ struct CommitFileMenu: View {
         MenuItem(title: String(localized: "Blame at \(id.short)", bundle: .module), icon: "person.text.rectangle")
         MenuItem(title: String(localized: "File history", bundle: .module), icon: "clock")
         MenuItem(title: String(localized: "Open \(name) at \(id.short)", bundle: .module), icon: "doc.text")
-        MenuItem(title: String(localized: "Restore \(name) from \(id.short)\u{2026}", bundle: .module), icon: "arrow.counterclockwise")
+        MenuItem(title: String(localized: "Restore \(name) from \(id.short)\u{2026}", bundle: .module), icon: "arrow.counterclockwise", enabled: true) { window.confirmRestore(path: path, from: id) }
         Divider()
         MenuItem(title: String(localized: "Copy path", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(path, label: String(localized: "path", bundle: .module)) }
     }
