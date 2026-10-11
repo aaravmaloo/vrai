@@ -7,6 +7,7 @@ struct BannerAction: Identifiable {
     var primary = false
     var enabled = false
     var perform: (@MainActor () -> Void)?
+    var busy = false
 
     var id: String { title }
 }
@@ -72,7 +73,10 @@ struct BannerView: View {
                         Button {
                             action.perform?()
                         } label: {
-                            Text(action.title)
+                            HStack(spacing: Vrai.Space.s4) {
+                                if action.busy { Spinner() }
+                                Text(action.title)
+                            }
                         }
                         .buttonStyle(VraiButtonStyle(variant: action.primary ? .primary : .secondary, size: .small))
                         .disabled(!action.enabled)
@@ -294,7 +298,7 @@ struct BannerStack: View {
     @Environment(WindowModel.self) private var window
 
     var body: some View {
-        let banners = SyncBanners.wire(BannerBuilder.banners(store: store), window: window)
+        let banners = SyncBanners.wire(BannerBuilder.banners(store: store).map { RewriteBanners.wire($0, window: window) }, window: window)
         if !banners.isEmpty {
             VStack(spacing: 0) {
                 ForEach(banners) { BannerView(model: $0) }

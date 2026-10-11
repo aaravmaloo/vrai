@@ -92,13 +92,17 @@ struct RepositoryShell: View {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: Vrai.Size.sidebar - Vrai.Space.s48, ideal: Vrai.Size.sidebar, max: Vrai.Size.sidebar + Vrai.Space.s64 * 2)
         } detail: {
-            ContentArea()
-                .safeAreaInset(edge: .top, spacing: 0) { BannerStack() }
-                .overlay(alignment: .bottom) { ToastHost() }
+            VStack(spacing: 0) {
+                ContentArea()
+                    .safeAreaInset(edge: .top, spacing: 0) { BannerStack() }
+                    .overlay(alignment: .bottom) { ToastHost() }
+                ConsoleDrawerHost()
+            }
         }
         .navigationTitle(window.repositoryName)
         .toolbar(removing: .title)
         .toolbar { RepositoryToolbar(window: window) }
+        .overlay { PaletteHost() }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
             let next = WidthClass(width: width)
             let previous = window.widthClass
@@ -161,8 +165,18 @@ struct ContentArea: View {
                     ChangesView()
                 case .stashes:
                     StashesView()
-                case .reflog, .refs, .worktrees, .submodules:
-                    HistoryView()
+                case .reflog:
+                    ReflogView()
+                case .refs:
+                    RefsView()
+                case .worktrees:
+                    WorktreesView()
+                case .submodules:
+                    SubmodulesView()
+                case .blame:
+                    BlameView()
+                case .fileHistory:
+                    FileHistoryView()
                 }
             }
         }

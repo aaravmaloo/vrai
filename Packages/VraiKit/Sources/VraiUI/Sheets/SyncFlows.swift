@@ -195,7 +195,7 @@ extension SyncModel {
                 message: String(localized: "Stopped on \(n(max(1, paths.count), "conflict"))", bundle: .module),
                 detail: String(localized: "Resolve them in Changes, then commit to finish.", bundle: .module),
                 action: String(localized: "Resolve conflicts", bundle: .module)
-            ) { [weak self] in self?.window.show(.changes) })
+            ) { [weak self] in self?.window.showConflicts() })
         case .remoteNotFound:
             noRemotes()
         case .hookFailed(let name, let output) where name == "pre-push":

@@ -192,7 +192,7 @@ struct ChangesMoreMenu: View {
                 window.stageEverything(includeUntracked: true)
             }
         )
-        MenuItem(title: String(localized: "Stash changes\u{2026}", bundle: .module), icon: "tray.and.arrow.down")
+        MenuItem(title: String(localized: "Stash changes\u{2026}", bundle: .module), icon: "tray.and.arrow.down", enabled: !files.isEmpty) { RewriteActions.openStash(window) }
         MenuItem(title: String(localized: "Remove untracked files\u{2026}", bundle: .module), icon: "trash", enabled: !groups.untracked.isEmpty, destructive: true) {
             window.confirmClean()
         }

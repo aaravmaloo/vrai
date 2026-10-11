@@ -253,6 +253,7 @@ struct BranchTreeView: View {
         }
         .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.switchTo(branch.name) })
         .contextMenu { BranchMenu(branch: branch, window: window) }
+        .modifier(RewriteBranchDrop(branch: branch, current: current, window: window))
     }
 }
 

@@ -396,3 +396,11 @@ extension WindowModel {
         }
     }
 }
+
+extension WindowModel {
+    func showConflicts() {
+        show(.changes)
+        guard let path = store.snapshot?.working.first(where: { $0.status == .conflicted })?.path else { return }
+        changes.select(ChangesPick(path: path, side: .unstaged, conflict: true), store: store, narrow: widthClass.isNarrow)
+    }
+}

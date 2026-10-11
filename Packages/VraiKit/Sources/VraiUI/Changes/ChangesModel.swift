@@ -86,6 +86,9 @@ struct ChangeGroups {
 
     static func resolve(_ pick: ChangesPick?, in working: [WorkingFile]) -> ChangesPick? {
         let groups = ChangeGroups(working)
+        if let pick, pick.conflict, working.first(where: { $0.path == pick.path })?.status != .conflicted, let next = groups.conflicts.first {
+            return ChangesPick(path: next.path, side: .unstaged, conflict: true)
+        }
         if let pick, let file = working.first(where: { $0.path == pick.path }) {
             if file.status == .conflicted { return ChangesPick(path: file.path, side: .unstaged, conflict: true) }
             switch pick.side {

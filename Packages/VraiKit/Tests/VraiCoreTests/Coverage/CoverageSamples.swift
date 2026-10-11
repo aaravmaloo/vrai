@@ -1,0 +1,3 @@
+import VraiGit
+
+enum CoverageSamples {}

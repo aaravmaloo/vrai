@@ -19,6 +19,8 @@ public final class WindowModel {
     public let alerts = AlertCenter()
     public let sheets = SheetCenter()
     public let changes = ChangesModel()
+    public let console = ConsoleModel()
+    public let palette = PaletteModel()
     public let now: Date?
     public var pane: Pane = .list
     public var columns: NavigationSplitViewVisibility = .all

@@ -68,6 +68,18 @@ struct ConflictResolverTests {
         #expect(try ConflictResolver.resolve(plain, block: 1, with: .base, diff3: wider) == "a\nkept\nold\nz\n")
     }
 
+    @Test func baseSpansNeighbouringDiff3Regions() throws {
+        let joined = "a\n<<<<<<< HEAD\nhalo\n\nfunc x\nmine\n=======\nmetal\n\nfunc x\nyours\n>>>>>>> other\nz\n"
+        let split = "a\n<<<<<<< 1\nhalo\n||||||| 2\n=======\nmetal\n>>>>>>> 3\n\nfunc x\n<<<<<<< 1\nmine\n||||||| 2\nold\n=======\nyours\n>>>>>>> 3\nz\n"
+        #expect(try ConflictResolver.resolve(joined, block: 1, with: .base, diff3: split) == "a\n\nfunc x\nold\nz\n")
+        let alternatives = ConflictResolver.alternatives(in: split)
+        #expect(alternatives.count == 3)
+        #expect(alternatives.last?.base == ["", "func x", "old"])
+        #expect(ConflictResolver.alternatives(in: split, longestRun: 1).count == 2)
+        let lone = "a\n<<<<<<< HEAD\nmine\n=======\nyours\n>>>>>>> other\nz\n"
+        #expect(try ConflictResolver.resolve(lone, block: 1, with: .base, diff3: split) == "a\nold\nz\n")
+    }
+
     @Test func lineEndingsAndMissingFinalNewlineSurvive() throws {
         let crlf = "one\r\n<<<<<<< HEAD\r\nmine\r\n=======\r\nyours\r\n>>>>>>> other\r\ntwo"
         #expect(ConflictResolver.conflicts(in: crlf).count == 1)

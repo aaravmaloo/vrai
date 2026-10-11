@@ -72,7 +72,7 @@ public enum ConflictResolver {
         var document = Document(text)
         let targets = document.located.filter { block == nil || $0.conflict.index == block }
         if let block, targets.isEmpty { throw Failure.blockNotFound(block) }
-        let alternatives = diff3.map(conflicts(in:)) ?? []
+        let alternatives = diff3.map { ConflictResolver.alternatives(in: $0) } ?? []
         let crlf = document.usesCRLF
         for target in targets.reversed() {
             let replacement = try lines(for: target, in: document.lines, choice: choice, alternatives: alternatives, crlf: crlf)
@@ -94,6 +94,32 @@ public enum ConflictResolver {
             guard let found = matchingBase(for: target.conflict, in: alternatives) else { throw Failure.noBase(target.conflict.index) }
             return crlf ? found.map { $0 + "\r" } : found
         }
+    }
+
+    public static func alternatives(in diff3: String, longestRun: Int = 6) -> [ConflictBlock.Conflict] {
+        let blocks = ConflictParser.blocks(in: diff3)
+        let singles = blocks.compactMap { block -> ConflictBlock.Conflict? in
+            if case .conflict(let conflict) = block { conflict } else { nil }
+        }
+        var runs: [ConflictBlock.Conflict] = []
+        for start in blocks.indices {
+            guard case .conflict(let first) = blocks[start] else { continue }
+            var run = first
+            run.base = first.base ?? []
+            var joined = 1
+            var index = start + 1
+            while index + 1 < blocks.count, joined < longestRun,
+                  case .context(let between, _) = blocks[index], case .conflict(let next) = blocks[index + 1] {
+                run.ours += between + next.ours
+                run.base = (run.base ?? []) + between + (next.base ?? [])
+                run.theirs += between + next.theirs
+                run.range = run.range.lowerBound..<next.range.upperBound
+                runs.append(run)
+                joined += 1
+                index += 2
+            }
+        }
+        return singles + runs
     }
 
     public static func matchingBase(for conflict: ConflictBlock.Conflict, in alternatives: [ConflictBlock.Conflict]) -> [String]? {

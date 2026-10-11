@@ -29,6 +29,7 @@ public final class RepositoryStore {
     public private(set) var openedCount: Int?
     public var view: RepositoryView = .history
     public var sidebarSelection: String?
+    public var fileFocus: FileFocus?
     public var renameThreshold = 50
     public var pageSize = 2000
     public private(set) var scope: HistoryScope = .all
@@ -653,6 +654,18 @@ public enum RepositoryView: String, Sendable, Hashable, CaseIterable {
     case refs
     case worktrees
     case submodules
+    case blame
+    case fileHistory
+}
+
+public struct FileFocus: Sendable, Hashable {
+    public var path: String
+    public var revision: String?
+
+    public init(path: String, revision: String? = nil) {
+        self.path = path
+        self.revision = revision
+    }
 }
 
 public struct ScrollRequest: Sendable, Hashable {

@@ -101,7 +101,7 @@ struct ErrorCopy {
     }
 
     init(_ error: GitError) {
-        if let copy = Self.changes(error) ?? Self.sync(error) ?? Self.rewrite(error) {
+        if let copy = Self.changes(error) ?? Self.sync(error) ?? Self.rewrite(error) ?? Self.places(error) ?? Self.console(error) ?? Self.longTail(error) ?? Self.settings(error) {
             self = copy
             return
         }

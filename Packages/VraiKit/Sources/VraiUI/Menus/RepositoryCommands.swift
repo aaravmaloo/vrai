@@ -179,13 +179,14 @@ public struct RepositoryCommands: Commands {
             }
         Button(String(localized: "Fetch, pull and push with options\u{2026}", bundle: .module)) { window?.sync.openSync(.push) }.disabled(window == nil)
         Divider()
-        Button(String(localized: "Stash changes\u{2026}", bundle: .module)) {}
+        Button(String(localized: "Stash changes\u{2026}", bundle: .module)) { if let window { RewriteActions.openStash(window) } }
             .keyboardShortcut("s", modifiers: [.command, .shift])
-            .disabled(true)
-        Button(String(localized: "Apply latest stash", bundle: .module)) {}
-            .disabled(true)
+            .disabled(window?.store.snapshot?.working.isEmpty ?? true)
+        Button(String(localized: "Apply latest stash", bundle: .module)) { if let window { RewriteActions.applyStash(window, index: 0, pop: false) } }
+            .disabled(window?.store.snapshot?.stashes.isEmpty ?? true)
             .modifierKeyAlternate(.option) {
-                Button(String(localized: "Pop latest stash", bundle: .module)) {}.disabled(true)
+                Button(String(localized: "Pop latest stash", bundle: .module)) { if let window { RewriteActions.applyStash(window, index: 0, pop: true) } }
+                    .disabled(window?.store.snapshot?.stashes.isEmpty ?? true)
             }
         Divider()
         Menu(String(localized: "Remotes", bundle: .module)) {
@@ -239,17 +240,18 @@ public struct RepositoryCommands: Commands {
         Button(String(localized: "Rename \(head)\u{2026}", bundle: .module)) { if let branch { window?.sync.rename(branch.name) } }.disabled(branch == nil)
         Button(branch?.upstream == nil ? String(localized: "Set upstream\u{2026}", bundle: .module) : String(localized: "Change upstream\u{2026}", bundle: .module)) { if let branch { window?.sync.editUpstream(branch.name) } }.disabled(branch == nil)
         Divider()
-        Button(String(localized: "Merge into \(head)\u{2026}", bundle: .module)) {}
+        Button(String(localized: "Merge into \(head)\u{2026}", bundle: .module)) { if let window { RewriteActions.openMerge(window) } }
             .keyboardShortcut("m", modifiers: [.command, .shift])
-            .disabled(true)
-        Button(String(localized: "Rebase \(head)\u{2026}", bundle: .module)) {}
+            .disabled(window?.store.snapshot == nil)
+        Button(String(localized: "Rebase \(head)\u{2026}", bundle: .module)) { if let window { RewriteActions.openRebase(window) } }
             .keyboardShortcut("r", modifiers: [.command, .shift])
-            .disabled(true)
-        Button(String(localized: "Interactive rebase\u{2026}", bundle: .module)) {}
+            .disabled(branch == nil)
+        Button(String(localized: "Interactive rebase\u{2026}", bundle: .module)) { if let window { RewriteActions.openInteractive(window) } }
             .keyboardShortcut("r", modifiers: [.command, .shift, .option])
-            .disabled(true)
+            .disabled(branch == nil)
         Divider()
-        Button(String(localized: "Start bisect\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Start bisect\u{2026}", bundle: .module)) { if let window { RewriteActions.openBisect(window) } }
+            .disabled(window?.store.snapshot?.state.isOperationInProgress ?? true)
         Button(String(localized: "Compare branches\u{2026}", bundle: .module)) {}.disabled(true)
     }
 
@@ -257,9 +259,12 @@ public struct RepositoryCommands: Commands {
         let head = window?.headName ?? ""
         CommitChangesItems(window: window)
         Divider()
-        Button(String(localized: "Cherry-pick selected", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Revert selected", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Reset \(head) to selected\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Cherry-pick selected", bundle: .module)) { if let window, let id = window.store.selection?.commitID { RewriteActions.openCherryPick(window, ids: [id]) } }
+            .disabled(window?.store.selection?.commitID == nil)
+        Button(String(localized: "Revert selected", bundle: .module)) { if let window, let id = window.store.selection?.commitID { RewriteActions.revert(window, id: id) } }
+            .disabled(window?.store.selection?.commitID == nil)
+        Button(String(localized: "Reset \(head) to selected\u{2026}", bundle: .module)) { if let window, let id = window.store.selection?.commitID { RewriteActions.openReset(window, target: id) } }
+            .disabled(window?.store.selection?.commitID == nil)
         Button(String(localized: "Tag selected\u{2026}", bundle: .module)) { if let id = window?.store.selection?.commitID { window?.sync.newTag(target: id.rawValue) } }.disabled(window?.store.selection?.commitID == nil)
         if app.preferences.expert {
             Divider()

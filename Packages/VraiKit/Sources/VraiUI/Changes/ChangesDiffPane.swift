@@ -15,7 +15,7 @@ struct ChangesDiffPane: View {
                 if pick.conflict {
                     VStack(spacing: 0) {
                         if widthClass.isNarrow { backBar }
-                        ConflictsPane()
+                        ConflictsPane(path: pick.path)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 } else if let file = store.snapshot?.working.first(where: { $0.path == pick.path }) {

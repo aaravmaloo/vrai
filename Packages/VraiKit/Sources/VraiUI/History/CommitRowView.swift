@@ -3,7 +3,7 @@ import VraiCore
 import VraiGit
 
 enum RefPills {
-    static func byCommit(_ snapshot: RepositorySnapshot) -> [OID: [RefPillModel]] {
+    static func byCommit(_ snapshot: RepositorySnapshot, skipped: [OID] = []) -> [OID: [RefPillModel]] {
         var map: [OID: [RefPillModel]] = [:]
         func add(_ id: OID?, _ pill: RefPillModel) {
             guard let id else { return }
@@ -40,6 +40,7 @@ enum RefPills {
         if case .bisecting(let good, let bad, _, _) = snapshot.state {
             add(bad, RefPillModel(kind: .bad, name: "bisect/bad"))
             for id in good { add(id, RefPillModel(kind: .good, name: "bisect/good")) }
+            for id in skipped { add(id, RefPillModel(kind: .skip, name: "bisect/skip")) }
         }
         return map
     }

@@ -202,6 +202,7 @@ struct CommitList: View {
     @Environment(Preferences.self) private var preferences
     @Environment(\.widthClass) private var widthClass
     @FocusState private var focused: Bool
+    @State private var bisectSkipped: [OID] = []
 
     var rowHeight: CGFloat {
         switch preferences.density {
@@ -213,7 +214,7 @@ struct CommitList: View {
 
     var body: some View {
         let history = store.history
-        let refs = store.snapshot.map(RefPills.byCommit) ?? [:]
+        let refs = store.snapshot.map { RefPills.byCommit($0, skipped: bisectSkipped) } ?? [:]
         let columns: CommitColumns = widthClass.isNarrow ? [.date] : .all
         let showHeader = widthClass >= .regular
         let filter = CommitFilter(query: window.query, author: window.author)
@@ -251,6 +252,7 @@ struct CommitList: View {
                             .onTapGesture { choose(.commit(commit.id)) }
                             .simultaneousGesture(TapGesture(count: 2).onEnded { confirmCheckout(commit) })
                             .contextMenu { CommitMenu(id: commit.id, window: window) }
+                            .modifier(RewriteCommitDrag(commit: commit))
                             .onAppear {
                                 store.requestSignatures(for: [commit.id])
                                 if index >= history.commits.count - 200 {
@@ -307,6 +309,7 @@ struct CommitList: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Commits", bundle: .module))
         .accessibilityIdentifier("commits")
+        .task(id: store.snapshot?.state) { bisectSkipped = await BisectMarks.skipped(store) }
     }
 
     func choose(_ selection: CommitSelection) {

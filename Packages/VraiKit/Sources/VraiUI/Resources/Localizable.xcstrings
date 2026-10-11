@@ -1,10 +1,238 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    " and " : {
+
+    },
+    " and your %@" : {
+
+    },
+    " into %@" : {
+
+    },
+    " yet." : {
+
+    },
+    "--include-untracked" : {
+
+    },
+    "--keep-index" : {
+
+    },
+    "--no-commit" : {
+
+    },
+    "--staged" : {
+
+    },
+    ", %lld staged" : {
+
+    },
+    ", and " : {
+
+    },
+    ", but it's on %@." : {
+
+    },
+    ", but they're on %@." : {
+
+    },
+    "%@ (current)" : {
+
+    },
+    "%@ %@\n\nWhat's in this release." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@\n\nWhat's in this release."
+          }
+        }
+      }
+    },
+    "%@ ahead; no merge commit needed." : {
+
+    },
+    "%@ already contains %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ already contains %2$@."
+          }
+        }
+      }
+    },
+    "%@ already has %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ already has %2$@"
+          }
+        }
+      }
+    },
+    "%@ already has every commit on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ already has every commit on %2$@."
+          }
+        }
+      }
+    },
+    "%@ already has everything on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ already has everything on %2$@."
+          }
+        }
+      }
+    },
+    "%@ already on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ already on %2$@"
+          }
+        }
+      }
+    },
+    "%@ and %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ and %2$@"
+          }
+        }
+      }
+    },
+    "%@ are deleted" : {
+
+    },
     "%@ are out of date" : {
 
     },
+    "%@ back in Changes." : {
+
+    },
+    "%@ back in staged changes." : {
+
+    },
+    "%@ back in unstaged changes." : {
+
+    },
     "%@ changed" : {
+
+    },
+    "%@ changed on both sides. Vrai walks you through each conflict." : {
+
+    },
+    "%@ didn't accept your credentials for %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ didn't accept your credentials for %2$@."
+          }
+        }
+      }
+    },
+    "%@ didn't accept your credentials." : {
+
+    },
+    "%@ didn't accept your credentials. Fetch %@ to sign in again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ didn't accept your credentials. Fetch %2$@ to sign in again."
+          }
+        }
+      }
+    },
+    "%@ doesn't exist at %@, so this deletes it from your working tree. A copy stays in Undo history for 14 days." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ doesn't exist at %2$@, so this deletes it from your working tree. A copy stays in Undo history for 14 days."
+          }
+        }
+      }
+    },
+    "%@ dropped" : {
+
+    },
+    "%@ folded in" : {
+
+    },
+    "%@ go back to the last commit" : {
+
+    },
+    "%@ has %@ you don't have" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ has %2$@ you don't have"
+          }
+        }
+      }
+    },
+    "%@ has %@ you don't have. Force pushing replaces %@ with your version." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ has %2$@ you don't have. Force pushing replaces %3$@ with your version."
+          }
+        }
+      }
+    },
+    "%@ has %@ you don't have. Pull %@ first, or force push with lease to replace %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ has %2$@ you don't have. Pull %3$@ first, or force push with lease to replace %4$@."
+          }
+        }
+      }
+    },
+    "%@ has no commits that aren't on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ has no commits that aren't on %2$@."
+          }
+        }
+      }
+    },
+    "%@ has no upstream" : {
+
+    },
+    "%@ holds changes to %@. A copy stays in Undo history for 14 days." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ holds changes to %2$@. A copy stays in Undo history for 14 days."
+          }
+        }
+      }
+    },
+    "%@ in Changes, ready to review." : {
+
+    },
+    "%@ is back where it was." : {
 
     },
     "%@ is gone" : {
@@ -16,10 +244,89 @@
     "%@ is the first bad commit" : {
 
     },
+    "%@ isn't on any remote yet. Pushing it sets the upstream, so later pushes are one click." : {
+
+    },
+    "%@ left in %@. Pick a side for each, or open it in your merge tool." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ left in %2$@. Pick a side for each, or open it in your merge tool."
+          }
+        }
+      }
+    },
+    "%@ left." : {
+
+    },
     "%@ left. Resolve them, then continue." : {
 
     },
+    "%@ lose their upstream." : {
+
+    },
+    "%@ loses its upstream." : {
+
+    },
+    "%@ moves back past %@:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ moves back past %2$@:"
+          }
+        }
+      }
+    },
+    "%@ needs a decision about the whole file." : {
+
+    },
+    "%@ now sits on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ now sits on %2$@."
+          }
+        }
+      }
+    },
+    "%@ now uses SSH" : {
+
+    },
+    "%@ on %@ can come along, or wait in a stash until you come back." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ on %2$@ can come along, or wait in a stash until you come back."
+          }
+        }
+      }
+    },
+    "%@ on it aren't in HEAD. Delete it from the branch menu to confirm; Undo history keeps it for 14 days." : {
+
+    },
     "%@ rejected your credentials" : {
+
+    },
+    "%@ replayed." : {
+
+    },
+    "%@ reworded" : {
+
+    },
+    "%@ rewritten." : {
+
+    },
+    "%@ squashed" : {
+
+    },
+    "%@ still have conflicts." : {
+
+    },
+    "%@ to edit" : {
 
     },
     "%@ to pull" : {
@@ -28,12 +335,64 @@
     "%@ to push" : {
 
     },
+    "%@ to push:" : {
+
+    },
+    "%@ to search, about %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ to search, about %2$@"
+          }
+        }
+      }
+    },
+    "%@ touching %@ merge cleanly." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ touching %2$@ merge cleanly."
+          }
+        }
+      }
+    },
+    "%@ was deleted on the current side and changed on the incoming one." : {
+
+    },
+    "%@ was deleted on the incoming side and changed on the current one." : {
+
+    },
+    "%@ will be replayed on top of %@:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ will be replayed on top of %2$@:"
+          }
+        }
+      }
+    },
+    "%@ will conflict" : {
+
+    },
     "%@, %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, %@ and %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@ and %3$@"
           }
         }
       }
@@ -49,6 +408,9 @@
       }
     },
     "%@, checked out" : {
+
+    },
+    "%@, using git stash." : {
 
     },
     "%@." : {
@@ -77,22 +439,135 @@
         }
       }
     },
+    "%lld of %lld characters" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld characters"
+          }
+        }
+      }
+    },
+    "%lld of its commits aren't in %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of its commits aren't in %2$@"
+          }
+        }
+      }
+    },
     "+%lld" : {
 
     },
-    ", %lld staged" : {
+    "−%lld" : {
+
+    },
+    "1 changed line goes back to the last commit" : {
+
+    },
+    "1 file still has conflicts." : {
+
+    },
+    "1 of its commits isn't in %@" : {
+
+    },
+    "1 untracked file is deleted" : {
+
+    },
+    "1, the branch it was merged into" : {
+
+    },
+    "2, the merged branch" : {
 
     },
     "A beautiful Git client, made for Mac." : {
 
     },
+    "A branch is a movable name for a line of commits. Its color follows it everywhere." : {
+
+    },
+    "A branch named %@ already exists." : {
+
+    },
+    "A branch, tag or remote with that name already exists. Pick another name." : {
+
+    },
+    "a commit" : {
+
+    },
+    "A copy of what was discarded stays in Undo history." : {
+
+    },
+    "A copy stays in Undo history for 14 days." : {
+
+    },
+    "a hunk" : {
+
+    },
+    "A normal push will be rejected. Pull first, or force push with lease to replace them." : {
+
+    },
+    "A remote is another copy of this repository you fetch from and push to." : {
+
+    },
+    "A remote named %@ already exists." : {
+
+    },
+    "A tag named %@ already exists." : {
+
+    },
+    "a trusted key" : {
+
+    },
     "Abort" : {
+
+    },
+    "Abort didn't finish" : {
 
     },
     "Abort merge" : {
 
     },
+    "Aborted" : {
+
+    },
+    "Aborted the cherry-pick" : {
+
+    },
+    "Aborted the merge" : {
+
+    },
+    "Aborted the rebase" : {
+
+    },
+    "Aborted the revert" : {
+
+    },
     "About Vrai" : {
+
+    },
+    "Accept base" : {
+
+    },
+    "Accept both" : {
+
+    },
+    "Accept current" : {
+
+    },
+    "Accept current for the whole file" : {
+
+    },
+    "Accept incoming" : {
+
+    },
+    "Accept incoming for the whole file" : {
+
+    },
+    "Action for %@" : {
 
     },
     "Actions" : {
@@ -102,6 +577,12 @@
 
     },
     "Add note" : {
+
+    },
+    "Add one to fetch, pull and push." : {
+
+    },
+    "Add one to push %@." : {
 
     },
     "Add remote" : {
@@ -135,6 +616,12 @@
         }
       }
     },
+    "Adds (cherry picked from commit …), -x" : {
+
+    },
+    "After the rebase, push with force with lease. Anyone who pulled %@ will need to reset to the new version." : {
+
+    },
     "Against %@" : {
 
     },
@@ -144,16 +631,58 @@
     "All branches" : {
 
     },
+    "All conflicts resolved. Commit the merge to finish." : {
+
+    },
+    "All remotes" : {
+
+    },
+    "Already up to date" : {
+
+    },
+    "Also delete %@" : {
+
+    },
+    "Also delete it on %@" : {
+
+    },
+    "Always make a merge commit" : {
+
+    },
     "Amend last commit" : {
 
     },
     "Amend…" : {
 
     },
+    "Amended the last commit on %@" : {
+
+    },
+    "and %@" : {
+
+    },
+    "Annotated" : {
+
+    },
+    "Annotated, plus your SSH signature so others can verify it." : {
+
+    },
     "Another git process is running" : {
 
     },
+    "Answer" : {
+
+    },
     "Appearance" : {
+
+    },
+    "Applied %@" : {
+
+    },
+    "Applied stash@{0}" : {
+
+    },
+    "Applied the patches" : {
 
     },
     "Apply" : {
@@ -168,7 +697,13 @@
     "Apply patches…" : {
 
     },
+    "Apply the changes without committing" : {
+
+    },
     "Applying patches" : {
+
+    },
+    "As branch" : {
 
     },
     "Assume unchanged" : {
@@ -180,6 +715,18 @@
     "Authored" : {
 
     },
+    "Autosquash" : {
+
+    },
+    "Autostash, update refs" : {
+
+    },
+    "Avoid spaces, .., ~ ^ : ? * [ \\ and a trailing slash. Try one like feature/graph-search." : {
+
+    },
+    "Back on %@." : {
+
+    },
     "Back to %@" : {
 
     },
@@ -189,10 +736,25 @@
     "Bad signature" : {
 
     },
+    "Base · %@" : {
+
+    },
     "Binary" : {
 
     },
     "Binary file, not shown." : {
+
+    },
+    "Bisect checks out commits halfway between a good one and a bad one. You say good or bad until one is left." : {
+
+    },
+    "Bisect didn't end" : {
+
+    },
+    "Bisect didn't move on" : {
+
+    },
+    "Bisect didn't start" : {
 
     },
     "Bisecting at %@" : {
@@ -204,7 +766,34 @@
     "Blame at %@" : {
 
     },
+    "Both sides changed %@" : {
+
+    },
+    "Both sides changed the same lines. Pick a side for each conflict in Changes, mark the files resolved, then continue." : {
+
+    },
+    "Both sides deleted %@" : {
+
+    },
+    "Both sides deleted %@. Take either side to remove it." : {
+
+    },
+    "branch" : {
+
+    },
     "Branch" : {
+
+    },
+    "branch %@" : {
+
+    },
+    "branch %@, checked out" : {
+
+    },
+    "Branch names can't contain spaces." : {
+
+    },
+    "Branch to merge" : {
 
     },
     "Branches" : {
@@ -213,13 +802,34 @@
     "Branches shown" : {
 
     },
+    "Bring changes" : {
+
+    },
+    "Bring your changes to %@?" : {
+
+    },
+    "Can't fast-forward" : {
+
+    },
+    "Can't fast-forward %@" : {
+
+    },
     "Cancel" : {
 
     },
     "Change upstream…" : {
 
     },
+    "Change what you need, then continue." : {
+
+    },
+    "Changed files" : {
+
+    },
     "Changes" : {
+
+    },
+    "Check a file or press Space." : {
 
     },
     "Check for updates…" : {
@@ -237,7 +847,22 @@
     "Check out as %@" : {
 
     },
+    "Check the signing key in Settings, Accounts, or turn off signing for this repository. Your message is kept." : {
+
+    },
+    "Check your connection, then try again." : {
+
+    },
+    "Check your connection, then try again. Everything that doesn't need the remote still works." : {
+
+    },
+    "Check your connection. Vrai retries %@ when you're back online." : {
+
+    },
     "Cherry-pick" : {
+
+    },
+    "Cherry-pick %@" : {
 
     },
     "Cherry-pick onto %@" : {
@@ -249,6 +874,16 @@
     "Cherry-pick with options…" : {
 
     },
+    "Cherry-picked %@ onto %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cherry-picked %1$@ onto %2$@"
+          }
+        }
+      }
+    },
     "Cherry-picking %@" : {
 
     },
@@ -256,6 +891,12 @@
 
     },
     "Clear" : {
+
+    },
+    "Click line numbers to pick lines, Shift-click to extend, then stage just those." : {
+
+    },
+    "Click line numbers to pick lines, Shift-click to extend, then unstage just those." : {
 
     },
     "Clone a repository…" : {
@@ -279,6 +920,9 @@
     "Command previews, the console prompt, Reflog and Refs are now available." : {
 
     },
+    "commit" : {
+
+    },
     "Commit" : {
 
     },
@@ -288,7 +932,16 @@
     "Commit and push" : {
 
     },
+    "Commit description" : {
+
+    },
     "Commit merge" : {
+
+    },
+    "Commit summary" : {
+
+    },
+    "Commit to %@" : {
 
     },
     "Commit to finish merging %@ into %@." : {
@@ -301,7 +954,13 @@
         }
       }
     },
+    "commits" : {
+
+    },
     "Commits" : {
+
+    },
+    "Commits anyone pushed since your last fetch are lost too." : {
 
     },
     "Commits you make here won't belong to any branch. Create a branch to keep them." : {
@@ -310,7 +969,16 @@
     "Committed" : {
 
     },
+    "Committed the merge" : {
+
+    },
+    "Committed to %@" : {
+
+    },
     "Committer" : {
+
+    },
+    "common ancestor" : {
 
     },
     "Compact" : {
@@ -319,13 +987,34 @@
     "Compare branches…" : {
 
     },
+    "Conflict %lld" : {
+
+    },
+    "Conflict markers are still in the file" : {
+
+    },
     "Conflicted" : {
+
+    },
+    "Conflicts" : {
+
+    },
+    "Conflicts in %@" : {
 
     },
     "Conflicts resolved" : {
 
     },
     "Continue" : {
+
+    },
+    "Continue didn't finish" : {
+
+    },
+    "Continue or abort it from the banner, then check out %@." : {
+
+    },
+    "Continue or abort it from the banner." : {
 
     },
     "Continue to commit it, or abort to go back." : {
@@ -340,10 +1029,23 @@
     "Copied %@" : {
 
     },
+    "Copies the changes of a commit onto the current branch as a new commit." : {
+
+    },
+    "Copy “%@” onto %@ as a new commit." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Copy “%1$@” onto %2$@ as a new commit."
+          }
+        }
+      }
+    },
     "Copy %@" : {
 
     },
-    "Copy URL" : {
+    "Copy command" : {
 
     },
     "Copy full hash" : {
@@ -364,6 +1066,24 @@
     "Copy subject" : {
 
     },
+    "Copy URL" : {
+
+    },
+    "Couldn't reach %@" : {
+
+    },
+    "Couldn't reach %@ on the last fetch." : {
+
+    },
+    "Create a branch here to push these commits." : {
+
+    },
+    "Create and switch" : {
+
+    },
+    "Create branch" : {
+
+    },
     "Create branch here and switch…" : {
 
     },
@@ -376,6 +1096,22 @@
     "Create fixup commit for this" : {
 
     },
+    "Create tag" : {
+
+    },
+    "Created %@ from stash@{%lld}" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Created %1$@ from stash@{%2$lld}"
+          }
+        }
+      }
+    },
+    "Current · %@" : {
+
+    },
     "Current branch" : {
 
     },
@@ -384,6 +1120,19 @@
     },
     "Date" : {
 
+    },
+    "Delete %@" : {
+
+    },
+    "Delete %@ on %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete %1$@ on %2$@?"
+          }
+        }
+      }
     },
     "Delete %@ on %@…" : {
       "localizations" : {
@@ -395,19 +1144,40 @@
         }
       }
     },
+    "Delete %@?" : {
+
+    },
     "Delete %@…" : {
+
+    },
+    "Delete branch" : {
+
+    },
+    "Delete file" : {
 
     },
     "Delete here and on %@…" : {
 
     },
-    "Delete here and on origin…" : {
+    "Delete on %@" : {
+
+    },
+    "Delete tag" : {
+
+    },
+    "Delete the tag %@?" : {
 
     },
     "Deleted" : {
 
     },
+    "Deleted from the working tree. Stage the deletion to remove it in the next commit." : {
+
+    },
     "Density" : {
+
+    },
+    "Depth" : {
 
     },
     "Describe" : {
@@ -416,25 +1186,99 @@
     "Description" : {
 
     },
+    "Destructive" : {
+
+    },
+    "detached" : {
+
+    },
     "Detached HEAD" : {
 
     },
     "Diff" : {
 
     },
+    "Discard" : {
+
+    },
+    "Discard %@" : {
+
+    },
     "Discard all changes…" : {
+
+    },
+    "Discard changes" : {
+
+    },
+    "Discard changes to %@" : {
+
+    },
+    "Discard changes to %@?" : {
 
     },
     "Discard changes…" : {
 
     },
+    "Discarded %@" : {
+
+    },
+    "Discarded a hunk" : {
+
+    },
+    "Discarded changes to %@" : {
+
+    },
+    "Discards %@%@. A copy stays in Undo history for 14 days." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Discards %1$@%2$@. A copy stays in Undo history for 14 days."
+          }
+        }
+      }
+    },
     "Dismiss" : {
+
+    },
+    "Don't ask again" : {
+
+    },
+    "Done" : {
+
+    },
+    "Drag to reorder, or select a step and press ⌥↑ ⌥↓. Keys set the action: p pick, r reword, e edit, s squash, f fixup, d drop." : {
+
+    },
+    "Drop" : {
+
+    },
+    "Drop %@ on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Drop %1$@ on %2$@"
+          }
+        }
+      }
+    },
+    "Drop stash" : {
+
+    },
+    "Drop stash@{%lld}?" : {
 
     },
     "Drop…" : {
 
     },
-    "Edit %@…" : {
+    "Dropped stash@{%lld}" : {
+
+    },
+    "Each step halves what's left." : {
+
+    },
+    "Edit" : {
 
     },
     "Edit .gitattributes" : {
@@ -446,13 +1290,46 @@
     "Edit .mailmap" : {
 
     },
+    "Edit %@…" : {
+
+    },
     "Edit a file in %@ and it shows up here." : {
+
+    },
+    "Edit remote %@" : {
+
+    },
+    "Edit steps…" : {
+
+    },
+    "Edit, Undo history lists older changes you can restore." : {
 
     },
     "End" : {
 
     },
     "End bisect" : {
+
+    },
+    "Ended bisect" : {
+
+    },
+    "Enter a personal access token to sign in again." : {
+
+    },
+    "Every commit picked as is" : {
+
+    },
+    "Every conflict in %@ has a resolution. Mark it resolved to stage it." : {
+
+    },
+    "Every file merged cleanly." : {
+
+    },
+    "Every remote branch still exists on %@." : {
+
+    },
+    "Everything on it is already in %@." : {
 
     },
     "Everything stays one step away in menus and the palette." : {
@@ -476,6 +1353,34 @@
     "Export archive…" : {
 
     },
+    "Fast-forward" : {
+
+    },
+    "Fast-forward only" : {
+
+    },
+    "Fast-forward possible" : {
+
+    },
+    "Fast-forward when possible" : {
+
+    },
+    "Fast-forwarded %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Fast-forwarded %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Fast-forwarded." : {
+
+    },
+    "feature/halo-experiments" : {
+
+    },
     "Fetch" : {
 
     },
@@ -485,10 +1390,34 @@
     "Fetch all remotes and prune" : {
 
     },
+    "Fetch every tag" : {
+
+    },
+    "Fetch reads, pull integrates, push writes. Each tab shows the exact command." : {
+
+    },
+    "Fetch the full history" : {
+
+    },
+    "Fetch, pull and push fail until you sign in again." : {
+
+    },
+    "Fetch, pull and push to %@ fail until you sign in again." : {
+
+    },
     "Fetch, pull and push wait until %@ is reachable. Everything else works." : {
 
     },
     "Fetch, pull and push with options…" : {
+
+    },
+    "Fetching" : {
+
+    },
+    "Fetching %@" : {
+
+    },
+    "Fetching every remote" : {
 
     },
     "File actions" : {
@@ -506,22 +1435,162 @@
     "Find in history" : {
 
     },
+    "Find the commit that broke something" : {
+
+    },
     "Finding the first bad commit, about %@ left" : {
+
+    },
+    "Finish the %@ first" : {
+
+    },
+    "Finish the merge first" : {
+
+    },
+    "Finish the rebase first" : {
+
+    },
+    "Fix what the hook reports, then try again." : {
+
+    },
+    "Fixup" : {
+
+    },
+    "Folds fixup! commits in" : {
+
+    },
+    "Force" : {
+
+    },
+    "Force push" : {
+
+    },
+    "Force push %@ with lease?" : {
+
+    },
+    "Force push %@?" : {
 
     },
     "Force push with lease" : {
 
     },
+    "Force push with lease to update %@." : {
+
+    },
+    "Force with lease" : {
+
+    },
+    "Force, hooks" : {
+
+    },
+    "From" : {
+
+    },
+    "full hash" : {
+
+    },
+    "Full history" : {
+
+    },
     "Git %@ is too old" : {
+
+    },
+    "git can't continue while files still have conflicts. Resolve each one and mark the file resolved, then continue." : {
+
+    },
+    "git can't find a repository here. Open the folder that holds the .git folder, or create a repository in it." : {
+
+    },
+    "git can't find that ref" : {
+
+    },
+    "git can't use that URL" : {
+
+    },
+    "git can't use that URL. Try one like git@github.com:owner/repo.git." : {
+
+    },
+    "git can't use the push URL. Try one like git@github.com:owner/repo.git." : {
+
+    },
+    "git couldn't find the remote it needs. Add one to fetch, pull and push." : {
+
+    },
+    "git couldn't read this repository" : {
+
+    },
+    "git couldn't sign the commit" : {
+
+    },
+    "git doesn't allow that name. Use letters, numbers, dashes and slashes." : {
+
+    },
+    "Git doesn't track %@, so no commit has a copy. Undo history keeps one for 14 days." : {
+
+    },
+    "git is asking to continue" : {
 
     },
     "Git isn't installed" : {
 
     },
+    "git left a lock file at %@. Wait for the other process to finish, then try again." : {
+
+    },
+    "git left a lock file at %@. Wait for the other process to finish, then try again. If nothing else is running, delete the lock file." : {
+
+    },
+    "git needs a summary line for every commit. Type one above the description, then commit." : {
+
+    },
+    "git needs a username and token to reach %@." : {
+
+    },
+    "git needs an answer" : {
+
+    },
     "Git reference" : {
 
     },
+    "git stopped because %@ you changed would be overwritten: %@%@. Set your changes aside while pulling, or commit them first." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "git stopped because %1$@ you changed would be overwritten: %2$@%3$@. Set your changes aside while pulling, or commit them first."
+          }
+        }
+      }
+    },
+    "git stopped because files you changed would be overwritten. Set your changes aside while pulling, or commit them first." : {
+
+    },
+    "git stopped so it doesn't overwrite %@ you changed: %@. Commit or stash them, then try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "git stopped so it doesn't overwrite %1$@ you changed: %2$@. Commit or stash them, then try again."
+          }
+        }
+      }
+    },
+    "git stopped so it doesn't overwrite files you changed. Commit or stash them, then try again." : {
+
+    },
+    "git was cancelled before it finished." : {
+
+    },
     "Git was not found" : {
+
+    },
+    "git won't accept that name" : {
+
+    },
+    "git won't accept that name: avoid .., ~ ^ : ? * [ \\ and a trailing slash." : {
+
+    },
+    "gone" : {
 
     },
     "Good" : {
@@ -530,13 +1599,16 @@
     "Graph" : {
 
     },
+    "Hard" : {
+
+    },
+    "Hash" : {
+
+    },
     "HEAD at %@" : {
 
     },
     "HEAD records newer commits than the ones checked out. Update to match." : {
-
-    },
-    "Hash" : {
 
     },
     "Hide inspector" : {
@@ -551,10 +1623,25 @@
     "History didn't load" : {
 
     },
+    "How to integrate" : {
+
+    },
+    "How to merge" : {
+
+    },
     "Ignore %@" : {
 
     },
     "Ignore all %@ files" : {
+
+    },
+    "Include untracked files" : {
+
+    },
+    "Includes untracked" : {
+
+    },
+    "Incoming · %@" : {
 
     },
     "Inspector" : {
@@ -572,6 +1659,24 @@
     "Interactive rebase…" : {
 
     },
+    "it" : {
+
+    },
+    "It goes back to the last commit" : {
+
+    },
+    "It matches %@ again." : {
+
+    },
+    "It may have been renamed or deleted outside Vrai. Pick another, then try again." : {
+
+    },
+    "It points at %@" : {
+
+    },
+    "It refused the push. Push to another branch and open a pull request, or ask for access." : {
+
+    },
     "It was deleted on %@. Push %@ to publish it again, or stop tracking it." : {
       "localizations" : {
         "en" : {
@@ -582,22 +1687,103 @@
         }
       }
     },
+    "It's in Changes, ready to review." : {
+
+    },
+    "It's untracked, so the file is deleted" : {
+
+    },
+    "its base" : {
+
+    },
+    "Its changes are already on this branch. Skip it to go on, or abort to go back." : {
+
+    },
+    "Its changes are in Changes." : {
+
+    },
     "Its message, files and diff appear here." : {
+
+    },
+    "its upstream" : {
 
     },
     "Its upstream %@ is gone" : {
 
     },
+    "Its upstream stays %@" : {
+
+    },
+    "Just a name for the commit. Good for private bookmarks." : {
+
+    },
+    "Keep" : {
+
+    },
+    "Keep both messages" : {
+
+    },
+    "Keep index, staged only" : {
+
+    },
+    "Keep the current version or take the incoming one. Taking the side that deleted it removes the file." : {
+
+    },
+    "Keep the summary under 50 characters. git log --oneline cuts at 72." : {
+
+    },
+    "Keeps both histories; adds a merge commit when they diverged." : {
+
+    },
+    "Keeps the branch visible in the graph as its own line." : {
+
+    },
+    "Kept base" : {
+
+    },
+    "Kept both, current first" : {
+
+    },
+    "Kept current" : {
+
+    },
+    "Kept incoming" : {
+
+    },
     "Keyboard shortcuts" : {
 
     },
+    "Kind" : {
+
+    },
+    "Known bad" : {
+
+    },
+    "Known good" : {
+
+    },
+    "Leave staged changes in place" : {
+
+    },
     "Light" : {
+
+    },
+    "lightweight" : {
+
+    },
+    "Lightweight" : {
+
+    },
+    "Limit how many commits to fetch on a shallow clone." : {
 
     },
     "Loading" : {
 
     },
     "Looking at %@, not on a branch" : {
+
+    },
+    "Made %@, which undoes its changes." : {
 
     },
     "Maintenance" : {
@@ -612,7 +1798,22 @@
     "Mark as good" : {
 
     },
+    "Mark as resolved" : {
+
+    },
+    "Marked %@ as resolved" : {
+
+    },
     "Match the system" : {
+
+    },
+    "Meld into the commit above, drop this message" : {
+
+    },
+    "Meld into the commit above, keep both messages" : {
+
+    },
+    "merge" : {
 
     },
     "Merge" : {
@@ -631,10 +1832,35 @@
     "Merge %@ now" : {
 
     },
+    "Merge branch '%@'" : {
+
+    },
+    "Merge commit message" : {
+
+    },
+    "Merge into %@" : {
+
+    },
     "Merge into %@…" : {
 
     },
+    "Merge its commits into %@, or replay %@ on top of it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Merge its commits into %1$@, or replay %2$@ on top of it."
+          }
+        }
+      }
+    },
     "Merge of" : {
+
+    },
+    "Merge remote-tracking branch '%@'" : {
+
+    },
+    "Merge tool" : {
 
     },
     "Merge with a merge commit" : {
@@ -642,6 +1868,16 @@
     },
     "Merge…" : {
 
+    },
+    "Merged %@ into %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Merged %1$@ into %2$@"
+          }
+        }
+      }
     },
     "Merging %@ into %@: %@ left" : {
       "localizations" : {
@@ -653,10 +1889,37 @@
         }
       }
     },
+    "Message" : {
+
+    },
+    "Message for the combined commit" : {
+
+    },
+    "Message, strategy" : {
+
+    },
+    "Mixed" : {
+
+    },
     "Modified" : {
 
     },
     "More" : {
+
+    },
+    "More actions" : {
+
+    },
+    "Move branches that point into the rebased commits" : {
+
+    },
+    "Moves %@ forward if it hasn't diverged; otherwise makes a merge commit." : {
+
+    },
+    "Moves the branch and keeps your uncommitted changes; stops if they'd be overwritten." : {
+
+    },
+    "Name" : {
 
     },
     "New branch" : {
@@ -668,6 +1931,9 @@
     "New branch from here…" : {
 
     },
+    "New branch from stash" : {
+
+    },
     "New branch from stash…" : {
 
     },
@@ -675,6 +1941,15 @@
 
     },
     "New branch…" : {
+
+    },
+    "New commit message" : {
+
+    },
+    "New file that git doesn't track yet. Stage it to include it in the next commit." : {
+
+    },
+    "New name" : {
 
     },
     "New repository…" : {
@@ -686,10 +1961,22 @@
     "New tag here…" : {
 
     },
+    "No changes are staged. Check a file or press Space to stage it, then commit." : {
+
+    },
     "No changes to commit" : {
 
     },
+    "no commits yet" : {
+
+    },
     "No commits yet" : {
+
+    },
+    "No conflicts" : {
+
+    },
+    "No conflicts expected" : {
 
     },
     "No file changes." : {
@@ -698,7 +1985,13 @@
     "No file selected" : {
 
     },
+    "No local changes to save" : {
+
+    },
     "No recent repositories" : {
+
+    },
+    "No spaces." : {
 
     },
     "No stashes" : {
@@ -707,16 +2000,76 @@
     "No text changes." : {
 
     },
+    "No uncommitted changes right now." : {
+
+    },
+    "No unstaged changes in this file." : {
+
+    },
+    "None" : {
+
+    },
+    "Normal push" : {
+
+    },
     "Not signed" : {
+
+    },
+    "Not staged" : {
 
     },
     "Note" : {
 
     },
+    "Note where it came from in the message" : {
+
+    },
+    "Nothing changes on %@." : {
+
+    },
+    "nothing committed" : {
+
+    },
+    "Nothing left to commit" : {
+
+    },
+    "Nothing selected" : {
+
+    },
+    "Nothing staged in this file yet." : {
+
+    },
+    "Nothing to commit" : {
+
+    },
+    "Nothing to prune on %@" : {
+
+    },
+    "Nothing to rebase" : {
+
+    },
+    "Nothing to stash" : {
+
+    },
+    "Nothing to undo" : {
+
+    },
+    "Nothing yet. Commits, merges, rebases and discards show up here." : {
+
+    },
+    "nothing you'd lose" : {
+
+    },
     "Notifications" : {
 
     },
+    "off" : {
+
+    },
     "Offline" : {
+
+    },
+    "On" : {
 
     },
     "On %@, %@" : {
@@ -739,10 +2092,32 @@
         }
       }
     },
+    "On %@%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "On %1$@%2$@"
+          }
+        }
+      }
+    },
     "On branches" : {
 
     },
     "Only reachable from remote branches or tags." : {
+
+    },
+    "Only the branch moves." : {
+
+    },
+    "Only the current side added %@" : {
+
+    },
+    "Only the incoming side added %@" : {
+
+    },
+    "Onto" : {
 
     },
     "Open" : {
@@ -758,22 +2133,34 @@
         }
       }
     },
-    "Open Changes" : {
-
-    },
     "Open a repository…" : {
 
     },
-    "Open in Terminal" : {
+    "Open Changes" : {
 
     },
     "Open in merge tool" : {
+
+    },
+    "Open in Terminal" : {
 
     },
     "Open recent" : {
 
     },
     "Open…" : {
+
+    },
+    "Opened %@ in FileMerge" : {
+
+    },
+    "Operation" : {
+
+    },
+    "Options" : {
+
+    },
+    "Or abort it from the banner to put %@ back." : {
 
     },
     "Panels" : {
@@ -785,13 +2172,40 @@
     "Parent %lld" : {
 
     },
+    "Parent 1" : {
+
+    },
+    "Parent 2" : {
+
+    },
     "Parents" : {
+
+    },
+    "Partly staged" : {
+
+    },
+    "Passphrase" : {
+
+    },
+    "path" : {
 
     },
     "People" : {
 
     },
+    "Pick" : {
+
+    },
+    "Pick a file to see its diff." : {
+
+    },
     "Pick a side for each conflict or combine them, then mark the file resolved." : {
+
+    },
+    "Pick a side for each conflict that's left, or remove the markers in your editor, then mark it resolved." : {
+
+    },
+    "Pick an older good commit." : {
 
     },
     "Pop" : {
@@ -800,10 +2214,25 @@
     "Pop latest stash" : {
 
     },
+    "Popped %@" : {
+
+    },
+    "Prefer %@ (-X ours)" : {
+
+    },
+    "Prefer %@ (-X theirs)" : {
+
+    },
     "Prune stale branches" : {
 
     },
     "Prune unreachable objects" : {
+
+    },
+    "Pruned %@" : {
+
+    },
+    "Pruning %@" : {
 
     },
     "Publish %@" : {
@@ -815,7 +2244,28 @@
     "Pull %@" : {
 
     },
+    "Pull and merge" : {
+
+    },
+    "Pull and rebase" : {
+
+    },
+    "Pull from…" : {
+
+    },
+    "Pull with changes set aside" : {
+
+    },
     "Pull with rebase" : {
+
+    },
+    "Pulling" : {
+
+    },
+    "Pulling from %@" : {
+
+    },
+    "Pulling would overwrite your changes" : {
 
     },
     "Push" : {
@@ -824,7 +2274,67 @@
     "Push %@" : {
 
     },
-    "Push %@ to origin" : {
+    "Push %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Push %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Push annotated tags on these commits" : {
+
+    },
+    "Push it first to set one, or choose a branch to pull from." : {
+
+    },
+    "Push options" : {
+
+    },
+    "Push rejected" : {
+
+    },
+    "Push somewhere other than where you fetch from." : {
+
+    },
+    "Push the tag to %@" : {
+
+    },
+    "Push to %@ and track it" : {
+
+    },
+    "Push URL" : {
+
+    },
+    "Push without the hook" : {
+
+    },
+    "Pushed %@ to %@/%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pushed %1$@ to %2$@/%3$@"
+          }
+        }
+      }
+    },
+    "Pushing" : {
+
+    },
+    "Pushing %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Pushing %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Puts all of %@'s changes in Changes as one commit for you to write." : {
 
     },
     "Reading %@" : {
@@ -840,7 +2350,13 @@
         }
       }
     },
+    "rebase" : {
+
+    },
     "Rebase" : {
+
+    },
+    "Rebase %@" : {
 
     },
     "Rebase %@ onto %@…" : {
@@ -859,8 +2375,30 @@
     "Rebase %@…" : {
 
     },
+    "Rebase finished" : {
+
+    },
+    "Rebase steps" : {
+
+    },
+    "Rebase stopped to let you edit" : {
+
+    },
+    "Rebase without touching the working tree" : {
+
+    },
     "Rebase…" : {
 
+    },
+    "Rebased %@ onto %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rebased %1$@ onto %2$@"
+          }
+        }
+      }
     },
     "Rebasing %@" : {
 
@@ -881,19 +2419,65 @@
     "Recent repositories" : {
 
     },
+    "Records who tagged it, when, and a message. Use for releases." : {
+
+    },
+    "Redo" : {
+
+    },
     "Regular" : {
 
     },
     "Release notes" : {
 
     },
+    "Remote" : {
+
+    },
+    "remote branch %@" : {
+
+    },
     "Remotes" : {
+
+    },
+    "Remove %@" : {
 
     },
     "Remove %@…" : {
 
     },
+    "Remove branches deleted on the remote when fetching" : {
+
+    },
     "Remove from recents" : {
+
+    },
+    "Remove remote branches that were deleted" : {
+
+    },
+    "Remove the commit" : {
+
+    },
+    "Remove the remote %@?" : {
+
+    },
+    "Remove untracked files…" : {
+
+    },
+    "Remove…" : {
+
+    },
+    "Removed %@ that no longer exist on %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Removed %1$@ that no longer exist on %2$@."
+          }
+        }
+      }
+    },
+    "Removed %@ that no longer exist on the remote." : {
 
     },
     "Removed line %lld: %@" : {
@@ -906,16 +2490,60 @@
         }
       }
     },
+    "Rename" : {
+
+    },
+    "Rename %@" : {
+
+    },
     "Rename %@…" : {
 
     },
-    "Renamed" : {
+    "Rename the branch on the remote by pushing the new name and deleting the old one." : {
 
     },
     "Rename…" : {
 
     },
+    "Renamed" : {
+
+    },
+    "Renamed from %@, %@ changed." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Renamed from %1$@, %2$@ changed."
+          }
+        }
+      }
+    },
+    "Renamed from %@, no content changes." : {
+
+    },
+    "Reorder, edit, squash or drop %@ on %@. Oldest first, like git's todo list." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reorder, edit, squash or drop %1$@ on %2$@. Oldest first, like git's todo list."
+          }
+        }
+      }
+    },
     "Repack" : {
+
+    },
+    "Replaces it no matter what. Others' commits can be lost." : {
+
+    },
+    "Replaces the remote branch only if nobody pushed since your last fetch." : {
+
+    },
+    "Replays your %@ on top. Rewrites them." : {
+
+    },
+    "Replays your commits on top of another branch, as if you had started from there. Their hashes change." : {
 
     },
     "Report a git problem…" : {
@@ -930,17 +2558,65 @@
     "Repository info…" : {
 
     },
+    "Reset" : {
+
+    },
+    "Reset %@ to %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reset %1$@ to %2$@"
+          }
+        }
+      }
+    },
+    "Reset %@ to %@ and discard?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reset %1$@ to %2$@ and discard?"
+          }
+        }
+      }
+    },
     "Reset %@ to here…" : {
 
     },
     "Reset %@ to selected…" : {
 
     },
+    "Reset and discard" : {
+
+    },
     "Reset to here" : {
+
+    },
+    "Resolve %@ to commit the merge" : {
 
     },
     "Resolve conflicts" : {
 
+    },
+    "Resolve every conflict first" : {
+
+    },
+    "Resolve them in Changes, then commit to finish." : {
+
+    },
+    "Restore" : {
+
+    },
+    "Restore %@ from %@?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Restore %1$@ from %2$@?"
+          }
+        }
+      }
     },
     "Restore %@ from %@…" : {
       "localizations" : {
@@ -951,6 +2627,22 @@
           }
         }
       }
+    },
+    "Restore file" : {
+
+    },
+    "Restored %@ from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Restored %1$@ from %2$@"
+          }
+        }
+      }
+    },
+    "Retry" : {
+
     },
     "Reveal in Finder" : {
 
@@ -964,7 +2656,13 @@
     "Revert selected" : {
 
     },
+    "Reverted %@" : {
+
+    },
     "Reverting %@" : {
+
+    },
+    "Reword" : {
 
     },
     "Reword in place…" : {
@@ -973,10 +2671,22 @@
     "Reword selected in place…" : {
 
     },
+    "Rewrites history" : {
+
+    },
     "Root commit" : {
 
     },
     "Run background maintenance now" : {
+
+    },
+    "Runs git push -u %@ after creating it." : {
+
+    },
+    "Same as URL" : {
+
+    },
+    "Save" : {
 
     },
     "Save as patch…" : {
@@ -994,7 +2704,22 @@
     "Select a commit" : {
 
     },
+    "Send" : {
+
+    },
+    "Sent to the server with -o. Separate several with commas." : {
+
+    },
+    "Set my changes aside and bring them back after" : {
+
+    },
+    "Set uncommitted changes aside while pulling" : {
+
+    },
     "Set upstream…" : {
+
+    },
+    "Sets changes aside in a stash so the working tree is clean. Apply or pop it later, on any branch." : {
 
     },
     "Settings" : {
@@ -1004,6 +2729,9 @@
 
     },
     "Show" : {
+
+    },
+    "Show changes" : {
 
     },
     "Show console" : {
@@ -1024,10 +2752,13 @@
     "Show sidebar" : {
 
     },
-    "Show the Welcome window when no repository is open" : {
+    "Show stash" : {
 
     },
     "Show the diff against another parent" : {
+
+    },
+    "Show the Welcome window when no repository is open" : {
 
     },
     "Show this window when no repository is open" : {
@@ -1039,14 +2770,39 @@
     "Side by side" : {
 
     },
+    "Sign in" : {
+
+    },
     "Sign in again to fetch, pull and push." : {
 
     },
     "Sign in again…" : {
 
     },
+    "Sign in needed" : {
+
+    },
+    "Sign in to %@" : {
+
+    },
+    "Sign off" : {
+
+    },
     "Signature" : {
 
+    },
+    "Signed" : {
+
+    },
+    "Signed in to %@ as %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Signed in to %1$@ as %2$@"
+          }
+        }
+      }
     },
     "Signed with %@ by %@" : {
       "localizations" : {
@@ -1064,6 +2820,27 @@
     "Skip" : {
 
     },
+    "Skip didn't finish" : {
+
+    },
+    "Skip hooks" : {
+
+    },
+    "Skip the pre-push hook" : {
+
+    },
+    "Soft" : {
+
+    },
+    "Some conflicts aren't resolved yet" : {
+
+    },
+    "some files" : {
+
+    },
+    "Some of its commits aren't in HEAD. Delete it from the branch menu to confirm; Undo history keeps it for 14 days." : {
+
+    },
     "Sparse checkout…" : {
 
     },
@@ -1076,7 +2853,29 @@
     "Split selected…" : {
 
     },
+    "Squash" : {
+
+    },
+    "Squash into staged changes" : {
+
+    },
+    "Squashed %@ from %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Squashed %1$@ from %2$@"
+          }
+        }
+      }
+    },
+    "Stacked branches follow along (--update-refs)." : {
+
+    },
     "Stage" : {
+
+    },
+    "Stage %@" : {
 
     },
     "Stage all" : {
@@ -1085,7 +2884,28 @@
     "Stage all, including untracked" : {
 
     },
+    "Stage at least one file to commit" : {
+
+    },
+    "Stage hunk" : {
+
+    },
     "Stage the files in Changes, write a summary and commit. The graph starts there." : {
+
+    },
+    "Staged" : {
+
+    },
+    "Staged %@" : {
+
+    },
+    "Staged %lld" : {
+
+    },
+    "Staged changes" : {
+
+    },
+    "Start bisect" : {
 
     },
     "Start bisect here…" : {
@@ -1094,10 +2914,22 @@
     "Start bisect…" : {
 
     },
+    "Start from" : {
+
+    },
+    "Start rebase" : {
+
+    },
+    "Starts a branch at %@, where the stash was made, then applies and drops it. Useful when the stash no longer applies cleanly." : {
+
+    },
     "Stash" : {
 
     },
     "Stash %@" : {
+
+    },
+    "Stash and switch" : {
 
     },
     "Stash changes" : {
@@ -1109,7 +2941,13 @@
     "Stash including untracked files" : {
 
     },
+    "Stash only what's staged" : {
+
+    },
     "Stash this file…" : {
+
+    },
+    "Stashed %@" : {
 
     },
     "Stashes" : {
@@ -1128,7 +2966,26 @@
         }
       }
     },
+    "Step %lld, %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Step %1$lld, %2$@ %3$@"
+          }
+        }
+      }
+    },
+    "Stop after applying, to amend it" : {
+
+    },
+    "Stop and let me resolve" : {
+
+    },
     "Stop tracking" : {
+
+    },
+    "Stopped %@" : {
 
     },
     "Stopped at %@ because of conflicts. Resolve them, then continue." : {
@@ -1150,7 +3007,37 @@
         }
       }
     },
+    "Stopped on %@" : {
+
+    },
+    "Stopped on conflicts" : {
+
+    },
+    "Stops if your branch has commits the remote lacks." : {
+
+    },
+    "Stops instead of making a merge commit." : {
+
+    },
+    "Strategy option" : {
+
+    },
+    "subject" : {
+
+    },
     "Submodules" : {
+
+    },
+    "Summary" : {
+
+    },
+    "Summary (required)" : {
+
+    },
+    "Summary of the amended commit" : {
+
+    },
+    "Switch %@ to another branch first, then try again." : {
 
     },
     "Switch and bring changes" : {
@@ -1159,7 +3046,19 @@
     "Switch branch" : {
 
     },
+    "Switch that worktree to another branch first, then try again." : {
+
+    },
     "Switch to %@" : {
+
+    },
+    "Switch to a branch to pull into it." : {
+
+    },
+    "Switch to another branch first, then delete it." : {
+
+    },
+    "Switch to the new branch" : {
 
     },
     "Switch to…" : {
@@ -1168,7 +3067,16 @@
     "Sync" : {
 
     },
+    "Sync with remotes" : {
+
+    },
     "Tag" : {
+
+    },
+    "tag %@" : {
+
+    },
+    "Tag names can't contain spaces." : {
 
     },
     "Tag selected…" : {
@@ -1177,13 +3085,172 @@
     "Tags" : {
 
     },
+    "Target" : {
+
+    },
     "Testing %@. Build and try it, then mark it." : {
+
+    },
+    "That conflict wasn't resolved" : {
+
+    },
+    "That name is taken" : {
+
+    },
+    "The %@ hook stopped the commit" : {
+
+    },
+    "The %@ hook stopped this" : {
+
+    },
+    "the branch" : {
+
+    },
+    "The branch or files changed after it, so putting it back now would lose newer work. Earlier states stay in Reflog, part of Expert mode." : {
+
+    },
+    "The branch wasn't created" : {
+
+    },
+    "The branches have diverged. Merge with a merge commit instead." : {
+
+    },
+    "The changes are staged, not committed yet." : {
+
+    },
+    "the changes in %@" : {
+
+    },
+    "The cherry-pick didn't finish" : {
+
+    },
+    "the commit" : {
+
+    },
+    "The commit stays; only the name goes. Undo history keeps it for 14 days." : {
+
+    },
+    "The conflict didn't come back" : {
+
+    },
+    "The current side deleted %@" : {
+
+    },
+    "The file changed after Vrai showed it, so git couldn't apply the lines you picked. The diff is up to date now; pick the lines again." : {
+
+    },
+    "The file wasn't marked resolved" : {
+
+    },
+    "The file wasn't resolved" : {
+
+    },
+    "The first step can't be squash or fixup" : {
+
+    },
+    "The good commit must be an ancestor of the bad one" : {
+
+    },
+    "The hook exited with an error and printed nothing." : {
+
+    },
+    "The incoming side deleted %@" : {
+
+    },
+    "The merge didn't finish" : {
+
+    },
+    "The merge tool didn't open" : {
+
+    },
+    "the other branch" : {
+
+    },
+    "The pre-push hook stopped the push" : {
+
+    },
+    "The push stops if anyone pushed to it since your last fetch." : {
+
+    },
+    "The rebase didn't finish" : {
+
+    },
+    "the remote" : {
 
     },
     "The remote" : {
 
     },
+    "The remote branch that pull reads from and push writes to, and that ahead and behind counts compare against." : {
+
+    },
+    "The remote protects this branch" : {
+
+    },
+    "The reset didn't finish" : {
+
+    },
+    "The revert didn't finish" : {
+
+    },
+    "the server" : {
+
+    },
+    "The server" : {
+
+    },
     "The signature does not match the commit" : {
+
+    },
+    "The stash didn't apply" : {
+
+    },
+    "The stash didn't finish" : {
+
+    },
+    "The stash wasn't dropped" : {
+
+    },
+    "The token is in the sandbox credential store." : {
+
+    },
+    "The token is in your login keychain." : {
+
+    },
+    "The working tree is clean, so there's nothing to stash." : {
+
+    },
+    "The working tree is clean." : {
+
+    },
+    "Their changes come back as staged changes, ready to commit again." : {
+
+    },
+    "Their changes come back unstaged. Your files don't change." : {
+
+    },
+    "them" : {
+
+    },
+    "There's no earlier commit in the list to fold it into. Pick it, or move it down." : {
+
+    },
+    "They go back to the last commit" : {
+
+    },
+    "They're staged. Commit to finish the merge." : {
+
+    },
+    "This branch has no upstream" : {
+
+    },
+    "This branch is checked out in another worktree" : {
+
+    },
+    "This branch isn't merged" : {
+
+    },
+    "This can't be undone anymore" : {
 
     },
     "This commit didn't load" : {
@@ -1195,8 +3262,71 @@
     "This diff didn't load" : {
 
     },
+    "This discards %@. A copy stays in Undo history for 14 days." : {
+
+    },
+    "This file has %@, so Vrai shows it as plain text. Stage or discard the whole file." : {
+
+    },
     "This folder isn't a git repository" : {
 
+    },
+    "This is a merge. Diff against parent" : {
+
+    },
+    "This puts back the version from %@. The result shows up in Changes for you to review." : {
+
+    },
+    "This removes %@ for everyone who uses %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This removes %1$@ for everyone who uses %2$@."
+          }
+        }
+      }
+    },
+    "This replaces %@ with your version of %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This replaces %1$@ with your version of %2$@."
+          }
+        }
+      }
+    },
+    "This repository has no remotes" : {
+
+    },
+    "This stash didn't load" : {
+
+    },
+    "This throws away your uncommitted changes to it. A copy stays in Undo history for 14 days." : {
+
+    },
+    "those commits' changes" : {
+
+    },
+    "Those lines changed on disk" : {
+
+    },
+    "Token" : {
+
+    },
+    "Track" : {
+
+    },
+    "Track %@/%@ as the upstream" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Track %1$@/%2$@ as the upstream"
+          }
+        }
+      }
     },
     "Try again" : {
 
@@ -1204,16 +3334,34 @@
     "Try again. If it keeps failing, check the repository in Terminal." : {
 
     },
-    "Type changed" : {
+    "Trying again." : {
 
     },
-    "URL" : {
+    "Type changed" : {
 
     },
     "Uncommitted changes" : {
 
     },
     "Uncommitted changes, %@" : {
+
+    },
+    "Undid: %@" : {
+
+    },
+    "Undo" : {
+
+    },
+    "Undo %@" : {
+
+    },
+    "Undo didn't finish" : {
+
+    },
+    "Undo history" : {
+
+    },
+    "Undo history keeps the branch for 14 days." : {
 
     },
     "Undo history…" : {
@@ -1225,19 +3373,76 @@
     "Unified diff" : {
 
     },
+    "Unknown branch" : {
+
+    },
     "Unknown key" : {
+
+    },
+    "Unlock" : {
+
+    },
+    "Unlock your SSH key" : {
 
     },
     "Unstage" : {
 
     },
+    "Unstage %@" : {
+
+    },
     "Unstage all" : {
+
+    },
+    "Unstage hunk" : {
+
+    },
+    "Unstaged" : {
+
+    },
+    "Unstaged %@" : {
+
+    },
+    "Unstaged %lld" : {
+
+    },
+    "Unstaged changes" : {
+
+    },
+    "Unstages everything; your files don't change." : {
 
     },
     "Untracked" : {
 
     },
     "Update submodules" : {
+
+    },
+    "Upstream" : {
+
+    },
+    "Upstream for %@" : {
+
+    },
+    "URL" : {
+
+    },
+    "Use an https or SSH address, like git@github.com:owner/repo.git." : {
+
+    },
+    "Use slashes to group branches, like feature/ or fix/." : {
+
+    },
+    "Use SSH instead" : {
+
+    },
+    "Use the commit as it is" : {
+
+    },
+    "Use the commit, edit its message" : {
+
+    },
+    "Username" : {
 
     },
     "Uses git %@ at %@" : {
@@ -1249,6 +3454,9 @@
           }
         }
       }
+    },
+    "Uses git replay; conflicts stop it instead of pausing." : {
+
     },
     "Verified" : {
 
@@ -1269,13 +3477,41 @@
     "Vrai needs git %@ or later. Update git, then open the repository again." : {
 
     },
+    "Vrai never stores the token; git hands it to your credential helper." : {
+
+    },
     "Vrai runs the git you already have. Install the command line tools, then open the repository again." : {
 
+    },
+    "Vrai stops fetching from %@ and forgets its %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Vrai stops fetching from %1$@ and forgets its %2$@."
+          }
+        }
+      }
     },
     "Welcome to Vrai" : {
 
     },
     "Welcome window" : {
+
+    },
+    "What happens to your files" : {
+
+    },
+    "What Vrai can put back. Discards, resets, deleted branches and dropped stashes are kept for 14 days." : {
+
+    },
+    "When both sides changed the same lines" : {
+
+    },
+    "Which changes" : {
+
+    },
+    "WIP on %@" : {
 
     },
     "Workspace" : {
@@ -1284,79 +3520,62 @@
     "Worktrees" : {
 
     },
+    "Write a summary to commit" : {
+
+    },
     "Write commit graph" : {
+
+    },
+    "You have %@ that %@ doesn't, and it has %lld you don't. Merge them, or rebase your %@ on top of it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You have %1$@ that %2$@ doesn't, and it has %3$lld you don't. Merge them, or rebase your %4$@ on top of it."
+          }
+        }
+      }
+    },
+    "You have uncommitted changes to %@ that this would replace. Commit or stash them, then try again." : {
 
     },
     "You won't be on a branch. Commits you make there are easy to lose unless you create a branch for them." : {
 
     },
+    "You're not on a branch" : {
+
+    },
+    "You're on this branch" : {
+
+    },
+    "your %@" : {
+
+    },
+    "Your %@" : {
+
+    },
     "Your %@ come along." : {
+
+    },
+    "Your branch and its upstream both have commits the other lacks. Pull and merge, or pull and rebase your commits on top." : {
+
+    },
+    "Your changes would be overwritten" : {
+
+    },
+    "Your local branches keep their commits." : {
+
+    },
+    "Your message is kept. Fix what the hook reports, then commit again." : {
+
+    },
+    "Your uncommitted change" : {
 
     },
     "Your uncommitted change comes along." : {
 
     },
-    "a commit" : {
-
-    },
-    "a trusted key" : {
-
-    },
-    "branch %@" : {
-
-    },
-    "branch %@, checked out" : {
-
-    },
-    "detached" : {
-
-    },
-    "full hash" : {
-
-    },
-    "git can't find a repository here. Open the folder that holds the .git folder, or create a repository in it." : {
-
-    },
-    "git couldn't read this repository" : {
-
-    },
-    "git left a lock file at %@. Wait for the other process to finish, then try again." : {
-
-    },
-    "gone" : {
-
-    },
-    "its base" : {
-
-    },
-    "lightweight" : {
-
-    },
-    "no commits yet" : {
-
-    },
-    "off" : {
-
-    },
-    "path" : {
-
-    },
-    "remote branch %@" : {
-
-    },
-    "subject" : {
-
-    },
-    "tag %@" : {
-
-    },
-    "the other branch" : {
-
-    },
-    "the remote" : {
-
-    },
-    "−%lld" : {
+    "Your uncommitted changes were kept." : {
 
     }
   },

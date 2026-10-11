@@ -37,7 +37,7 @@ struct RepositoryToolbar: ToolbarContent {
                 .sharedBackgroundVisibility(.hidden)
                 ToolbarItem {
                     ToolbarCapsule(label: String(localized: "Stash", bundle: .module)) {
-                        ToolbarIconButton(icon: "tray.and.arrow.down", label: window.optionDown ? String(localized: "Stash including untracked files", bundle: .module) : String(localized: "Stash changes", bundle: .module), shortcut: "\u{21E7}\u{2318}S", enabled: false)
+                        ToolbarIconButton(icon: "tray.and.arrow.down", label: window.optionDown ? String(localized: "Stash including untracked files", bundle: .module) : String(localized: "Stash changes", bundle: .module), shortcut: "\u{21E7}\u{2318}S", busy: window.store.busy.contains("stash"), enabled: !(window.store.snapshot?.working.isEmpty ?? true)) { RewriteToolbar.stash(window) }
                     }
                     .toolbarSlot()
                 }
@@ -271,8 +271,8 @@ struct BranchButtons: View {
     var body: some View {
         let alt = window.optionDown
         ToolbarIconButton(icon: "arrow.triangle.branch", label: String(localized: "New branch", bundle: .module), shortcut: "\u{21E7}\u{2318}B") { window.sync.newBranch() }
-        ToolbarIconButton(icon: "arrow.triangle.merge", label: alt ? String(localized: "Merge with a merge commit", bundle: .module) : String(localized: "Merge", bundle: .module), shortcut: "\u{21E7}\u{2318}M", enabled: false)
-        ToolbarIconButton(icon: "arrow.triangle.swap", label: alt ? String(localized: "Interactive rebase", bundle: .module) : String(localized: "Rebase", bundle: .module), shortcut: alt ? "\u{2325}\u{21E7}\u{2318}R" : "\u{21E7}\u{2318}R", enabled: false)
+        ToolbarIconButton(icon: "arrow.triangle.merge", label: alt ? String(localized: "Merge with a merge commit", bundle: .module) : String(localized: "Merge", bundle: .module), shortcut: "\u{21E7}\u{2318}M", busy: window.store.busy.contains("merge"), enabled: window.store.snapshot != nil) { RewriteToolbar.merge(window) }
+        ToolbarIconButton(icon: "arrow.triangle.swap", label: alt ? String(localized: "Interactive rebase", bundle: .module) : String(localized: "Rebase", bundle: .module), shortcut: alt ? "\u{2325}\u{21E7}\u{2318}R" : "\u{21E7}\u{2318}R", busy: window.store.busy.contains("rebase") || window.store.busy.contains("interactiveRebase"), enabled: window.store.snapshot?.currentBranch != nil) { RewriteToolbar.rebase(window) }
     }
 }
 
@@ -342,9 +342,9 @@ struct NarrowActions: View {
         ToolbarIconButton(icon: "magnifyingglass", label: String(localized: "Search", bundle: .module), enabled: false)
         Menu {
             Button(String(localized: "New branch\u{2026}", bundle: .module), systemImage: "arrow.triangle.branch") { window.sync.newBranch() }
-            Button(String(localized: "Merge\u{2026}", bundle: .module), systemImage: "arrow.triangle.merge") {}.disabled(true)
-            Button(String(localized: "Rebase\u{2026}", bundle: .module), systemImage: "arrow.triangle.swap") {}.disabled(true)
-            Button(String(localized: "Stash changes\u{2026}", bundle: .module), systemImage: "tray.and.arrow.down") {}.disabled(true)
+            Button(String(localized: "Merge\u{2026}", bundle: .module), systemImage: "arrow.triangle.merge") { RewriteActions.openMerge(window) }
+            Button(String(localized: "Rebase\u{2026}", bundle: .module), systemImage: "arrow.triangle.swap") { RewriteActions.openRebase(window) }.disabled(window.store.snapshot?.currentBranch == nil)
+            Button(String(localized: "Stash changes\u{2026}", bundle: .module), systemImage: "tray.and.arrow.down") { RewriteActions.openStash(window) }.disabled(window.store.snapshot?.working.isEmpty ?? true)
             Divider()
             Button(String(localized: "Show console", bundle: .module), systemImage: "terminal") {}.disabled(true)
             Toggle(isOn: Binding(get: { window.preferences.expert }, set: { _ in window.toggleExpert() })) {
