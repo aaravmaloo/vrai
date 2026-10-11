@@ -433,14 +433,16 @@ struct RepositorySwitcher: View {
             }
             Divider()
             Button {
-                OpenPanel.choose(app: app) { openWindow(value: $0) }
+                AppSheets.present(.open, window: window, app: app, openWindow: openWindow)
             } label: {
                 Label(String(localized: "Open\u{2026}", bundle: .module), systemImage: "folder")
             }
-            Button {} label: { Label(String(localized: "Clone\u{2026}", bundle: .module), systemImage: "square.and.arrow.down") }
-                .disabled(true)
-            Button {} label: { Label(String(localized: "New repository\u{2026}", bundle: .module), systemImage: "folder.badge.plus") }
-                .disabled(true)
+            Button {
+                AppSheets.present(.clone(url: nil), window: window, app: app, openWindow: openWindow)
+            } label: { Label(String(localized: "Clone\u{2026}", bundle: .module), systemImage: "square.and.arrow.down") }
+            Button {
+                AppSheets.present(.newRepository(folder: nil), window: window, app: app, openWindow: openWindow)
+            } label: { Label(String(localized: "New repository\u{2026}", bundle: .module), systemImage: "folder.badge.plus") }
             Divider()
             Button {
                 openWindow(id: "welcome")

@@ -91,7 +91,7 @@ extension RepositoryStore {
         if (try? await isAncestor(head, of: target)) == true {
             return MergePreview(kind: .fastForward, commits: commits, commitCount: count, files: files)
         }
-        guard let result = try? await git.runAllowingFailure(.read(["merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", head.rawValue, target.rawValue], acceptedExitCodes: [0, 1]), background: true), result.succeeded else {
+        guard let result = try? await git.runAllowingFailure(SharedCommands.mergeTree(head.rawValue, target.rawValue), background: true), result.succeeded else {
             return MergePreview(kind: .clean, commits: commits, commitCount: count, files: files)
         }
         let fields = result.stdout.split(separator: 0).map { String(decoding: $0, as: UTF8.self) }
@@ -173,7 +173,7 @@ extension RepositoryStore {
 
     public func openMergeTool(path: String) async throws {
         try await perform("mergetool") {
-            _ = try await git.run(GitCommand(["mergetool", "--tool=opendiff", "--no-prompt", "--", path], access: .write))
+            _ = try await git.run(SharedCommands.mergeTool(path: path))
         }
     }
 

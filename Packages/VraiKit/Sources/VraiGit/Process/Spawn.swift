@@ -25,6 +25,7 @@ final class SpawnedProcess: @unchecked Sendable {
         var inPipe: [Int32] = [-1, -1]
         guard pipe(&outPipe) == 0, pipe(&errPipe) == 0 else { throw Failure(code: errno) }
         if stdin != nil, pipe(&inPipe) != 0 { throw Failure(code: errno) }
+        if stdin != nil { _ = fcntl(inPipe[1], F_SETNOSIGPIPE, 1) }
 
         var actions: posix_spawn_file_actions_t?
         posix_spawn_file_actions_init(&actions)

@@ -196,6 +196,11 @@ struct ChangesMoreMenu: View {
         MenuItem(title: String(localized: "Remove untracked files\u{2026}", bundle: .module), icon: "trash", enabled: !groups.untracked.isEmpty, destructive: true) {
             window.confirmClean()
         }
+        if window.preferences.expert {
+            MenuItem(title: String(localized: "Remove untracked and ignored files\u{2026}", bundle: .module), icon: "trash", enabled: true, destructive: true) {
+                LongTailActions.openClean(window, ignored: true)
+            }
+        }
         Divider()
         MenuItem(title: String(localized: "Discard all changes\u{2026}", bundle: .module), icon: "arrow.uturn.backward", enabled: !files.isEmpty, destructive: true) {
             window.confirmDiscardAll()

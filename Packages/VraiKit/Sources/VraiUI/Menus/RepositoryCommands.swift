@@ -21,16 +21,14 @@ public struct RepositoryCommands: Commands {
                 .disabled(true)
         }
         CommandGroup(replacing: .newItem) {
-            Button(String(localized: "New repository\u{2026}", bundle: .module)) {}
+            Button(String(localized: "New repository\u{2026}", bundle: .module)) { AppSheets.present(.newRepository(folder: nil), window: window, app: app, openWindow: openWindow) }
                 .keyboardShortcut("n", modifiers: [.command, .option])
-                .disabled(true)
             Button(String(localized: "Open\u{2026}", bundle: .module)) {
-                OpenPanel.choose(app: app) { openWindow(value: $0) }
+                AppSheets.present(.open, window: window, app: app, openWindow: openWindow)
             }
             .keyboardShortcut("o")
-            Button(String(localized: "Clone\u{2026}", bundle: .module)) {}
+            Button(String(localized: "Clone\u{2026}", bundle: .module)) { AppSheets.present(.clone(url: nil), window: window, app: app, openWindow: openWindow) }
                 .keyboardShortcut("o", modifiers: [.command, .shift])
-                .disabled(true)
             Menu(String(localized: "Open recent", bundle: .module)) {
                 ForEach(app.recents) { recent in
                     Button(recent.name) { openWindow(value: app.request(RepositoryReference(path: recent.path))) }
@@ -89,12 +87,11 @@ public struct RepositoryCommands: Commands {
         CommandGroup(replacing: .help) {
             KeyboardShortcutsMenuItem()
             Menu(String(localized: "Git reference", bundle: .module)) {
-                ForEach(["rebase", "reset", "reflog", "bisect", "worktree", "cherry-pick"], id: \.self) { command in
-                    Button("git " + command) { GitReference.open(command) }
+                ForEach(AppModel.referenceCommands, id: \.self) { command in
+                    Button("git " + command) { AppSheets.present(.reference(command), window: window, app: app, openWindow: openWindow) }
                 }
             }
-            Button(String(localized: "Report a git problem\u{2026}", bundle: .module)) {}
-                .disabled(true)
+            Button(String(localized: "Report a git problem\u{2026}", bundle: .module)) { AppSheets.present(.bugReport, window: window, app: app, openWindow: openWindow) }
         }
     }
 
@@ -203,31 +200,37 @@ public struct RepositoryCommands: Commands {
         }
         Button(String(localized: "Add worktree\u{2026}", bundle: .module)) { if let window { PlacesActions.openAddWorktree(window) } }.disabled(window?.store.snapshot == nil)
         Button(String(localized: "Add submodule\u{2026}", bundle: .module)) { if let window { PlacesActions.openAddSubmodule(window) } }.disabled(window?.store.snapshot == nil)
-        Button(String(localized: "Apply patches\u{2026}", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Create bundle\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Apply patches\u{2026}", bundle: .module)) { if let window { LongTailActions.openApplyPatches(window) } }.disabled(window?.store.snapshot == nil)
+        Button(String(localized: "Create bundle\u{2026}", bundle: .module)) { if let window { LongTailActions.openBundle(window) } }.disabled(window?.store.snapshot?.headOID == nil)
         if expert {
-            Button(String(localized: "Sparse checkout\u{2026}", bundle: .module)) {}.disabled(true)
+            Button(String(localized: "Sparse checkout\u{2026}", bundle: .module)) { if let window { LongTailActions.openSparse(window) } }.disabled(window?.store.snapshot?.headOID == nil)
         }
         Divider()
         Menu(String(localized: "Maintenance", bundle: .module)) {
-            Button(String(localized: "Clean up", bundle: .module)) {}.disabled(true)
-            Button(String(localized: "Verify integrity", bundle: .module)) {}.disabled(true)
+            Button(String(localized: "Clean up", bundle: .module)) { if let window { LongTailActions.maintenance(window, .gc) } }.disabled(window == nil)
+            Button(String(localized: "Verify integrity", bundle: .module)) { if let window { LongTailActions.verifyIntegrity(window) } }.disabled(window == nil)
             Button(String(localized: "Run background maintenance now", bundle: .module)) {}.disabled(true)
             if expert {
                 Divider()
-                Button(String(localized: "Prune unreachable objects", bundle: .module)) {}.disabled(true)
-                Button(String(localized: "Repack", bundle: .module)) {}.disabled(true)
-                Button(String(localized: "Write commit graph", bundle: .module)) {}.disabled(true)
+                Button(String(localized: "Clean up thoroughly", bundle: .module)) { if let window { LongTailActions.maintenance(window, .gcAggressive) } }.disabled(window == nil)
+                Button(String(localized: "Clean up and prune now", bundle: .module)) { if let window { LongTailActions.maintenance(window, .gcPruneNow) } }.disabled(window == nil)
+                Button(String(localized: "Pack refs", bundle: .module)) { if let window { LongTailActions.maintenance(window, .packRefs) } }.disabled(window == nil)
+                Button(String(localized: "Prune unreachable objects", bundle: .module)) { if let window { LongTailActions.maintenance(window, .prune) } }.disabled(window == nil)
+                Button(String(localized: "Repack", bundle: .module)) { if let window { LongTailActions.maintenance(window, .repack) } }.disabled(window == nil)
+                Button(String(localized: "Write commit graph", bundle: .module)) { if let window { LongTailActions.maintenance(window, .commitGraph) } }.disabled(window == nil)
+                if window?.store.hasPromisorPacks == true {
+                    Button(String(localized: "Download missing files", bundle: .module)) { if let window { LongTailActions.maintenance(window, .backfill) } }
+                }
             }
         }
-        Button(String(localized: "Repository info\u{2026}", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Edit .gitignore", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Repository info\u{2026}", bundle: .module)) { if let window { LongTailActions.openInfo(window) } }.disabled(window?.store.snapshot == nil)
+        Button(String(localized: "Edit .gitignore", bundle: .module)) { if let window { LongTailActions.openTextFile(window, .gitignore) } }.disabled(window?.store.snapshot?.root == nil)
         if expert {
-            Button(String(localized: "Edit .gitattributes", bundle: .module)) {}.disabled(true)
-            Button(String(localized: "Edit .mailmap", bundle: .module)) {}.disabled(true)
+            Button(String(localized: "Edit .gitattributes", bundle: .module)) { if let window { LongTailActions.openTextFile(window, .gitattributes) } }.disabled(window?.store.snapshot?.root == nil)
+            Button(String(localized: "Edit .mailmap", bundle: .module)) { if let window { LongTailActions.openTextFile(window, .mailmap) } }.disabled(window?.store.snapshot?.root == nil)
         }
         Divider()
-        Button(String(localized: "Open in Terminal", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Open in Terminal", bundle: .module)) { if let window { LongTailActions.openInTerminal(window) } }.disabled(window?.store.snapshot?.root == nil)
         Button(String(localized: "Reveal in Finder", bundle: .module)) {
             if let root = window?.store.snapshot?.root { NSWorkspace.shared.activateFileViewerSelecting([root]) }
         }
@@ -258,7 +261,7 @@ public struct RepositoryCommands: Commands {
         Divider()
         Button(String(localized: "Start bisect\u{2026}", bundle: .module)) { if let window { RewriteActions.openBisect(window) } }
             .disabled(window?.store.snapshot?.state.isOperationInProgress ?? true)
-        Button(String(localized: "Compare branches\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Compare branches\u{2026}", bundle: .module)) { if let window { LongTailActions.openCompare(window) } }.disabled(window?.store.snapshot?.headOID == nil)
     }
 
     @ViewBuilder var commitItems: some View {
@@ -274,8 +277,10 @@ public struct RepositoryCommands: Commands {
         Button(String(localized: "Tag selected\u{2026}", bundle: .module)) { if let id = window?.store.selection?.commitID { window?.sync.newTag(target: id.rawValue) } }.disabled(window?.store.selection?.commitID == nil)
         if app.preferences.expert {
             Divider()
-            Button(String(localized: "Reword selected in place\u{2026}", bundle: .module)) {}.disabled(true)
-            Button(String(localized: "Split selected\u{2026}", bundle: .module)) {}.disabled(true)
+            Button(String(localized: "Reword selected in place\u{2026}", bundle: .module)) { if let window, let id = window.store.selection?.commitID { LongTailActions.openReword(window, id: id) } }
+                .disabled(window?.store.selection?.commitID == nil)
+            Button(String(localized: "Split selected\u{2026}", bundle: .module)) { if let window, let id = window.store.selection?.commitID { LongTailActions.openSplit(window, id: id) } }
+                .disabled(window?.store.selection?.commitID == nil)
         }
     }
 }

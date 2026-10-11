@@ -100,7 +100,7 @@ struct InspectorView: View {
                     }
                     KeyValueRow(key: String(localized: "Signature", bundle: .module)) {
                         if let detail {
-                            SignatureBadge(state: detail.commit.signature, signer: detail.signer ?? commit.authorName)
+                            SignatureCheck(target: .commit(commit.id), state: detail.commit.signature, signer: detail.signer ?? commit.authorName)
                         } else {
                             Spinner()
                         }

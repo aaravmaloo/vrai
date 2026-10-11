@@ -518,7 +518,7 @@ public final class RepositoryStore {
     }
 
     public func describe(id: OID) async throws -> String {
-        try await git.run(.read(["describe", "--tags", "--always", id.rawValue]), background: true).output.trimmingCharacters(in: .whitespacesAndNewlines)
+        try await git.run(SharedCommands.describe(id.rawValue), background: true).output.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     public func branchesContaining(id: OID) async throws -> [String] {

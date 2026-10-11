@@ -186,7 +186,7 @@ extension UndoStore {
                 if existing != nil { try fileManager.removeItem(at: url) }
                 continue
             }
-            let data = try await git.run(.read(["cat-file", "blob", oid.rawValue]), background: true).stdout
+            let data = try await git.run(SharedCommands.blob(oid.rawValue), background: true).stdout
             let mode = modes[oid] ?? "100644"
             try fileManager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             let wasLink = existing?[.type] as? FileAttributeType == .typeSymbolicLink
@@ -234,7 +234,7 @@ extension UndoStore {
 
     func restorePatch(_ entry: UndoEntry) async throws {
         guard let patch = entry.patch else { throw noLongerApplies() }
-        let data = try await git.run(.read(["cat-file", "blob", patch.rawValue]), background: true).stdout
+        let data = try await git.run(SharedCommands.blob(patch.rawValue), background: true).stdout
         try await runOrNoLongerApplies(StagingService.applyCommand(data, cached: false, reverse: false))
     }
 

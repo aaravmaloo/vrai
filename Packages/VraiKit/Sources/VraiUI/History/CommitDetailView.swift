@@ -149,7 +149,7 @@ struct CommitHeaderView: View {
                     }
                 }
                 if expert || signature == .bad {
-                    SignatureBadge(state: signature, signer: signer ?? commit.authorName)
+                    SignatureCheck(target: .commit(commit.id), state: signature, signer: signer ?? commit.authorName)
                 }
                 if !refs.isEmpty {
                     PillRow {

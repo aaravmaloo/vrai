@@ -37,6 +37,9 @@ mkdir -p "$kit/Sources/VraiUI/Tokens" "$kit/Tests/VraiUITests/Resources"
 cp "$ds/project/assets/SwiftUI/VraiTokens.swift" "$kit/Sources/VraiUI/Tokens/VraiTokens.swift"
 cp "$ds/icons.json" "$kit/Tests/VraiUITests/Resources/icons.json"
 echo "tokens: copied VraiTokens.swift and icons.json"
+mkdir -p "$kit/Tests/VraiCoreTests/Resources"
+cp "$ds/project/git-coverage.md" "$kit/Tests/VraiCoreTests/Resources/git-coverage.md"
+echo "coverage: copied git-coverage.md"
 
 if [ "$skip_render" = 0 ]; then
   iconset="$assets/AppIcon.appiconset"

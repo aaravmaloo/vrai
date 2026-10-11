@@ -191,7 +191,7 @@ public struct SnapshotBuilder: Sendable {
     func enrich(_ state: RepoState) async throws -> RepoState {
         switch state {
         case .detached(let id, _):
-            let result = try await git.runAllowingFailure(.read(["describe", "--tags", "--abbrev=0", id.rawValue]), background: true)
+            let result = try await git.runAllowingFailure(SharedCommands.nearestTag(id.rawValue), background: true)
             let tag = result.exitCode == 0 ? result.output.trimmingCharacters(in: .whitespacesAndNewlines) : nil
             return .detached(id, nearestTag: tag)
         case .bisecting(_, _, let current, _):

@@ -69,9 +69,9 @@ struct CommitMenu: View {
         }
         if window.preferences.expert {
             Divider()
-            MenuItem(title: String(localized: "Create fixup commit for this", bundle: .module), icon: "bandage")
-            MenuItem(title: String(localized: "Reword in place\u{2026}", bundle: .module), icon: "pencil")
-            MenuItem(title: String(localized: "Split commit\u{2026}", bundle: .module), icon: "rectangle.split.2x1")
+            MenuItem(title: String(localized: "Create fixup commit for this", bundle: .module), icon: "bandage", enabled: rewrite.inHead) { LongTailActions.fixup(window, id: id) }
+            MenuItem(title: String(localized: "Reword in place\u{2026}", bundle: .module), icon: "pencil", enabled: rewrite.inHead) { LongTailActions.openReword(window, id: id) }
+            MenuItem(title: String(localized: "Split commit\u{2026}", bundle: .module), icon: "rectangle.split.2x1", enabled: rewrite.inHead && !rewrite.isMerge) { LongTailActions.openSplit(window, id: id) }
             MenuItem(title: String(localized: "Show object", bundle: .module), icon: "cube", enabled: true) { window.showObject(id) }
         }
         Divider()
@@ -82,8 +82,8 @@ struct CommitMenu: View {
         MenuItem(title: String(localized: "Copy subject", bundle: .module), icon: "text.alignleft", enabled: commit != nil) {
             if let commit { window.copy(commit.subject, label: String(localized: "subject", bundle: .module)) }
         }
-        MenuItem(title: String(localized: "Save as patch\u{2026}", bundle: .module), icon: "square.and.arrow.down")
-        MenuItem(title: String(localized: "Export archive\u{2026}", bundle: .module), icon: "archivebox")
+        MenuItem(title: String(localized: "Save as patch\u{2026}", bundle: .module), icon: "square.and.arrow.down", enabled: true) { LongTailActions.savePatch(window, id: id) }
+        MenuItem(title: String(localized: "Export archive\u{2026}", bundle: .module), icon: "archivebox", enabled: true) { LongTailActions.openArchive(window, ref: id.rawValue, label: id.short) }
     }
 }
 
@@ -144,7 +144,7 @@ struct BranchMenu: View {
         MenuItem(title: String(localized: "Show in history", bundle: .module), icon: "clock.arrow.circlepath", enabled: true) { window.store.showRef(branch.name) }
         MenuItem(title: String(localized: "Copy name", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(branch.name) }
         if window.preferences.expert {
-            MenuItem(title: String(localized: "Copy pull request summary", bundle: .module), icon: "envelope")
+            MenuItem(title: String(localized: "Copy pull request summary", bundle: .module), icon: "envelope", enabled: true) { LongTailActions.copyPullRequestSummary(window, branch: branch.name) }
         }
     }
 }
@@ -177,7 +177,10 @@ struct TagMenu: View {
         MenuItem(title: String(localized: "Check out \(tag.name)", bundle: .module), icon: "mappin.and.ellipse", enabled: true) { window.sync.confirmDetach(tag.target, subject: nil) }
         MenuItem(title: String(localized: "New branch from \(tag.name)\u{2026}", bundle: .module), icon: "arrow.triangle.branch", enabled: true) { window.sync.newBranch(from: tag.name) }
         MenuItem(title: String(localized: "Push \(tag.name) to \(window.sync.defaultRemote ?? "origin")", bundle: .module), icon: "arrow.up.to.line", enabled: window.sync.defaultRemote != nil) { window.sync.pushTag(tag.name) }
-        MenuItem(title: String(localized: "Export archive\u{2026}", bundle: .module), icon: "archivebox")
+        MenuItem(title: String(localized: "Export archive\u{2026}", bundle: .module), icon: "archivebox", enabled: true) { LongTailActions.openArchive(window, ref: tag.name, label: tag.name) }
+        if tag.annotated {
+            MenuItem(title: String(localized: "Check signature", bundle: .module), icon: "checkmark.seal", enabled: true) { LongTailActions.checkTagSignature(window, tag: tag.name) }
+        }
         Divider()
         MenuItem(title: String(localized: "Copy name", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(tag.name) }
         AlternateMenuItem(
@@ -238,15 +241,21 @@ struct WorkingFileMenu: View {
             MenuItem(title: String(localized: "File history", bundle: .module), icon: "clock", enabled: true) { window.openFileHistory(path: file.path) }
             Divider()
         }
-        MenuItem(title: String(localized: "Ignore \(name)", bundle: .module), icon: "eye.slash")
+        MenuItem(title: String(localized: "Ignore \(name)", bundle: .module), icon: "eye.slash", enabled: true) { LongTailActions.ignore(window, pattern: RepositoryStore.ignorePattern(forPath: file.path)) }
         if let ext {
-            MenuItem(title: String(localized: "Ignore all \(ext) files", bundle: .module), icon: "eye.slash")
+            MenuItem(title: String(localized: "Ignore all \(ext) files", bundle: .module), icon: "eye.slash", enabled: true) { LongTailActions.ignore(window, pattern: RepositoryStore.ignorePattern(forExtension: ext)) }
         }
         if window.preferences.expert, file.status == .modified {
-            MenuItem(title: String(localized: "Assume unchanged", bundle: .module), icon: "lock")
+            MenuItem(title: String(localized: "Assume unchanged", bundle: .module), icon: "lock", enabled: true) { LongTailActions.assumeUnchanged(window, path: file.path) }
         }
         if window.preferences.expert, file.status == .untracked {
-            MenuItem(title: String(localized: "Intent to add", bundle: .module), icon: "plus")
+            MenuItem(title: String(localized: "Intent to add", bundle: .module), icon: "plus", enabled: true) { LongTailActions.intentToAdd(window, path: file.path) }
+        }
+        if file.status == .modified || file.status == .added || file.status == .renamed || file.status == .typeChanged {
+            Divider()
+            MenuItem(title: String(localized: "Rename\u{2026}", bundle: .module), icon: "pencil", enabled: true) { LongTailActions.openRename(window, path: file.path) }
+            MenuItem(title: String(localized: "Stop tracking", bundle: .module), icon: "eye.slash", enabled: true) { LongTailActions.removeFile(window, path: file.path, keepFile: true) }
+            MenuItem(title: String(localized: "Delete file\u{2026}", bundle: .module), icon: "trash", enabled: true, destructive: true) { LongTailActions.confirmDeleteFile(window, path: file.path) }
         }
         Divider()
         MenuItem(title: String(localized: "Reveal in Finder", bundle: .module), icon: "folder", enabled: file.status != .deleted) { window.reveal(file.path) }

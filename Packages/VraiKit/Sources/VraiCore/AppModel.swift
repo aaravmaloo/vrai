@@ -96,6 +96,17 @@ public final class AppModel {
 
     public var gitVersion: GitVersion? { gitExecutable?.version }
 
+    public func rediscoverGit() {
+        do {
+            gitExecutable = try GitExecutable.discover(preferred: defaults.string(forKey: "gitPath"))
+            gitError = nil
+        } catch let error as GitError {
+            gitError = error
+        } catch {
+            gitError = GitError(.gitNotFound)
+        }
+    }
+
     public func takePendingOpen() -> URL? {
         defer { pendingOpen = nil }
         return pendingOpen
@@ -187,6 +198,10 @@ public final class AppModel {
     private func loadColors(_ reference: RepositoryReference) -> BranchColors {
         guard let data = defaults.data(forKey: colorsKey(reference)), let decoded = try? JSONDecoder().decode(BranchColors.self, from: data) else { return BranchColors() }
         return decoded
+    }
+
+    public func branchLane(for path: String, branch: String) -> Int? {
+        (colors[path] ?? loadColors(RepositoryReference(path: path))).color(for: branch)
     }
 
     public func saveColors(_ colors: BranchColors, for reference: RepositoryReference) {
