@@ -41,6 +41,10 @@ public enum ErrorClassifier {
         if subcommand == "pull" && (all.contains("Not possible to fast-forward") || all.contains("Diverging branches can't be fast-forwarded")) { return .divergentBranches }
         if all.contains("Not possible to fast-forward") || all.contains("Not a fast-forward") { return .notFastForward }
 
+        if all.contains("not uptodate. Cannot merge") || all.contains("would be overwritten by merge. Cannot merge")
+            || all.contains("cannot rebase: You have unstaged changes") || all.contains("cannot rebase: Your index contains uncommitted changes") {
+            return .localChangesWouldBeOverwritten(paths: entryPaths(in: all))
+        }
         if all.contains("would be overwritten by") {
             return .localChangesWouldBeOverwritten(paths: indentedPaths(after: "would be overwritten by", in: all))
         }
@@ -54,9 +58,12 @@ public enum ErrorClassifier {
             || all.contains("is not possible because you have unmerged files") || all.contains("You must edit all merge conflicts") {
             return .unresolvedConflicts
         }
+        if subcommand == "replay", result.exitCode == 1 { return .conflicts(paths: conflictPaths(in: all)) }
         if all.contains("CONFLICT (") || all.contains("Automatic merge failed") || all.contains("could not apply") || all.contains("after resolving the conflicts") {
             return .conflicts(paths: conflictPaths(in: all))
         }
+        if all.contains("You can amend the commit now") { return .stoppedForEdit }
+        if all.contains("leftover conflict marker") { return .conflictMarkersRemain }
         if subcommand == "commit" || subcommand == "merge" || subcommand == "rebase" {
             if all.contains("nothing to commit") || all.contains("no changes added to commit") { return .nothingToCommit }
             if all.contains("Aborting commit due to empty commit message") { return .emptyMessage }
@@ -128,10 +135,20 @@ public enum ErrorClassifier {
         return paths
     }
 
+    static func entryPaths(in text: String) -> [String] {
+        var paths: [String] = []
+        for match in text.matches(of: /Entry '(.+?)' (?:not uptodate|would be overwritten by merge)\. Cannot merge\./) {
+            let path = String(match.output.1)
+            if !paths.contains(path) { paths.append(path) }
+        }
+        return paths
+    }
+
     static func conflictPaths(in text: String) -> [String] {
         var paths: [String] = []
         for match in text.matches(of: /CONFLICT \([^)]*\): (?:Merge conflict in |.*? deleted in .*? and modified in .*?\.  Version .*? of )?(.+)$/.anchorsMatchLineEndings()) {
-            let path = String(match.output.1).trimmingCharacters(in: .whitespaces)
+            var path = String(match.output.1).trimmingCharacters(in: .whitespaces)
+            if path.hasSuffix(" left in tree.") { path.removeLast(" left in tree.".count) }
             if !paths.contains(path) { paths.append(path) }
         }
         return paths

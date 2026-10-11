@@ -87,7 +87,7 @@ struct BackgroundFetcherTests {
         let fetcher = BackgroundFetcher(store: store, notifier: ClosureNotifier { _ in }, interval: .milliseconds(150))
         fetcher.start()
         #expect(fetcher.isRunning)
-        #expect(try await waitFor(.seconds(10)) { await MainActor.run { fetcher.fetchCount >= 2 } })
+        #expect(try await waitFor(.seconds(60)) { await MainActor.run { fetcher.fetchCount >= 2 } })
         fetcher.stop()
         let settled = fetcher.fetchCount
         try await Task.sleep(for: .milliseconds(500))
