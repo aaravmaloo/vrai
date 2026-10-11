@@ -12,4 +12,9 @@ extension WindowModel {
         store.fileFocus = FileFocus(path: path)
         show(.fileHistory)
     }
+
+    public func openFileHistory(path: String, selecting id: OID) {
+        store.fileFocus = FileFocus(path: path, revision: id.rawValue)
+        show(.fileHistory)
+    }
 }

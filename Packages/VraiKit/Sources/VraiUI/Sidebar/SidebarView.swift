@@ -65,6 +65,10 @@ struct SidebarView: View {
             SidebarItem(icon: "tray.full", label: String(localized: "Stashes", bundle: .module), count: snapshot?.stashes.count, selected: store.view == .stashes) {
                 window.show(.stashes)
             }
+            if preferences.expert {
+                SidebarItem(icon: "clock", label: String(localized: "Reflog", bundle: .module), selected: store.view == .reflog) { window.show(.reflog) }
+                SidebarItem(icon: "point.3.connected.trianglepath.dotted", label: String(localized: "Refs", bundle: .module), selected: store.view == .refs) { window.show(.refs) }
+            }
         }
     }
 
@@ -140,9 +144,10 @@ struct SidebarView: View {
 
     @ViewBuilder var worktrees: some View {
         if let snapshot, snapshot.worktrees.count > 1 {
-            SidebarSection(title: String(localized: "Worktrees", bundle: .module), key: "worktrees", count: snapshot.worktrees.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "Add worktree", bundle: .module))) {
+            SidebarSection(title: String(localized: "Worktrees", bundle: .module), key: "worktrees", count: snapshot.worktrees.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "Add worktree", bundle: .module)), perform: { PlacesActions.openAddWorktree(window) }) {
                 ForEach(snapshot.worktrees) { worktree in
-                    SidebarItem(icon: "rectangle.on.rectangle", label: URL(filePath: worktree.path).lastPathComponent, detail: worktree.branch ?? String(localized: "detached", bundle: .module), help: worktree.path, trailing: worktree.locked ? AnyView(Symbol("lock", font: Font.Vrai.callout).foregroundStyle(Color.Vrai.textTertiary)) : nil)
+                    SidebarItem(icon: "rectangle.on.rectangle", label: URL(filePath: worktree.path).lastPathComponent, detail: worktree.branch ?? String(localized: "detached", bundle: .module), selected: PlacesActions.selectedWorktree(store) == worktree.path, help: worktree.path, trailing: worktree.locked ? AnyView(Symbol("lock", font: Font.Vrai.callout).foregroundStyle(Color.Vrai.textTertiary)) : nil) { PlacesActions.showWorktree(window, path: worktree.path) }
+                        .contextMenu { WorktreeMenu(worktree: worktree, window: window, opener: PlacesOpener(app: app, openWindow: openWindow)) }
                 }
             }
         }
@@ -150,9 +155,10 @@ struct SidebarView: View {
 
     @ViewBuilder var submodules: some View {
         if let snapshot, !snapshot.submodules.isEmpty {
-            SidebarSection(title: String(localized: "Submodules", bundle: .module), key: "submodules", count: snapshot.submodules.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "Add submodule", bundle: .module))) {
+            SidebarSection(title: String(localized: "Submodules", bundle: .module), key: "submodules", count: snapshot.submodules.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "Add submodule", bundle: .module)), perform: { PlacesActions.openAddSubmodule(window) }) {
                 ForEach(snapshot.submodules) { module in
-                    SidebarItem(icon: "shippingbox", label: URL(filePath: module.path).lastPathComponent, help: module.path, trailing: Self.submoduleBadge(module))
+                    SidebarItem(icon: "shippingbox", label: URL(filePath: module.path).lastPathComponent, selected: PlacesActions.selectedSubmodule(store) == module.path, help: module.path, trailing: Self.submoduleBadge(module)) { PlacesActions.showSubmodule(window, path: module.path) }
+                        .contextMenu { SubmoduleMenu(module: module, window: window, opener: PlacesOpener(app: app, openWindow: openWindow)) }
                 }
             }
         }
@@ -299,6 +305,7 @@ struct SidebarSection<Content: View>: View {
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityValue(collapsible ? (open ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module)) : Text(verbatim: ""))
+                .accessibilityIdentifier("sidebar-section-" + key)
                 if let action {
                     IconButton(icon: action.icon, label: action.label, small: true) { perform?() }
                         .disabled(perform == nil)

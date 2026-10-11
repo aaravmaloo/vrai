@@ -234,8 +234,8 @@ struct WorkingFileMenu: View {
         }
         Divider()
         if file.status != .untracked {
-            MenuItem(title: String(localized: "Blame", bundle: .module), icon: "person.text.rectangle")
-            MenuItem(title: String(localized: "File history", bundle: .module), icon: "clock")
+            MenuItem(title: String(localized: "Blame", bundle: .module), icon: "person.text.rectangle", enabled: true) { window.openBlame(path: file.path) }
+            MenuItem(title: String(localized: "File history", bundle: .module), icon: "clock", enabled: true) { window.openFileHistory(path: file.path) }
             Divider()
         }
         MenuItem(title: String(localized: "Ignore \(name)", bundle: .module), icon: "eye.slash")
@@ -261,9 +261,9 @@ struct CommitFileMenu: View {
 
     var body: some View {
         let name = PathParts.split(path).name
-        MenuItem(title: String(localized: "Blame at \(id.short)", bundle: .module), icon: "person.text.rectangle")
-        MenuItem(title: String(localized: "File history", bundle: .module), icon: "clock")
-        MenuItem(title: String(localized: "Open \(name) at \(id.short)", bundle: .module), icon: "doc.text")
+        MenuItem(title: String(localized: "Blame at \(id.short)", bundle: .module), icon: "person.text.rectangle", enabled: true) { window.openBlame(path: path, revision: id.rawValue) }
+        MenuItem(title: String(localized: "File history", bundle: .module), icon: "clock", enabled: true) { window.openFileHistory(path: path, selecting: id) }
+        MenuItem(title: String(localized: "Open \(name) at \(id.short)", bundle: .module), icon: "doc.text", enabled: true) { PlacesActions.openFile(window, path: path, at: id) }
         MenuItem(title: String(localized: "Restore \(name) from \(id.short)\u{2026}", bundle: .module), icon: "arrow.counterclockwise", enabled: true) { window.confirmRestore(path: path, from: id) }
         Divider()
         MenuItem(title: String(localized: "Copy path", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(path, label: String(localized: "path", bundle: .module)) }

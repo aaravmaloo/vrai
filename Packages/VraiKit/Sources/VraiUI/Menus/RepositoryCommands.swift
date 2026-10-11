@@ -109,6 +109,11 @@ public struct RepositoryCommands: Commands {
         Toggle(String(localized: "Stashes", bundle: .module), isOn: Binding(get: { store?.view == .stashes }, set: { _ in window?.show(.stashes) }))
             .keyboardShortcut("3")
             .disabled(window == nil)
+        if app.preferences.expert {
+            Toggle(String(localized: "Reflog", bundle: .module), isOn: Binding(get: { store?.view == .reflog }, set: { _ in window?.show(.reflog) }))
+                .keyboardShortcut("4")
+                .disabled(window == nil)
+        }
         Divider()
         Button(window?.sidebarShown == false ? String(localized: "Show sidebar", bundle: .module) : String(localized: "Hide sidebar", bundle: .module)) {
             window?.toggleSidebar()
@@ -195,8 +200,8 @@ public struct RepositoryCommands: Commands {
                 Button(String(localized: "Edit \(remote.name)\u{2026}", bundle: .module)) { window?.sync.editRemote(remote.name) }
             }
         }
-        Button(String(localized: "Add worktree\u{2026}", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Add submodule\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Add worktree\u{2026}", bundle: .module)) { if let window { PlacesActions.openAddWorktree(window) } }.disabled(window?.store.snapshot == nil)
+        Button(String(localized: "Add submodule\u{2026}", bundle: .module)) { if let window { PlacesActions.openAddSubmodule(window) } }.disabled(window?.store.snapshot == nil)
         Button(String(localized: "Apply patches\u{2026}", bundle: .module)) {}.disabled(true)
         Button(String(localized: "Create bundle\u{2026}", bundle: .module)) {}.disabled(true)
         if expert {
