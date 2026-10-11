@@ -65,7 +65,7 @@ public final class RepositoryStore {
     public func refresh() async throws {
         let built: RepositorySnapshot
         do {
-            built = try await SnapshotBuilder(git: git).build(colors: branchColors, network: snapshot?.network ?? .unknown)
+            built = try await SnapshotBuilder(git: git, renameThreshold: renameThreshold).build(colors: branchColors, network: snapshot?.network ?? .unknown)
         } catch let error as GitError {
             snapshotError = error
             throw error

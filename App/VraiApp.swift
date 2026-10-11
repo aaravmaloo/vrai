@@ -15,7 +15,7 @@ struct VraiApp: App {
         }
         .defaultSize(AppDelegate.windowSize)
         .defaultLaunchBehavior(app.launch.open == nil ? .suppressed : .presented)
-        .restorationBehavior(app.launch.isSandboxed ? .disabled : .automatic)
+        .restorationBehavior(app.launch.isSandboxed || app.preferences.openAt == .welcome ? .disabled : .automatic)
         .windowResizability(.contentMinSize)
         .commands { RepositoryCommands(app: app) }
 
@@ -40,6 +40,7 @@ struct VraiApp: App {
             SettingsView()
                 .environment(app)
         }
+        .windowResizability(.contentMinSize)
     }
 }
 

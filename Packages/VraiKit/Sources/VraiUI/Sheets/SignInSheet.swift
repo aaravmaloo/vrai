@@ -8,6 +8,7 @@ struct SignInTarget: Sendable {
     var host: String
     var repository: String
     var username: String
+    var note: String? = nil
 }
 
 struct SignInSheet: View {
@@ -60,6 +61,7 @@ struct SignInSheet: View {
     var description: String {
         switch mode {
         case .again(let target, _):
+            if let note = target.note { return note }
             return SyncCopy.authTitle(host: target.host, repository: target.repository) + " " + String(localized: "Enter a personal access token to sign in again.", bundle: .module)
         case .prompt(let request, _):
             if asksForAccount, let url = request.url {

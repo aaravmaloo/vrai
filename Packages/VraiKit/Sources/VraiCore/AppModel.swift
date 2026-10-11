@@ -63,8 +63,8 @@ public final class AppModel {
     public let launch: LaunchOptions
     public let preferences: Preferences
     public private(set) var recents: [RecentRepository] = []
-    public private(set) var gitExecutable: GitExecutable?
-    public private(set) var gitError: GitError?
+    public internal(set) var gitExecutable: GitExecutable?
+    public internal(set) var gitError: GitError?
     public private(set) var pendingOpen: URL?
 
     @ObservationIgnored public let defaults: UserDefaults

@@ -63,13 +63,13 @@ public struct StagingService: Sendable {
         return write(arguments, stdin: patch, risk: !cached && reverse ? .destructive : .safe, paths: false)
     }
 
-    public static func diffCommand(path: String, oldPath: String?, staged: Bool, untracked: Bool) -> GitCommand {
+    public static func diffCommand(path: String, oldPath: String?, staged: Bool, untracked: Bool, renameThreshold: Int = 50) -> GitCommand {
         if untracked, !staged {
             return read(["diff", "--no-index", "--no-color", "--no-ext-diff", "--", "/dev/null", path], acceptedExitCodes: [0, 1])
         }
         if staged {
             let paths = [oldPath, path].compactMap { $0 }
-            return read(["diff", "--cached", "--no-color", "--no-ext-diff", "--find-renames", "--"] + paths)
+            return read(["diff", "--cached", "--no-color", "--no-ext-diff", "--find-renames=\(renameThreshold)%", "--"] + paths)
         }
         return read(["diff", "--no-color", "--no-ext-diff", "--", path])
     }
@@ -105,8 +105,8 @@ public struct StagingService: Sendable {
         return Set(ParseSupport.nulFields(data).filter { !$0.isEmpty })
     }
 
-    public func diff(path: String, oldPath: String? = nil, staged: Bool, untracked: Bool) async throws -> FileDiff? {
-        let data = try await git.run(Self.diffCommand(path: path, oldPath: oldPath, staged: staged, untracked: untracked), background: true).stdout
+    public func diff(path: String, oldPath: String? = nil, staged: Bool, untracked: Bool, renameThreshold: Int = 50) async throws -> FileDiff? {
+        let data = try await git.run(Self.diffCommand(path: path, oldPath: oldPath, staged: staged, untracked: untracked, renameThreshold: renameThreshold), background: true).stdout
         let files = PatchParser.parse(data)
         return files.first { $0.path == path } ?? files.first
     }

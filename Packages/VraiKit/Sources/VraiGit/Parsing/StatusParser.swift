@@ -23,6 +23,10 @@ public struct StatusReport: Sendable, Hashable {
 public enum StatusParser {
     public static let command = GitCommand.read(["status", "--porcelain=v2", "-z", "--branch", "--show-stash", "--untracked-files=all", "--find-renames"])
 
+    public static func command(renameThreshold: Int) -> GitCommand {
+        .read(["status", "--porcelain=v2", "-z", "--branch", "--show-stash", "--untracked-files=all", "--find-renames=\(renameThreshold)%"])
+    }
+
     public static func parse(_ data: Data) -> StatusReport {
         var report = StatusReport(oid: nil, isInitial: false, branch: nil, upstream: nil, ahead: 0, behind: 0, stashCount: 0, files: [], conflicts: [])
         let fields = ParseSupport.nulFields(data)

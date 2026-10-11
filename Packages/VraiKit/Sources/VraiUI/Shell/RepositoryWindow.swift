@@ -122,6 +122,7 @@ struct RepositoryShell: View {
         .modifier(AlertHost(center: window.alerts))
         .modifier(SheetHost(center: window.sheets))
         .modifier(SyncWiring(window: window))
+        .settingsWiring(window)
         .focusedSceneValue(\.windowModel, window)
         .tint(Color.Vrai.accent)
         .onChange(of: store.snapshotError) { _, error in

@@ -159,7 +159,7 @@ extension RepositoryStore {
         } else {
             untracked = try await staging.trackedPaths([path]).isEmpty
         }
-        return try await staging.diff(path: path, oldPath: staged ? file?.oldPath : nil, staged: staged, untracked: untracked)
+        return try await staging.diff(path: path, oldPath: staged ? file?.oldPath : nil, staged: staged, untracked: untracked, renameThreshold: renameThreshold)
     }
 
     private static func quoted(_ subject: String) -> String {

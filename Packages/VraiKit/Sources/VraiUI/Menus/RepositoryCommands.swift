@@ -85,8 +85,7 @@ public struct RepositoryCommands: Commands {
             Divider()
         }
         CommandGroup(replacing: .help) {
-            Button(String(localized: "Keyboard shortcuts", bundle: .module)) {}
-                .disabled(true)
+            KeyboardShortcutsMenuItem()
             Menu(String(localized: "Git reference", bundle: .module)) {
                 ForEach(["rebase", "reset", "reflog", "bisect", "worktree", "cherry-pick"], id: \.self) { command in
                     Button("git " + command) {}.disabled(true)

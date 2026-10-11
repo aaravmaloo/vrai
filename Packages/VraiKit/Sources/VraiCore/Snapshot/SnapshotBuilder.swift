@@ -3,15 +3,25 @@ import VraiGit
 
 public struct SnapshotBuilder: Sendable {
     public let git: GitProcess
+    public var renameThreshold: Int
     public var fileManager: FileManager { .default }
 
-    public init(git: GitProcess) {
+    public init(git: GitProcess, renameThreshold: Int = 50) {
         self.git = git
+        self.renameThreshold = renameThreshold
     }
 
     public static let numstatHead = GitCommand.read(["diff", "HEAD", "--numstat", "-z", "--find-renames", "--no-ext-diff", "--ignore-submodules=dirty"])
     public static let numstatCached = GitCommand.read(["diff", "--cached", "--numstat", "-z", "--find-renames", "--no-ext-diff"])
     public static let numstatWorktree = GitCommand.read(["diff", "--numstat", "-z", "--no-ext-diff"])
+
+    public static func numstatHead(renameThreshold: Int) -> GitCommand {
+        .read(["diff", "HEAD", "--numstat", "-z", "--find-renames=\(renameThreshold)%", "--no-ext-diff", "--ignore-submodules=dirty"])
+    }
+
+    public static func numstatCached(renameThreshold: Int) -> GitCommand {
+        .read(["diff", "--cached", "--numstat", "-z", "--find-renames=\(renameThreshold)%", "--no-ext-diff"])
+    }
 
     public func location() async throws -> RepositoryLocation {
         do {
@@ -30,7 +40,7 @@ public struct SnapshotBuilder: Sendable {
         let location = try await location()
         let hasModules = location.root.map { fileManager.fileExists(atPath: $0.appending(path: ".gitmodules").path(percentEncoded: false)) } ?? false
 
-        async let statusData = git.run(StatusParser.command, background: true).stdout
+        async let statusData = git.run(StatusParser.command(renameThreshold: renameThreshold), background: true).stdout
         async let refsData = git.run(RefParser.command, background: true).stdout
         async let remotesData = git.run(ConfigParser.remotesCommand, background: true).stdout
         async let stashData = git.run(StashParser.command, background: true).stdout
@@ -131,9 +141,9 @@ public struct SnapshotBuilder: Sendable {
     }
 
     func numstats() async throws -> [String: Count] {
-        let head = try await git.runAllowingFailure(Self.numstatHead, background: true)
+        let head = try await git.runAllowingFailure(Self.numstatHead(renameThreshold: renameThreshold), background: true)
         if head.succeeded { return Self.parseNumstat(head.stdout) }
-        async let cached = git.run(Self.numstatCached, background: true).stdout
+        async let cached = git.run(Self.numstatCached(renameThreshold: renameThreshold), background: true).stdout
         async let worktree = git.run(Self.numstatWorktree, background: true).stdout
         var merged = Self.parseNumstat(try await cached)
         for (path, count) in Self.parseNumstat(try await worktree) {

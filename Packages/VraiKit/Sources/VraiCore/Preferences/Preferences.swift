@@ -47,6 +47,8 @@ public final class Preferences {
     public var codeSize: Int { didSet { write("codeSize", codeSize) } }
     public var terminal: String { didSet { write("terminal", terminal) } }
     public var openAt: OpenAt { didSet { write("openAt", openAt.rawValue) } }
+    public var gitPath: String? { didSet { writeOptional("gitPath", gitPath) } }
+    public var accounts: [SignedInAccount] { didSet { writeAccounts() } }
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -69,9 +71,22 @@ public final class Preferences {
         codeSize = defaults.object(forKey: "codeSize") as? Int ?? 12
         terminal = defaults.string(forKey: "terminal") ?? "Terminal"
         openAt = OpenAt(rawValue: defaults.string(forKey: "openAt") ?? "") ?? .reopen
+        gitPath = defaults.string(forKey: "gitPath").flatMap { $0.isEmpty ? nil : $0 }
+        accounts = defaults.data(forKey: "accounts").flatMap { try? JSONDecoder().decode([SignedInAccount].self, from: $0) } ?? []
     }
 
     private func write(_ key: String, _ value: Any) {
         defaults.set(value, forKey: key)
+    }
+
+    private func writeOptional(_ key: String, _ value: String?) {
+        if let value, !value.isEmpty { defaults.set(value, forKey: key) } else { defaults.removeObject(forKey: key) }
+    }
+
+    private func writeAccounts() {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        guard let data = try? encoder.encode(accounts) else { return }
+        defaults.set(data, forKey: "accounts")
     }
 }

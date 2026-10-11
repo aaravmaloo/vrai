@@ -13,6 +13,7 @@ public enum ErrorClassifier {
 
         if all.contains("not a git repository") { return .notARepository }
         if let path = firstMatch(all, /Unable to create '([^']+\.lock)': File exists/) { return .lockFileExists(path: path) }
+        if let path = firstMatch(all, /could not lock config file ([^\n]+): File exists/) { return .lockFileExists(path: path + ".lock") }
         if subcommand == "apply", all.contains("patch does not apply") || all.contains("patch failed") || all.contains("corrupt patch") || all.contains("does not exist in index")
             || all.contains("already exists in index") || all.contains("already exists in working directory") || all.contains("does not match index")
             || all.contains("No valid patches in input") || all.contains("patch with only garbage") || all.contains("No such file or directory") {
