@@ -27,16 +27,28 @@ public enum ErrorClassifier {
         if all.contains("does not appear to be a git repository") || (all.contains("repository '") && all.contains("' not found")) {
             return .remoteNotFound
         }
+        if all.contains("No such remote") { return .remoteNotFound }
+        if all.firstMatch(of: /git: 'remote-[^']+' is not a git command/) != nil { return .invalidURL }
         if all.contains("protected branch") || all.contains("GH006") || all.contains("pre-receive hook declined") { return .protectedBranch }
         if all.contains("[rejected]") || all.contains("Updates were rejected") || all.contains("failed to push some refs") && all.contains("non-fast-forward") {
             return .pushRejected(behind: nil)
         }
         if all.contains("has no upstream branch") || all.contains("There is no tracking information for the current branch") { return .noUpstream }
+        if subcommand == "pull" && all.contains("You are not currently on a branch") { return .noUpstream }
+        if subcommand == "push" && (all.contains("src refspec") && all.contains("does not match any") || all.contains("remote ref does not exist")) { return .refNotFound }
+        if all.contains("the requested upstream branch") && all.contains("does not exist") { return .refNotFound }
         if all.contains("Need to specify how to reconcile divergent branches") || all.contains("You have divergent branches") { return .divergentBranches }
+        if subcommand == "pull" && (all.contains("Not possible to fast-forward") || all.contains("Diverging branches can't be fast-forwarded")) { return .divergentBranches }
         if all.contains("Not possible to fast-forward") || all.contains("Not a fast-forward") { return .notFastForward }
 
         if all.contains("would be overwritten by") {
             return .localChangesWouldBeOverwritten(paths: indentedPaths(after: "would be overwritten by", in: all))
+        }
+        if all.contains("cannot pull with rebase: You have unstaged changes") || all.contains("cannot pull with rebase: Your index contains uncommitted changes") {
+            return .localChangesWouldBeOverwritten(paths: [])
+        }
+        if let staged = firstMatch(all, /cannot continue with staged changes in the following files:\n([^\n]*)/) {
+            return .localChangesWouldBeOverwritten(paths: staged.split(separator: " ").map(String.init))
         }
         if all.contains("you need to resolve your current index first") || all.contains("Committing is not possible because you have unmerged files")
             || all.contains("is not possible because you have unmerged files") || all.contains("You must edit all merge conflicts") {
@@ -72,6 +84,9 @@ public enum ErrorClassifier {
         if all.contains("patch does not apply") || all.contains("corrupt patch") || all.contains("patch failed") { return .patchDoesNotApply }
         if all.contains("contains modified or untracked files, use --force to delete it") { return .worktreeDirty }
         if all.contains("cannot remove a locked working tree") || all.contains("is locked") && subcommand == "worktree" { return .worktreeLocked }
+        if all.contains("no branch named") || subcommand == "branch" && all.contains("does not exist") || subcommand == "tag" && all.firstMatch(of: /tag '[^']+' not found/) != nil {
+            return .refNotFound
+        }
         if all.contains("unknown revision") || all.contains("bad revision") || all.contains("Needed a single revision") || all.contains("not a valid object name")
             || all.contains("invalid reference") || all.contains("pathspec") && all.contains("did not match any") || all.contains("couldn't find remote ref")
             || all.contains("ambiguous argument") || all.contains("no such branch") || all.contains("not found") && subcommand == "branch" {

@@ -1,0 +1,8 @@
+From file:///SANDBOX/fixtures/detached/remotes/origin
+   87f2f88..7271425  feature/line-staging -> origin/feature/line-staging
+You are not currently on a branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+

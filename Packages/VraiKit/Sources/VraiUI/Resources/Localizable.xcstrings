@@ -1,6 +1,60 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Changes" : {
+
+    },
+    "Console" : {
+
+    },
+    "Fetch" : {
+
+    },
+    "Hide inspector" : {
+
+    },
+    "History" : {
+
+    },
+    "Inspector" : {
+
+    },
+    "Merge" : {
+
+    },
+    "New branch" : {
+
+    },
+    "No repository open" : {
+
+    },
+    "Open a repository and its history shows up here." : {
+
+    },
+    "Pull" : {
+
+    },
+    "Push" : {
+
+    },
+    "Rebase" : {
+
+    },
+    "Search actions, branches, commits" : {
+
+    },
+    "Show inspector" : {
+
+    },
+    "Stash changes" : {
+
+    },
+    "Stashes" : {
+
+    },
+    "Workspace" : {
+
+    }
   },
   "version" : "1.0"
 }

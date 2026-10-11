@@ -1,0 +1,6 @@
+hint: The '.git/hooks/pre-push' hook was ignored because it's not set as executable.
+hint: You can disable this warning with `git config set advice.ignoredHook false`.
+remote: GH006: Protected branch update failed for refs/heads/main.        
+To file:///SANDBOX/fixtures/everyday/remotes/origin.git
+ ! [remote rejected] HEAD -> main (pre-receive hook declined)
+error: failed to push some refs to 'file:///SANDBOX/fixtures/everyday/remotes/origin.git'

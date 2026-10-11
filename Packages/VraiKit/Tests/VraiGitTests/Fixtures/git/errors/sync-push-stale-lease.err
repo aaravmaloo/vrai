@@ -1,0 +1,5 @@
+hint: The '.git/hooks/pre-push' hook was ignored because it's not set as executable.
+hint: You can disable this warning with `git config set advice.ignoredHook false`.
+To file:///SANDBOX/fixtures/push-rejected/remotes/origin.git
+ ! [rejected]        feature/graph-renderer -> feature/graph-renderer (stale info)
+error: failed to push some refs to 'file:///SANDBOX/fixtures/push-rejected/remotes/origin.git'

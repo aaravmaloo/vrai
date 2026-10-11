@@ -1,0 +1,2 @@
+error: src refspec nope does not match any
+error: failed to push some refs to 'file:///SANDBOX/fixtures/everyday/remotes/origin.git'

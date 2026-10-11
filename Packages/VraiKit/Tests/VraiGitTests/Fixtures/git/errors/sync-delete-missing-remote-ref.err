@@ -1,0 +1,2 @@
+error: unable to delete 'nope': remote ref does not exist
+error: failed to push some refs to 'file:///SANDBOX/fixtures/everyday/remotes/origin.git'

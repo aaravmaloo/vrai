@@ -1,0 +1,12 @@
+From file:///SANDBOX/fixtures/everyday/remotes/origin
+   87f2f88..7271425  feature/line-staging -> origin/feature/line-staging
+hint: Diverging branches can't be fast-forwarded, you need to either:
+hint:
+hint: 	git merge --no-ff
+hint:
+hint: or:
+hint:
+hint: 	git rebase
+hint:
+hint: Disable this message with "git config set advice.diverging false"
+fatal: Not possible to fast-forward, aborting.

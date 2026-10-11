@@ -1,0 +1,12 @@
+From file:///SANDBOX/fixtures/everyday/remotes/origin
+   87f2f88..7271425  feature/line-staging -> origin/feature/line-staging
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=<remote>/<branch> lonely
+

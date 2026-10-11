@@ -1,0 +1,2 @@
+fatal: cannot continue with staged changes in the following files:
+Sources/VraiGit/Graph/LaneLayout.swift Sources/VraiUI/History/GraphCell.swift Sources/VraiUI/History/LaneColors.swift Sources/VraiUI/History/Palette.swift

@@ -1,0 +1,2 @@
+remote: Credentials expired or revoked.
+fatal: Authentication failed for 'http://127.0.0.1:47813/vrai.git/'

@@ -1,6 +1,18 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lldd ago" : {
+
+    },
+    "%lldh ago" : {
+
+    },
+    "%lldm ago" : {
+
+    },
+    "just now" : {
+
+    }
   },
   "version" : "1.0"
 }
