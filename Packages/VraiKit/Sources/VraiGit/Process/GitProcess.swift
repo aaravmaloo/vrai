@@ -44,15 +44,19 @@ public actor GitProcess {
         do {
             let outcome = try await invocation.run()
             let result = GitResult(command: command, exitCode: outcome.status, stdout: outcome.stdout, stderr: outcome.stderr, startedAt: started, duration: clock.now - begin)
-            report(ConsoleEntry(source: source, command: command.display, cwd: workingDirectory.path(percentEncoded: false), startedAt: started, duration: result.duration, exitCode: outcome.status, stdout: outcome.stdout, stderr: outcome.stderr, background: background, cancelled: outcome.cancelled))
+            report(ConsoleEntry(source: source, command: command.display, cwd: workingDirectory.path(percentEncoded: false), startedAt: started, duration: result.duration, exitCode: outcome.status, stdout: outcome.stdout, stderr: outcome.stderr, background: background, cancelled: outcome.cancelled, acceptedExitCodes: command.acceptedExitCodes))
             if outcome.cancelled { throw GitError(.cancelled, result: result) }
             return result
         } catch let error as GitError {
             throw error
         } catch {
-            report(ConsoleEntry(source: source, command: command.display, cwd: workingDirectory.path(percentEncoded: false), startedAt: started, duration: clock.now - begin, exitCode: nil, stdout: Data(), stderr: Data(String(describing: error).utf8), background: background))
+            report(ConsoleEntry(source: source, command: command.display, cwd: workingDirectory.path(percentEncoded: false), startedAt: started, duration: clock.now - begin, exitCode: nil, stdout: Data(), stderr: Data(String(describing: error).utf8), background: background, acceptedExitCodes: command.acceptedExitCodes))
             throw GitError(.gitNotFound)
         }
+    }
+
+    public nonisolated func sibling(at directory: URL) -> GitProcess {
+        GitProcess(executable: executable, workingDirectory: directory, environment: environment, observer: observer)
     }
 
     public func output(_ arguments: [String], acceptedExitCodes: Set<Int32> = [0]) async throws -> Data {

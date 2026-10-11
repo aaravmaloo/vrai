@@ -19,6 +19,7 @@ extension SyncForm {
         @ViewBuilder let content: () -> Content
         @ViewBuilder let footerStart: () -> Start
         @Environment(WindowModel.self) private var window
+        @Environment(\.commandDraft) private var draft
         @State private var headerHeight: CGFloat = 0
         @State private var footerHeight: CGFloat = 0
         @State private var contentHeight: CGFloat = 0
@@ -81,6 +82,7 @@ extension SyncForm {
                         .buttonStyle(VraiButtonStyle(variant: .secondary))
                         .keyboardShortcut(.cancelAction)
                         Button {
+                            if draft?.submit() == true { return }
                             if primaryEnabled, !busy { onSubmit() }
                         } label: {
                             HStack(spacing: Vrai.Space.s6) {
@@ -90,7 +92,7 @@ extension SyncForm {
                         }
                         .buttonStyle(VraiButtonStyle(variant: danger ? .danger : .primary))
                         .keyboardShortcut(.defaultAction)
-                        .disabled(!primaryEnabled || busy)
+                        .disabled(!(primaryEnabled || draft?.isEdited == true) || busy)
                     }
                     .fixedSize()
                 }
@@ -591,7 +593,7 @@ extension SyncForm {
                     .textSelection(.enabled)
                     .accessibilityLabel(command.display)
                     .accessibilityIdentifier("command-preview")
-                if let tag = Self.riskTag(command.risk) {
+                if let tag = Self.riskTag(RiskTag.level(command)) {
                     Text(tag.label)
                         .font(Font.Vrai.captionStrong)
                         .foregroundStyle(tag.tone.color)
@@ -620,7 +622,7 @@ extension SyncForm {
             .background(Color.Vrai.bgSunken, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .strokeBorder(command.risk == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.separator, lineWidth: Metrics.hairline)
+                    .strokeBorder(RiskTag.level(command) == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.separator, lineWidth: Metrics.hairline)
             }
         }
 
@@ -669,7 +671,13 @@ extension SyncForm {
                     if !expert, showsPreview { previews }
                 }
             }
-            if expert { previews }
+            if expert { expertPreviews }
+        }
+
+        @ViewBuilder var expertPreviews: some View {
+            ForEach(Array(commands.enumerated()), id: \.offset) { offset, command in
+                ExpertCommandField(index: offset, command: command)
+            }
         }
 
         @ViewBuilder var previews: some View {

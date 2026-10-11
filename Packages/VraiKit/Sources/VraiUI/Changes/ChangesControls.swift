@@ -140,9 +140,9 @@ struct ComposerCommandLine: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if command.risk == .rewrites {
+            if RiskTag.level(command) == .rewrites {
                 riskTag(String(localized: "Rewrites history", bundle: .module), tone: .warning)
-            } else if command.risk == .destructive {
+            } else if RiskTag.level(command) == .destructive {
                 riskTag(String(localized: "Destructive", bundle: .module), tone: .danger)
             }
             Button {

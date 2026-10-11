@@ -74,7 +74,7 @@ final class StreamBox: @unchecked Sendable {
             self.continuation = nil
             let duration = clock.now - begin
             let result = GitResult(command: command, exitCode: status, stdout: head, stderr: stderr, startedAt: startedAt, duration: duration)
-            let entry = ConsoleEntry(source: source, command: command.display, cwd: directory, startedAt: startedAt, duration: duration, exitCode: status, stdout: head, stderr: stderr, background: background, cancelled: cancelled)
+            let entry = ConsoleEntry(source: source, command: command.display, cwd: directory, startedAt: startedAt, duration: duration, exitCode: status, stdout: head, stderr: stderr, background: background, cancelled: cancelled, acceptedExitCodes: command.acceptedExitCodes)
             return (continuation, result, cancelled, report, entry)
         }
         guard let (continuation, result, wasCancelled, report, entry) = done else { return }

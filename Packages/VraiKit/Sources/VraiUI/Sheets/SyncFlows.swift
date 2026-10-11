@@ -334,8 +334,8 @@ extension SyncModel {
 }
 
 extension SyncModel {
-    func newBranch(from: String? = nil, checkout: Bool = true) {
-        showSheet { BranchSheet(from: from ?? "HEAD", checkout: checkout) }
+    func newBranch(from: String? = nil, checkout: Bool = true, name: String = "") {
+        showSheet { BranchSheet(from: from ?? "HEAD", checkout: checkout, name: name) }
     }
 
     func createBranch(name: String, from: String, switchTo: Bool, publish: Bool) {

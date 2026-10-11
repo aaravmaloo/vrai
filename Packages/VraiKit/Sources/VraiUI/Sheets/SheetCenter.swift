@@ -36,6 +36,7 @@ struct SheetHost: ViewModifier {
     func body(content: Content) -> some View {
         content.sheet(item: $center.current) { request in
             request.content
+                .modifier(CommandDraftScope())
         }
     }
 }

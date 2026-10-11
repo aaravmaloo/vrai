@@ -10,9 +10,10 @@ struct BranchSheet: View {
     @Environment(WindowModel.self) private var window
     @Environment(RepositoryStore.self) private var store
 
-    init(from: String, checkout: Bool) {
+    init(from: String, checkout: Bool, name: String = "") {
         _from = State(initialValue: from)
         _checkout = State(initialValue: checkout)
+        _name = State(initialValue: name)
     }
 
     var snapshot: RepositorySnapshot? { store.snapshot }

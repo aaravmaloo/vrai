@@ -21,8 +21,9 @@ public struct ConsoleEntry: Sendable, Hashable, Identifiable {
     public var stderrTruncated: Bool
     public var background: Bool
     public var cancelled: Bool
+    public var acceptedExitCodes: Set<Int32>
 
-    public init(id: UUID = UUID(), source: Source, command: String, cwd: String, startedAt: Date, duration: Duration, exitCode: Int32?, stdout: Data, stderr: Data, background: Bool, cancelled: Bool = false) {
+    public init(id: UUID = UUID(), source: Source, command: String, cwd: String, startedAt: Date, duration: Duration, exitCode: Int32?, stdout: Data, stderr: Data, background: Bool, cancelled: Bool = false, acceptedExitCodes: Set<Int32> = [0]) {
         self.id = id
         self.source = source
         self.command = command
@@ -36,7 +37,8 @@ public struct ConsoleEntry: Sendable, Hashable, Identifiable {
         self.stderr = String(decoding: stderr.prefix(Self.outputCap), as: UTF8.self)
         self.background = background
         self.cancelled = cancelled
+        self.acceptedExitCodes = acceptedExitCodes
     }
 
-    public var failed: Bool { cancelled || exitCode.map { $0 != 0 } ?? true }
+    public var failed: Bool { cancelled || exitCode.map { !acceptedExitCodes.contains($0) } ?? true }
 }

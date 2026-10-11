@@ -10,9 +10,12 @@ struct PaletteAction: Identifiable {
     var keywords: [String]
     var enabled: Bool
     var expertOnly: Bool
+    var detail: String?
+    var danger: Bool
+    var alternate: (@MainActor () -> Void)?
     var perform: @MainActor () -> Void
 
-    init(id: String, title: String, icon: String, shortcut: String? = nil, keywords: [String] = [], enabled: Bool = true, expertOnly: Bool = false, perform: @escaping @MainActor () -> Void) {
+    init(id: String, title: String, icon: String, shortcut: String? = nil, keywords: [String] = [], enabled: Bool = true, expertOnly: Bool = false, detail: String? = nil, danger: Bool = false, alternate: (@MainActor () -> Void)? = nil, perform: @escaping @MainActor () -> Void) {
         self.id = id
         self.title = title
         self.icon = icon
@@ -20,6 +23,9 @@ struct PaletteAction: Identifiable {
         self.keywords = keywords
         self.enabled = enabled
         self.expertOnly = expertOnly
+        self.detail = detail
+        self.danger = danger
+        self.alternate = alternate
         self.perform = perform
     }
 }

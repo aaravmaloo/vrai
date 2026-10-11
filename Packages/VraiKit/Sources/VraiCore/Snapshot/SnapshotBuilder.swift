@@ -218,7 +218,7 @@ public struct SnapshotBuilder: Sendable {
         let worktrees = WorktreeParser.parse(try await git.run(WorktreeParser.command, background: true).stdout)
         return await withTaskGroup(of: (Int, Int?).self) { group in
             for (index, worktree) in worktrees.enumerated() where !worktree.isMain && !worktree.isBare && worktree.prunable == nil {
-                let process = GitProcess(executable: git.executable, workingDirectory: URL(filePath: worktree.path, directoryHint: .isDirectory), environment: git.environment)
+                let process = git.sibling(at: URL(filePath: worktree.path, directoryHint: .isDirectory))
                 group.addTask {
                     let data = try? await process.run(.read(["status", "--porcelain=v2", "-z", "--untracked-files=normal"]), background: true).stdout
                     return (index, data.map { StatusParser.parse($0).files.count })
@@ -240,7 +240,7 @@ public struct SnapshotBuilder: Sendable {
                 let info = declared.first { $0.path == link.path }
                 group.addTask {
                     let directory = root.appending(path: link.path, directoryHint: .isDirectory)
-                    let process = GitProcess(executable: git.executable, workingDirectory: directory, environment: git.environment)
+                    let process = git.sibling(at: directory)
                     var head = SubmoduleParser.head(at: directory)
                     if head == .unresolved {
                         let result = try? await process.runAllowingFailure(.read(["rev-parse", "--verify", "--quiet", "HEAD"]), background: true)

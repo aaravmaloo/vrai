@@ -108,11 +108,11 @@ public final class AppModel {
         return .user()
     }
 
-    public func process(at url: URL) throws -> GitProcess {
+    public func process(at url: URL, observer: GitProcess.Observer? = nil) throws -> GitProcess {
         guard let gitExecutable else { throw gitError ?? GitError(.gitNotFound) }
         var environment = self.environment
         if let askpass, let askpassHelper { environment = askpass.environment(environment, helper: askpassHelper, context: url.path(percentEncoded: false)) }
-        return GitProcess(executable: gitExecutable, workingDirectory: url, environment: environment)
+        return GitProcess(executable: gitExecutable, workingDirectory: url, environment: environment, observer: observer)
     }
 
     public func open(path: String) async throws -> RepositoryReference {
@@ -137,7 +137,8 @@ public final class AppModel {
 
     public func store(for reference: RepositoryReference) throws -> RepositoryStore {
         if let existing = stores[reference.path] { return existing }
-        let store = RepositoryStore(git: try process(at: reference.url), colors: colors[reference.path] ?? loadColors(reference))
+        let console = ConsoleLog(spillFolder: launch.sandbox?.appending(path: "console", directoryHint: .isDirectory))
+        let store = RepositoryStore(git: try process(at: reference.url, observer: console.observer), colors: colors[reference.path] ?? loadColors(reference), console: console)
         store.renameThreshold = preferences.renameThreshold
         stores[reference.path] = store
         return store

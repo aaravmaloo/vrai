@@ -97,6 +97,7 @@ struct RewriteFoot: View {
     var identifier: String?
     let cancel: () -> Void
     let action: () -> Void
+    @Environment(\.commandDraft) private var draft
 
     var body: some View {
         Button(action: cancel) {
@@ -104,7 +105,10 @@ struct RewriteFoot: View {
         }
         .buttonStyle(VraiButtonStyle(variant: .secondary))
         .keyboardShortcut(.cancelAction)
-        Button(action: action) {
+        Button {
+            if draft?.submit() == true { return }
+            action()
+        } label: {
             HStack(spacing: Vrai.Space.s6) {
                 if busy { Spinner() }
                 Text(label)
@@ -112,7 +116,7 @@ struct RewriteFoot: View {
         }
         .buttonStyle(VraiButtonStyle(variant: variant))
         .keyboardShortcut(.defaultAction)
-        .disabled(disabled || busy)
+        .disabled((disabled && draft?.isEdited != true) || busy)
         .accessibilityIdentifier(identifier ?? label)
     }
 }
@@ -492,7 +496,7 @@ struct RewriteCommandPreview: View {
     @State private var copied = false
 
     var body: some View {
-        let level = risk ?? command.risk
+        let level = RiskTag.level(command, at: risk)
         HStack(spacing: Vrai.Space.s8) {
             Text(verbatim: "$")
                 .font(Font.Vrai.codeSmall)
@@ -584,7 +588,7 @@ struct RewriteOptions<Content: View>: View {
                 if !expert, showCommand { RewriteCommandPreview(command: command, risk: risk) }
             }
         }
-        if expert { RewriteCommandPreview(command: command, risk: risk) }
+        if expert { ExpertCommandField(index: 0, command: command, risk: risk) }
     }
 }
 

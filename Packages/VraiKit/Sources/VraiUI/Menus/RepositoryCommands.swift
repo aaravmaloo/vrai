@@ -64,9 +64,9 @@ public struct RepositoryCommands: Commands {
             }
             .keyboardShortcut("f")
             .disabled(window == nil)
-            Button(String(localized: "Command palette", bundle: .module)) {}
+            Button(String(localized: "Command palette", bundle: .module)) { window?.openPalette() }
                 .keyboardShortcut("k")
-                .disabled(true)
+                .disabled(window == nil)
         }
         CommandGroup(replacing: .sidebar) {
             viewItems
@@ -81,6 +81,8 @@ public struct RepositoryCommands: Commands {
             commitItems
         }
         CommandGroup(before: .windowList) {
+            Toggle(String(localized: "Console", bundle: .module), isOn: Binding(get: { window?.console.open == true }, set: { _ in window?.console.toggle() }))
+                .disabled(window == nil)
             Button(String(localized: "Welcome to Vrai", bundle: .module)) { openWindow(id: "welcome") }
             Divider()
         }
@@ -88,7 +90,7 @@ public struct RepositoryCommands: Commands {
             KeyboardShortcutsMenuItem()
             Menu(String(localized: "Git reference", bundle: .module)) {
                 ForEach(["rebase", "reset", "reflog", "bisect", "worktree", "cherry-pick"], id: \.self) { command in
-                    Button("git " + command) {}.disabled(true)
+                    Button("git " + command) { GitReference.open(command) }
                 }
             }
             Button(String(localized: "Report a git problem\u{2026}", bundle: .module)) {}
@@ -124,9 +126,9 @@ public struct RepositoryCommands: Commands {
         }
         .keyboardShortcut("0", modifiers: [.command, .option])
         .disabled(window == nil)
-        Button(String(localized: "Show console", bundle: .module)) {}
+        Button(window?.console.open == true ? String(localized: "Hide console", bundle: .module) : String(localized: "Show console", bundle: .module)) { window?.console.toggle() }
             .keyboardShortcut("j")
-            .disabled(true)
+            .disabled(window == nil)
         Divider()
         Toggle(String(localized: "Unified diff", bundle: .module), isOn: Binding(get: { preferences?.diffMode == .unified }, set: { _ in preferences?.diffMode = .unified }))
             .disabled(window == nil)
@@ -238,9 +240,9 @@ public struct RepositoryCommands: Commands {
         Button(String(localized: "New branch\u{2026}", bundle: .module)) { window?.sync.newBranch() }
             .keyboardShortcut("b", modifiers: [.command, .shift])
             .disabled(window?.store.snapshot == nil)
-        Button(String(localized: "Switch to\u{2026}", bundle: .module)) {}
+        Button(String(localized: "Switch to\u{2026}", bundle: .module)) { window?.openPalette(.branches) }
             .keyboardShortcut("b")
-            .disabled(true)
+            .disabled(window?.store.snapshot == nil)
         Button(String(localized: "Rename \(head)\u{2026}", bundle: .module)) { if let branch { window?.sync.rename(branch.name) } }.disabled(branch == nil)
         Button(branch?.upstream == nil ? String(localized: "Set upstream\u{2026}", bundle: .module) : String(localized: "Change upstream\u{2026}", bundle: .module)) { if let branch { window?.sync.editUpstream(branch.name) } }.disabled(branch == nil)
         Divider()

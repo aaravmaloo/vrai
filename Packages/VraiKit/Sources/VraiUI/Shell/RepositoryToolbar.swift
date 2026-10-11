@@ -191,8 +191,12 @@ struct ToolbarTitle: View {
         }
         .padding(.horizontal, Vrai.Space.s6)
         .frame(height: Vrai.Size.toolbarItem)
+        .contentShape(Rectangle())
+        .onTapGesture { window.openPalette(.branches) }
         .help(String(localized: "Switch branch", bundle: .module))
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { window.openPalette(.branches) }
     }
 
     func isDetached(_ snapshot: RepositorySnapshot?) -> Bool {
@@ -280,7 +284,7 @@ struct PanelButtons: View {
     let window: WindowModel
 
     var body: some View {
-        ToolbarIconButton(icon: "terminal", label: String(localized: "Show console", bundle: .module), shortcut: "\u{2318}J", enabled: false)
+        ToolbarIconButton(icon: "terminal", label: window.console.open ? String(localized: "Hide console", bundle: .module) : String(localized: "Show console", bundle: .module), shortcut: "\u{2318}J", active: window.console.open) { window.console.toggle() }
         ToolbarIconButton(icon: "sidebar.right", label: window.preferences.inspector ? String(localized: "Hide inspector", bundle: .module) : String(localized: "Show inspector", bundle: .module), shortcut: "\u{2325}\u{2318}0", active: window.preferences.inspector) {
             window.preferences.inspector.toggle()
         }
@@ -308,10 +312,14 @@ struct ToolbarField: View {
         .frame(width: showText ? Vrai.Size.field : nil, height: Vrai.Size.toolbarItem)
         .fixedSize()
         .glassEffect(.regular, in: Capsule())
+        .contentShape(Capsule())
+        .onTapGesture { window.openPalette() }
         .help(String(localized: "Command palette", bundle: .module))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Search actions, branches, commits", bundle: .module))
         .accessibilityAddTraits(.isButton)
+        .accessibilityAction { window.openPalette() }
+        .accessibilityIdentifier("toolbar-palette-field")
     }
 }
 
@@ -339,14 +347,14 @@ struct NarrowActions: View {
         .menuIndicator(.hidden)
         .fixedSize()
         .help(String(localized: "Sync", bundle: .module))
-        ToolbarIconButton(icon: "magnifyingglass", label: String(localized: "Search", bundle: .module), enabled: false)
+        ToolbarIconButton(icon: "magnifyingglass", label: String(localized: "Search", bundle: .module), shortcut: "\u{2318}K") { window.openPalette() }
         Menu {
             Button(String(localized: "New branch\u{2026}", bundle: .module), systemImage: "arrow.triangle.branch") { window.sync.newBranch() }
             Button(String(localized: "Merge\u{2026}", bundle: .module), systemImage: "arrow.triangle.merge") { RewriteActions.openMerge(window) }
             Button(String(localized: "Rebase\u{2026}", bundle: .module), systemImage: "arrow.triangle.swap") { RewriteActions.openRebase(window) }.disabled(window.store.snapshot?.currentBranch == nil)
             Button(String(localized: "Stash changes\u{2026}", bundle: .module), systemImage: "tray.and.arrow.down") { RewriteActions.openStash(window) }.disabled(window.store.snapshot?.working.isEmpty ?? true)
             Divider()
-            Button(String(localized: "Show console", bundle: .module), systemImage: "terminal") {}.disabled(true)
+            Button(window.console.open ? String(localized: "Hide console", bundle: .module) : String(localized: "Show console", bundle: .module), systemImage: "terminal") { window.console.toggle() }
             Toggle(isOn: Binding(get: { window.preferences.expert }, set: { _ in window.toggleExpert() })) {
                 Label(String(localized: "Expert mode", bundle: .module), systemImage: "terminal")
             }

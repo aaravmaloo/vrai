@@ -72,7 +72,7 @@ struct CommitMenu: View {
             MenuItem(title: String(localized: "Create fixup commit for this", bundle: .module), icon: "bandage")
             MenuItem(title: String(localized: "Reword in place\u{2026}", bundle: .module), icon: "pencil")
             MenuItem(title: String(localized: "Split commit\u{2026}", bundle: .module), icon: "rectangle.split.2x1")
-            MenuItem(title: String(localized: "Show object", bundle: .module), icon: "cube")
+            MenuItem(title: String(localized: "Show object", bundle: .module), icon: "cube", enabled: true) { window.showObject(id) }
         }
         Divider()
         AlternateMenuItem(

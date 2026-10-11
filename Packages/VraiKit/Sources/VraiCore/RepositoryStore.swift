@@ -7,6 +7,7 @@ import VraiGit
 public final class RepositoryStore {
     public let git: GitProcess
     public let undo: UndoStore
+    public let console: ConsoleLog
     public internal(set) var snapshot: RepositorySnapshot?
     public private(set) var busy: Set<String> = []
     public var branchColors: BranchColors
@@ -56,9 +57,10 @@ public final class RepositoryStore {
     @ObservationIgnored private var refreshAgain = false
     @ObservationIgnored private var scrollSequence = 0
 
-    public init(git: GitProcess, colors: BranchColors = BranchColors()) {
+    public init(git: GitProcess, colors: BranchColors = BranchColors(), console: ConsoleLog = ConsoleLog()) {
         self.git = git
         self.undo = UndoStore(git: git)
+        self.console = console
         self.branchColors = colors
     }
 

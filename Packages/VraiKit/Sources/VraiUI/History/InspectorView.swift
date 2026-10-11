@@ -134,8 +134,7 @@ struct InspectorView: View {
             }
             if expert {
                 InspectorSection(title: String(localized: "Note", bundle: .module)) {
-                    VraiButton(title: String(localized: "Add note", bundle: .module), size: .small) {}
-                        .disabled(true)
+                    CommitNoteEditor(id: commit.id)
                 }
             }
             InspectorSection(title: String(localized: "Actions", bundle: .module)) {
