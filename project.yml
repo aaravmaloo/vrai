@@ -97,6 +97,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aaravmaloo.vrai.flowtests
+        CODE_SIGN_ENTITLEMENTS: UITests/VraiFlowTests.entitlements
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Vrai
         SWIFT_STRICT_CONCURRENCY: complete
@@ -115,6 +116,8 @@ schemes:
         "-VraiSandbox $(TMPDIR)vrai-sandbox": true
     test:
       config: Debug
+      captureScreenshotsAutomatically: false
+      deleteScreenshotsWhenEachTestSucceeds: true
       targets:
         - VraiFlowTests
     archive:

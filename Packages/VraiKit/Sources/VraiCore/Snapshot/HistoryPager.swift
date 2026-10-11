@@ -59,6 +59,7 @@ public struct HistoryPage: Sendable {
     public var lanes: Int
     public var isLast: Bool
     public var offset: Int
+    public var wipRow: GraphRow? = nil
 }
 
 public actor HistoryPager {
@@ -70,6 +71,7 @@ public actor HistoryPager {
     private var layout: LaneLayout
     private let colors: [OID: Int]
     private let head: OID?
+    private var wip: LayoutCommit?
     private var iterator: AsyncThrowingStream<Data, Error>.AsyncIterator?
     private var buffer = Data()
     private var nulsInBuffer = 0
@@ -79,8 +81,9 @@ public actor HistoryPager {
     private var fellBack = false
     private let fieldCount = LogParser.historyFields.count
 
-    public init(git: GitProcess, scope: HistoryScope = .all, filter: HistoryFilter = HistoryFilter(), colors: [OID: Int] = [:], head: OID? = nil, pageSize: Int = 2000) {
+    public init(git: GitProcess, scope: HistoryScope = .all, filter: HistoryFilter = HistoryFilter(), colors: [OID: Int] = [:], head: OID? = nil, pageSize: Int = 2000, wip: LayoutCommit? = nil) {
         self.git = git
+        self.wip = wip
         self.scope = scope
         self.filter = filter
         self.pageSize = pageSize
@@ -138,12 +141,17 @@ public actor HistoryPager {
         buffer.removeSubrange(buffer.startIndex..<cut)
         nulsInBuffer -= records * fieldCount
         let colors = self.colors
+        var wipRow: GraphRow?
+        if let pending = wip {
+            wip = nil
+            wipRow = layout.append([pending], colorOf: { colors[$0] }).first
+        }
         let rows = layout.append(commits.map { LayoutCommit(id: $0.id, parents: $0.parents, color: colors[$0.id]) }, head: head, colorOf: { colors[$0] })
         let offset = delivered
         delivered += commits.count
         let isLast = finished && nulsInBuffer < fieldCount
         if isLast { buffer.removeAll() }
-        return HistoryPage(commits: commits, rows: rows, lanes: layout.maxWidth, isLast: isLast, offset: offset)
+        return HistoryPage(commits: commits, rows: rows, lanes: layout.maxWidth, isLast: isLast, offset: offset, wipRow: wipRow)
     }
 
     public func cancel() {

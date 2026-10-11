@@ -1,58 +1,1362 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ are out of date" : {
+
+    },
+    "%@ changed" : {
+
+    },
+    "%@ is gone" : {
+
+    },
+    "%@ is out of date" : {
+
+    },
+    "%@ is the first bad commit" : {
+
+    },
+    "%@ left. Resolve them, then continue." : {
+
+    },
+    "%@ rejected your credentials" : {
+
+    },
+    "%@ to pull" : {
+
+    },
+    "%@ to push" : {
+
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, %lld staged, on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld staged, on %3$@"
+          }
+        }
+      }
+    },
+    "%@, checked out" : {
+
+    },
+    "%@." : {
+
+    },
+    "%lld new" : {
+
+    },
+    "%lld of %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$@"
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "+%lld" : {
+
+    },
+    ", %lld staged" : {
+
+    },
+    "A beautiful Git client, made for Mac." : {
+
+    },
+    "Abort" : {
+
+    },
+    "Abort merge" : {
+
+    },
+    "About Vrai" : {
+
+    },
+    "Actions" : {
+
+    },
+    "Add files to %@ and they appear in Changes." : {
+
+    },
+    "Add note" : {
+
+    },
+    "Add remote" : {
+
+    },
+    "Add remote…" : {
+
+    },
+    "Add submodule" : {
+
+    },
+    "Add submodule…" : {
+
+    },
+    "Add worktree" : {
+
+    },
+    "Add worktree…" : {
+
+    },
+    "Added" : {
+
+    },
+    "Added line %lld: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Added line %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Against %@" : {
+
+    },
+    "All authors" : {
+
+    },
+    "All branches" : {
+
+    },
+    "Amend last commit" : {
+
+    },
+    "Amend…" : {
+
+    },
+    "Another git process is running" : {
+
+    },
+    "Appearance" : {
+
+    },
+    "Apply" : {
+
+    },
+    "Apply and drop (pop)" : {
+
+    },
+    "Apply latest stash" : {
+
+    },
+    "Apply patches…" : {
+
+    },
+    "Applying patches" : {
+
+    },
+    "Assume unchanged" : {
+
+    },
+    "Author" : {
+
+    },
+    "Authored" : {
+
+    },
+    "Back to %@" : {
+
+    },
+    "Bad" : {
+
+    },
+    "Bad signature" : {
+
+    },
+    "Binary" : {
+
+    },
+    "Binary file, not shown." : {
+
+    },
+    "Bisecting at %@" : {
+
+    },
+    "Blame" : {
+
+    },
+    "Blame at %@" : {
+
+    },
+    "Branch" : {
+
+    },
+    "Branches" : {
+
+    },
+    "Branches shown" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Change upstream…" : {
+
+    },
     "Changes" : {
 
     },
-    "Console" : {
+    "Check for updates…" : {
+
+    },
+    "Check out" : {
+
+    },
+    "Check out %@" : {
+
+    },
+    "Check out %@?" : {
+
+    },
+    "Check out as %@" : {
+
+    },
+    "Cherry-pick" : {
+
+    },
+    "Cherry-pick onto %@" : {
+
+    },
+    "Cherry-pick selected" : {
+
+    },
+    "Cherry-pick with options…" : {
+
+    },
+    "Cherry-picking %@" : {
+
+    },
+    "Clean up" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Clone a repository…" : {
+
+    },
+    "Clone…" : {
+
+    },
+    "Close" : {
+
+    },
+    "Collapsed" : {
+
+    },
+    "Comfortable" : {
+
+    },
+    "Command palette" : {
+
+    },
+    "Command previews, the console prompt, Reflog and Refs are now available." : {
+
+    },
+    "Commit" : {
+
+    },
+    "Commit actions" : {
+
+    },
+    "Commit and push" : {
+
+    },
+    "Commit merge" : {
+
+    },
+    "Commit to finish merging %@ into %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Commit to finish merging %1$@ into %2$@."
+          }
+        }
+      }
+    },
+    "Commits" : {
+
+    },
+    "Commits you make here won't belong to any branch. Create a branch to keep them." : {
+
+    },
+    "Committed" : {
+
+    },
+    "Committer" : {
+
+    },
+    "Compact" : {
+
+    },
+    "Compare branches…" : {
+
+    },
+    "Conflicted" : {
+
+    },
+    "Conflicts resolved" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Continue to commit it, or abort to go back." : {
+
+    },
+    "Continue to commit the revert, or abort to go back." : {
+
+    },
+    "Copied" : {
+
+    },
+    "Copied %@" : {
+
+    },
+    "Copy %@" : {
+
+    },
+    "Copy URL" : {
+
+    },
+    "Copy full hash" : {
+
+    },
+    "Copy hash" : {
+
+    },
+    "Copy name" : {
+
+    },
+    "Copy path" : {
+
+    },
+    "Copy pull request summary" : {
+
+    },
+    "Copy subject" : {
+
+    },
+    "Create branch here and switch…" : {
+
+    },
+    "Create branch here…" : {
+
+    },
+    "Create bundle…" : {
+
+    },
+    "Create fixup commit for this" : {
+
+    },
+    "Current branch" : {
+
+    },
+    "Dark" : {
+
+    },
+    "Date" : {
+
+    },
+    "Delete %@ on %@…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete %1$@ on %2$@…"
+          }
+        }
+      }
+    },
+    "Delete %@…" : {
+
+    },
+    "Delete here and on %@…" : {
+
+    },
+    "Delete here and on origin…" : {
+
+    },
+    "Deleted" : {
+
+    },
+    "Density" : {
+
+    },
+    "Describe" : {
+
+    },
+    "Description" : {
+
+    },
+    "Detached HEAD" : {
+
+    },
+    "Diff" : {
+
+    },
+    "Discard all changes…" : {
+
+    },
+    "Discard changes…" : {
+
+    },
+    "Dismiss" : {
+
+    },
+    "Drop…" : {
+
+    },
+    "Edit %@…" : {
+
+    },
+    "Edit .gitattributes" : {
+
+    },
+    "Edit .gitignore" : {
+
+    },
+    "Edit .mailmap" : {
+
+    },
+    "Edit a file in %@ and it shows up here." : {
+
+    },
+    "End" : {
+
+    },
+    "End bisect" : {
+
+    },
+    "Everything stays one step away in menus and the palette." : {
+
+    },
+    "Expanded" : {
+
+    },
+    "Expert" : {
+
+    },
+    "Expert mode" : {
+
+    },
+    "Expert mode is off" : {
+
+    },
+    "Expert mode is on" : {
+
+    },
+    "Export archive…" : {
 
     },
     "Fetch" : {
 
     },
+    "Fetch %@" : {
+
+    },
+    "Fetch all remotes and prune" : {
+
+    },
+    "Fetch, pull and push wait until %@ is reachable. Everything else works." : {
+
+    },
+    "Fetch, pull and push with options…" : {
+
+    },
+    "File actions" : {
+
+    },
+    "File history" : {
+
+    },
+    "Files" : {
+
+    },
+    "Filter by subject, author or hash" : {
+
+    },
+    "Find in history" : {
+
+    },
+    "Finding the first bad commit, about %@ left" : {
+
+    },
+    "Force push with lease" : {
+
+    },
+    "Git %@ is too old" : {
+
+    },
+    "Git isn't installed" : {
+
+    },
+    "Git reference" : {
+
+    },
+    "Git was not found" : {
+
+    },
+    "Good" : {
+
+    },
+    "Graph" : {
+
+    },
+    "HEAD at %@" : {
+
+    },
+    "HEAD records newer commits than the ones checked out. Update to match." : {
+
+    },
+    "Hash" : {
+
+    },
     "Hide inspector" : {
+
+    },
+    "Hide sidebar" : {
 
     },
     "History" : {
 
     },
+    "History didn't load" : {
+
+    },
+    "Ignore %@" : {
+
+    },
+    "Ignore all %@ files" : {
+
+    },
     "Inspector" : {
+
+    },
+    "Intent to add" : {
+
+    },
+    "Interactive rebase" : {
+
+    },
+    "Interactive rebase from here…" : {
+
+    },
+    "Interactive rebase…" : {
+
+    },
+    "It was deleted on %@. Push %@ to publish it again, or stop tracking it." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "It was deleted on %1$@. Push %2$@ to publish it again, or stop tracking it."
+          }
+        }
+      }
+    },
+    "Its message, files and diff appear here." : {
+
+    },
+    "Its upstream %@ is gone" : {
+
+    },
+    "Keyboard shortcuts" : {
+
+    },
+    "Light" : {
+
+    },
+    "Loading" : {
+
+    },
+    "Looking at %@, not on a branch" : {
+
+    },
+    "Maintenance" : {
+
+    },
+    "Make the first commit" : {
+
+    },
+    "Mark as bad" : {
+
+    },
+    "Mark as good" : {
+
+    },
+    "Match the system" : {
 
     },
     "Merge" : {
 
     },
+    "Merge %@ into %@…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Merge %1$@ into %2$@…"
+          }
+        }
+      }
+    },
+    "Merge %@ now" : {
+
+    },
+    "Merge into %@…" : {
+
+    },
+    "Merge of" : {
+
+    },
+    "Merge with a merge commit" : {
+
+    },
+    "Merge…" : {
+
+    },
+    "Merging %@ into %@: %@ left" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Merging %1$@ into %2$@: %3$@ left"
+          }
+        }
+      }
+    },
+    "Modified" : {
+
+    },
+    "More" : {
+
+    },
     "New branch" : {
 
     },
-    "No repository open" : {
+    "New branch from %@…" : {
 
     },
-    "Open a repository and its history shows up here." : {
+    "New branch from here…" : {
+
+    },
+    "New branch from stash…" : {
+
+    },
+    "New branch here…" : {
+
+    },
+    "New branch…" : {
+
+    },
+    "New repository…" : {
+
+    },
+    "New tag" : {
+
+    },
+    "New tag here…" : {
+
+    },
+    "No changes to commit" : {
+
+    },
+    "No commits yet" : {
+
+    },
+    "No file changes." : {
+
+    },
+    "No file selected" : {
+
+    },
+    "No recent repositories" : {
+
+    },
+    "No stashes" : {
+
+    },
+    "No text changes." : {
+
+    },
+    "Not signed" : {
+
+    },
+    "Note" : {
+
+    },
+    "Notifications" : {
+
+    },
+    "Offline" : {
+
+    },
+    "On %@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "On %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "On %@, based on %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "On %1$@, based on %2$@"
+          }
+        }
+      }
+    },
+    "On branches" : {
+
+    },
+    "Only reachable from remote branches or tags." : {
+
+    },
+    "Open" : {
+
+    },
+    "Open %@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open %1$@ at %2$@"
+          }
+        }
+      }
+    },
+    "Open Changes" : {
+
+    },
+    "Open a repository…" : {
+
+    },
+    "Open in Terminal" : {
+
+    },
+    "Open in merge tool" : {
+
+    },
+    "Open recent" : {
+
+    },
+    "Open…" : {
+
+    },
+    "Panels" : {
+
+    },
+    "Parent" : {
+
+    },
+    "Parent %lld" : {
+
+    },
+    "Parents" : {
+
+    },
+    "People" : {
+
+    },
+    "Pick a side for each conflict or combine them, then mark the file resolved." : {
+
+    },
+    "Pop" : {
+
+    },
+    "Pop latest stash" : {
+
+    },
+    "Prune stale branches" : {
+
+    },
+    "Prune unreachable objects" : {
+
+    },
+    "Publish %@" : {
 
     },
     "Pull" : {
 
     },
+    "Pull %@" : {
+
+    },
+    "Pull with rebase" : {
+
+    },
     "Push" : {
 
     },
+    "Push %@" : {
+
+    },
+    "Push %@ to origin" : {
+
+    },
+    "Reading %@" : {
+
+    },
+    "Reading %@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Reading %1$@: %2$@"
+          }
+        }
+      }
+    },
     "Rebase" : {
+
+    },
+    "Rebase %@ onto %@…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rebase %1$@ onto %2$@…"
+          }
+        }
+      }
+    },
+    "Rebase %@ onto here…" : {
+
+    },
+    "Rebase %@…" : {
+
+    },
+    "Rebase…" : {
+
+    },
+    "Rebasing %@" : {
+
+    },
+    "Rebasing %@ onto %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Rebasing %1$@ onto %2$@"
+          }
+        }
+      }
+    },
+    "Recent" : {
+
+    },
+    "Recent repositories" : {
+
+    },
+    "Regular" : {
+
+    },
+    "Release notes" : {
+
+    },
+    "Remotes" : {
+
+    },
+    "Remove %@…" : {
+
+    },
+    "Remove from recents" : {
+
+    },
+    "Removed line %lld: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Removed line %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Rename %@…" : {
+
+    },
+    "Renamed" : {
+
+    },
+    "Rename…" : {
+
+    },
+    "Repack" : {
+
+    },
+    "Report a git problem…" : {
+
+    },
+    "Repositories you open, clone or create show up here." : {
+
+    },
+    "Repository" : {
+
+    },
+    "Repository info…" : {
+
+    },
+    "Reset %@ to here…" : {
+
+    },
+    "Reset %@ to selected…" : {
+
+    },
+    "Reset to here" : {
+
+    },
+    "Resolve conflicts" : {
+
+    },
+    "Restore %@ from %@…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Restore %1$@ from %2$@…"
+          }
+        }
+      }
+    },
+    "Reveal in Finder" : {
+
+    },
+    "Revert" : {
+
+    },
+    "Revert commit" : {
+
+    },
+    "Revert selected" : {
+
+    },
+    "Reverting %@" : {
+
+    },
+    "Reword in place…" : {
+
+    },
+    "Reword selected in place…" : {
+
+    },
+    "Root commit" : {
+
+    },
+    "Run background maintenance now" : {
+
+    },
+    "Save as patch…" : {
+
+    },
+    "Search" : {
 
     },
     "Search actions, branches, commits" : {
 
     },
+    "Search or run a git command" : {
+
+    },
+    "Select a commit" : {
+
+    },
+    "Set upstream…" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Settings…" : {
+
+    },
+    "Show" : {
+
+    },
+    "Show console" : {
+
+    },
+    "Show history" : {
+
+    },
+    "Show in history" : {
+
+    },
     "Show inspector" : {
+
+    },
+    "Show object" : {
+
+    },
+    "Show sidebar" : {
+
+    },
+    "Show the Welcome window when no repository is open" : {
+
+    },
+    "Show the diff against another parent" : {
+
+    },
+    "Show this window when no repository is open" : {
+
+    },
+    "Show whitespace" : {
+
+    },
+    "Side by side" : {
+
+    },
+    "Sign in again to fetch, pull and push." : {
+
+    },
+    "Sign in again…" : {
+
+    },
+    "Signature" : {
+
+    },
+    "Signed with %@ by %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Signed with %1$@ by %2$@"
+          }
+        }
+      }
+    },
+    "Signed with %@ key not in your allowed signers" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Sparse checkout…" : {
+
+    },
+    "Split commit…" : {
+
+    },
+    "Split diff" : {
+
+    },
+    "Split selected…" : {
+
+    },
+    "Stage" : {
+
+    },
+    "Stage all" : {
+
+    },
+    "Stage all, including untracked" : {
+
+    },
+    "Stage the files in Changes, write a summary and commit. The graph starts there." : {
+
+    },
+    "Start bisect here…" : {
+
+    },
+    "Start bisect…" : {
+
+    },
+    "Stash" : {
+
+    },
+    "Stash %@" : {
 
     },
     "Stash changes" : {
 
     },
+    "Stash changes…" : {
+
+    },
+    "Stash including untracked files" : {
+
+    },
+    "Stash this file…" : {
+
+    },
     "Stashes" : {
 
     },
+    "Stashing sets your changes aside so you can switch branches with a clean working tree, then bring them back." : {
+
+    },
+    "Step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Step %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "Stop tracking" : {
+
+    },
+    "Stopped at %@ because of conflicts. Resolve them, then continue." : {
+
+    },
+    "Stopped at %@ so you can edit it. Amend the commit, then continue." : {
+
+    },
+    "Stopped at %@. Continue when you're ready." : {
+
+    },
+    "Stopped at patch %lld of %lld. Fix it, then continue." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Stopped at patch %1$lld of %2$lld. Fix it, then continue."
+          }
+        }
+      }
+    },
+    "Submodules" : {
+
+    },
+    "Switch and bring changes" : {
+
+    },
+    "Switch branch" : {
+
+    },
+    "Switch to %@" : {
+
+    },
+    "Switch to…" : {
+
+    },
+    "Sync" : {
+
+    },
+    "Tag" : {
+
+    },
+    "Tag selected…" : {
+
+    },
+    "Tags" : {
+
+    },
+    "Testing %@. Build and try it, then mark it." : {
+
+    },
+    "The remote" : {
+
+    },
+    "The signature does not match the commit" : {
+
+    },
+    "This commit didn't load" : {
+
+    },
+    "This commit is not signed" : {
+
+    },
+    "This diff didn't load" : {
+
+    },
+    "This folder isn't a git repository" : {
+
+    },
+    "Try again" : {
+
+    },
+    "Try again. If it keeps failing, check the repository in Terminal." : {
+
+    },
+    "Type changed" : {
+
+    },
+    "URL" : {
+
+    },
+    "Uncommitted changes" : {
+
+    },
+    "Uncommitted changes, %@" : {
+
+    },
+    "Undo history…" : {
+
+    },
+    "Unified" : {
+
+    },
+    "Unified diff" : {
+
+    },
+    "Unknown key" : {
+
+    },
+    "Unstage" : {
+
+    },
+    "Unstage all" : {
+
+    },
+    "Untracked" : {
+
+    },
+    "Update submodules" : {
+
+    },
+    "Uses git %@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Uses git %1$@ at %2$@"
+          }
+        }
+      }
+    },
+    "Verified" : {
+
+    },
+    "Verify integrity" : {
+
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "Vrai needs git %@ or later. Update git, then open the repository again." : {
+
+    },
+    "Vrai runs the git you already have. Install the command line tools, then open the repository again." : {
+
+    },
+    "Welcome to Vrai" : {
+
+    },
+    "Welcome window" : {
+
+    },
     "Workspace" : {
+
+    },
+    "Worktrees" : {
+
+    },
+    "Write commit graph" : {
+
+    },
+    "You won't be on a branch. Commits you make there are easy to lose unless you create a branch for them." : {
+
+    },
+    "Your %@ come along." : {
+
+    },
+    "Your uncommitted change comes along." : {
+
+    },
+    "a commit" : {
+
+    },
+    "a trusted key" : {
+
+    },
+    "branch %@" : {
+
+    },
+    "branch %@, checked out" : {
+
+    },
+    "detached" : {
+
+    },
+    "full hash" : {
+
+    },
+    "git can't find a repository here. Open the folder that holds the .git folder, or create a repository in it." : {
+
+    },
+    "git couldn't read this repository" : {
+
+    },
+    "git left a lock file at %@. Wait for the other process to finish, then try again." : {
+
+    },
+    "gone" : {
+
+    },
+    "its base" : {
+
+    },
+    "lightweight" : {
+
+    },
+    "no commits yet" : {
+
+    },
+    "off" : {
+
+    },
+    "path" : {
+
+    },
+    "remote branch %@" : {
+
+    },
+    "subject" : {
+
+    },
+    "tag %@" : {
+
+    },
+    "the other branch" : {
+
+    },
+    "the remote" : {
+
+    },
+    "−%lld" : {
 
     }
   },

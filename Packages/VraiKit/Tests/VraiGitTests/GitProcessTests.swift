@@ -38,6 +38,19 @@ struct GitProcessTests {
         #expect(finished == 1500)
     }
 
+    @Test func cancellingBeforeGitStartsThrowsCancelled() async throws {
+        let git = try Self.process(at: TestSandbox.root)
+        let task = Task {
+            withUnsafeCurrentTask { $0?.cancel() }
+            return try await git.run(.read(["--version"]))
+        }
+        await #expect {
+            _ = try await task.value
+        } throws: { error in
+            (error as? GitError)?.code == .cancelled
+        }
+    }
+
     @Test func runsWithArgumentArraysAndReportsToTheConsole() async throws {
         let dir = try Self.scratchRepo()
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -91,7 +104,7 @@ struct GitProcessTests {
         #expect(variables["GIT_OPTIONAL_LOCKS"] == "0")
         #expect(variables["GIT_TERMINAL_PROMPT"] == "0")
         #expect(variables["GIT_CONFIG_NOSYSTEM"] == "1")
-        #expect(variables["HOME"]?.hasSuffix("vrai-sandbox/home") == true)
+        #expect(variables["HOME"]?.hasSuffix(TestSandbox.root.lastPathComponent + "/home") == true)
         #expect(variables["SSH_AUTH_SOCK"] == nil)
         #expect(TestSandbox.environment.variables(for: .write(["commit"]))["GIT_OPTIONAL_LOCKS"] == nil)
         #expect(variables["GIT_EDITOR"] == "true")

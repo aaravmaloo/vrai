@@ -29,7 +29,7 @@ public actor GitProcess {
     public func runAllowingFailure(_ command: GitCommand, source: ConsoleEntry.Source = .vrai, background: Bool = false, progress: (@Sendable (String) -> Void)? = nil) async throws -> GitResult {
         if command.access == .write { await acquireWrite() }
         defer { if command.access == .write { releaseWrite() } }
-        try Task.checkCancellation()
+        if Task.isCancelled { throw GitError(.cancelled) }
         let started = Date()
         let clock = ContinuousClock()
         let begin = clock.now

@@ -64,6 +64,25 @@ struct PerformanceTests {
         Self.record(String(format: "history large, first 2000 commits, commit-graph ignored: median %.1f ms (5 warm runs, for reference)", slow))
     }
 
+    @MainActor
+    @Test func outsideCommitAppearsWithinASecond() async throws {
+        let copy = try ReadSideTests.privateCopy("everyday")
+        defer { try? FileManager.default.removeItem(at: copy) }
+        let repository = copy.appending(path: "vrai", directoryHint: .isDirectory)
+        let store = RepositoryStore(git: try Sandbox.git(at: repository))
+        await store.open(watch: true)
+        defer { store.close() }
+        try await Task.sleep(for: .milliseconds(200))
+        let outside = try Sandbox.git(at: repository)
+        let clock = ContinuousClock()
+        let start = clock.now
+        try await outside.run(.write(["commit", "--allow-empty", "-m", "test"]))
+        try await waitUntil(timeout: .seconds(5)) { store.history.commits.first?.subject == "test" }
+        let elapsed = milliseconds(clock.now - start)
+        Self.record(String(format: "outside commit to new history row (everyday): %.0f ms (budget 1000 ms)", elapsed))
+        #expect(elapsed < 1000)
+    }
+
     @Test(.enabled(if: Sandbox.has("large/monorepo")))
     func largeSnapshot() async throws {
         let git = try Sandbox.git("large/monorepo")

@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 public struct LaunchOptions: Sendable, Equatable {
@@ -10,12 +11,16 @@ public struct LaunchOptions: Sendable, Equatable {
     public var open: URL?
     public var appearance: Appearance?
     public var now: Date?
+    public var windowSize: CGSize?
+    public var capture = false
 
-    public init(sandbox: URL? = nil, open: URL? = nil, appearance: Appearance? = nil, now: Date? = nil) {
+    public init(sandbox: URL? = nil, open: URL? = nil, appearance: Appearance? = nil, now: Date? = nil, windowSize: CGSize? = nil, capture: Bool = false) {
         self.sandbox = sandbox
         self.open = open
         self.appearance = appearance
         self.now = now
+        self.windowSize = windowSize
+        self.capture = capture
     }
 
     public init(arguments: [String]) {
@@ -35,6 +40,11 @@ public struct LaunchOptions: Sendable, Equatable {
                 appearance = Appearance(rawValue: value)
             case "-VraiNow":
                 now = TimeInterval(value).map { Date(timeIntervalSince1970: $0) }
+            case "-VraiWindowSize":
+                let parts = value.split(separator: "x").compactMap { Double($0) }
+                windowSize = parts.count == 2 ? CGSize(width: parts[0], height: parts[1]) : nil
+            case "-VraiCapture":
+                capture = ["YES", "1", "true"].contains(value)
             default:
                 index = next
                 continue
