@@ -68,6 +68,8 @@ public final class AppModel {
     public private(set) var pendingOpen: URL?
 
     @ObservationIgnored public let defaults: UserDefaults
+    @ObservationIgnored public let askpass: AskpassBridge?
+    @ObservationIgnored public let askpassHelper: URL?
     @ObservationIgnored private var stores: [String: RepositoryStore] = [:]
     @ObservationIgnored private var colors: [String: BranchColors] = [:]
     @ObservationIgnored private var requested: Set<String> = []
@@ -77,6 +79,9 @@ public final class AppModel {
     public init(launch: LaunchOptions) {
         self.launch = launch
         defaults = launch.makeDefaults()
+        askpassHelper = AskpassBridge.bundledHelper()
+        let socketFolder = launch.sandbox?.appending(path: "askpass", directoryHint: .isDirectory) ?? FileManager.default.temporaryDirectory.appending(path: "vrai-askpass", directoryHint: .isDirectory)
+        askpass = askpassHelper == nil ? nil : try? AskpassBridge(socketURL: AskpassBridge.socketURL(in: socketFolder))
         preferences = Preferences(defaults: defaults)
         recents = loadRecents()
         pendingOpen = launch.open
@@ -105,6 +110,8 @@ public final class AppModel {
 
     public func process(at url: URL) throws -> GitProcess {
         guard let gitExecutable else { throw gitError ?? GitError(.gitNotFound) }
+        var environment = self.environment
+        if let askpass, let askpassHelper { environment = askpass.environment(environment, helper: askpassHelper, context: url.path(percentEncoded: false)) }
         return GitProcess(executable: gitExecutable, workingDirectory: url, environment: environment)
     }
 

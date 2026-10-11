@@ -291,9 +291,10 @@ enum BannerBuilder {
 
 struct BannerStack: View {
     @Environment(RepositoryStore.self) private var store
+    @Environment(WindowModel.self) private var window
 
     var body: some View {
-        let banners = BannerBuilder.banners(store: store)
+        let banners = SyncBanners.wire(BannerBuilder.banners(store: store), window: window)
         if !banners.isEmpty {
             VStack(spacing: 0) {
                 ForEach(banners) { BannerView(model: $0) }

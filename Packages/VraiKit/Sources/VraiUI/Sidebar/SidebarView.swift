@@ -85,7 +85,7 @@ struct SidebarView: View {
                 return a < b
             }
             let tree = BranchTree(names: names)
-            SidebarSection(title: String(localized: "Branches", bundle: .module), key: "branches", count: names.count, action: (icon: "plus", label: String(localized: "New branch", bundle: .module))) {
+            SidebarSection(title: String(localized: "Branches", bundle: .module), key: "branches", count: names.count, action: (icon: "plus", label: String(localized: "New branch", bundle: .module)), perform: { window.sync.newBranch() }) {
                 if case .detached(let id) = snapshot.head {
                     SidebarItem(icon: "mappin.and.ellipse", label: String(localized: "HEAD at \(id.short)", bundle: .module), tone: .warning, current: true, selected: store.sidebarSelection == "head", help: String(localized: "Detached HEAD", bundle: .module)) {
                         pick("head", ref: "HEAD")
@@ -101,19 +101,21 @@ struct SidebarView: View {
 
     @ViewBuilder var remotes: some View {
         if let snapshot, !snapshot.remotes.isEmpty {
-            SidebarSection(title: String(localized: "Remotes", bundle: .module), key: "remotes", count: snapshot.remotes.count, action: (icon: "plus", label: String(localized: "Add remote", bundle: .module))) {
+            SidebarSection(title: String(localized: "Remotes", bundle: .module), key: "remotes", count: snapshot.remotes.count, action: (icon: "plus", label: String(localized: "Add remote", bundle: .module)), perform: { window.sync.addRemote() }) {
                 ForEach(snapshot.remotes) { remote in
                     let showBranches = preferences.showRemotes
                     let open = showBranches && (window.expandedFolders["remote:" + remote.name] ?? false)
-                    SidebarItem(icon: "network", label: remote.name, detail: PathText.remoteDetail(remote.fetchURL), expanded: showBranches ? open : nil, help: remote.fetchURL) {
+                    SidebarItem(icon: "network", label: remote.name, detail: PathText.remoteDetail(remote.fetchURL), expanded: showBranches ? open : nil, help: remote.fetchURL, trailing: SyncSidebar.badge(for: remote, snapshot: snapshot)) {
                         if showBranches { window.expandedFolders["remote:" + remote.name] = !open }
                     }
+                    .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.editRemote(remote.name) })
                     .contextMenu { RemoteMenu(remote: remote, window: window) }
                     if open {
                         ForEach(snapshot.remoteBranches.filter { $0.remote == remote.name }.sorted { $0.name < $1.name }) { branch in
                             SidebarItem(icon: "cloud", iconColor: Color.Vrai.lane(branch.colorIndex), label: branch.name, depth: 1, selected: store.sidebarSelection == "remote:" + branch.fullName, help: branch.fullName) {
                                 pick("remote:" + branch.fullName, ref: branch.fullName)
                             }
+                            .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.checkOut(remote: branch) })
                             .contextMenu { RemoteBranchMenu(remote: branch, window: window) }
                         }
                     }
@@ -125,7 +127,7 @@ struct SidebarView: View {
     @ViewBuilder var tags: some View {
         if let snapshot, !snapshot.tags.isEmpty {
             let sorted = snapshot.tags.sorted { $0.name.compare($1.name, options: .numeric) == .orderedDescending }
-            SidebarSection(title: String(localized: "Tags", bundle: .module), key: "tags", count: sorted.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "New tag", bundle: .module))) {
+            SidebarSection(title: String(localized: "Tags", bundle: .module), key: "tags", count: sorted.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "New tag", bundle: .module)), perform: { window.sync.newTag() }) {
                 ForEach(sorted.prefix(500)) { tag in
                     SidebarItem(icon: "tag", label: tag.name, detail: tag.annotated ? nil : String(localized: "lightweight", bundle: .module), selected: store.sidebarSelection == "tag:" + tag.name) {
                         pick("tag:" + tag.name, ref: tag.name)
@@ -249,6 +251,7 @@ struct BranchTreeView: View {
         ) {
             pick(key, branch.name)
         }
+        .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.switchTo(branch.name) })
         .contextMenu { BranchMenu(branch: branch, window: window) }
     }
 }
@@ -260,6 +263,7 @@ struct SidebarSection<Content: View>: View {
     var collapsible = true
     var defaultOpen = true
     var action: (icon: String, label: String)?
+    var perform: (@MainActor () -> Void)?
     @ViewBuilder let content: () -> Content
     @Environment(WindowModel.self) private var window
     @State private var hovering = false
@@ -295,8 +299,8 @@ struct SidebarSection<Content: View>: View {
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityValue(collapsible ? (open ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module)) : Text(verbatim: ""))
                 if let action {
-                    IconButton(icon: action.icon, label: action.label, small: true) {}
-                        .disabled(true)
+                    IconButton(icon: action.icon, label: action.label, small: true) { perform?() }
+                        .disabled(perform == nil)
                         .opacity(hovering ? 1 : 0)
                 }
             }

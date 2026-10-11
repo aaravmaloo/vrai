@@ -45,11 +45,11 @@ struct CommitMenu: View {
             return false
         }()
         AlternateMenuItem(
-            primary: MenuItem(title: String(localized: "Check out \(id.short)", bundle: .module), icon: "mappin.and.ellipse"),
-            alternate: MenuItem(title: String(localized: "Create branch here and switch\u{2026}", bundle: .module), icon: "arrow.triangle.branch")
+            primary: MenuItem(title: String(localized: "Check out \(id.short)", bundle: .module), icon: "mappin.and.ellipse", enabled: true) { window.sync.confirmDetach(id, subject: commit?.subject) },
+            alternate: MenuItem(title: String(localized: "Create branch here and switch\u{2026}", bundle: .module), icon: "arrow.triangle.branch", enabled: true) { window.sync.newBranch(from: id.rawValue, checkout: true) }
         )
-        MenuItem(title: String(localized: "New branch from here\u{2026}", bundle: .module), icon: "arrow.triangle.branch")
-        MenuItem(title: String(localized: "New tag here\u{2026}", bundle: .module), icon: "tag")
+        MenuItem(title: String(localized: "New branch from here\u{2026}", bundle: .module), icon: "arrow.triangle.branch", enabled: true) { window.sync.newBranch(from: id.rawValue) }
+        MenuItem(title: String(localized: "New tag here\u{2026}", bundle: .module), icon: "tag", enabled: true) { window.sync.newTag(target: id.rawValue) }
         Divider()
         AlternateMenuItem(
             primary: MenuItem(title: String(localized: "Cherry-pick onto \(head)", bundle: .module), icon: "arrow.turn.down.right"),
@@ -107,8 +107,8 @@ struct BranchMenu: View {
             Text("\(branch.name), checked out", bundle: .module)
         }
         AlternateMenuItem(
-            primary: MenuItem(title: String(localized: "Switch to \(branch.name)", bundle: .module), icon: "arrow.triangle.branch"),
-            alternate: MenuItem(title: String(localized: "Switch and bring changes", bundle: .module), icon: "arrow.triangle.branch")
+            primary: MenuItem(title: String(localized: "Switch to \(branch.name)", bundle: .module), icon: "arrow.triangle.branch", enabled: !current) { window.sync.switchTo(branch.name) },
+            alternate: MenuItem(title: String(localized: "Switch and bring changes", bundle: .module), icon: "arrow.triangle.branch", enabled: !current) { window.sync.switchTo(branch.name, carry: .bring) }
         )
         AlternateMenuItem(
             primary: MenuItem(title: String(localized: "Merge \(branch.name) into \(head)\u{2026}", bundle: .module), icon: "arrow.triangle.merge"),
@@ -118,26 +118,26 @@ struct BranchMenu: View {
         Divider()
         if current {
             AlternateMenuItem(
-                primary: MenuItem(title: branch.ahead > 0 ? String(localized: "Push \(n(branch.ahead, "commit"))", bundle: .module) : String(localized: "Push", bundle: .module), icon: "arrow.up.to.line"),
-                alternate: MenuItem(title: String(localized: "Force push with lease", bundle: .module), icon: "arrow.up.to.line", destructive: true)
+                primary: MenuItem(title: branch.ahead > 0 ? String(localized: "Push \(n(branch.ahead, "commit"))", bundle: .module) : String(localized: "Push", bundle: .module), icon: "arrow.up.to.line", enabled: true) { window.sync.push() },
+                alternate: MenuItem(title: String(localized: "Force push with lease", bundle: .module), icon: "arrow.up.to.line", enabled: true, destructive: true) { window.sync.push(force: .withLease) }
             )
             if branch.upstream != nil {
                 AlternateMenuItem(
-                    primary: MenuItem(title: branch.behind > 0 ? String(localized: "Pull \(n(branch.behind, "commit"))", bundle: .module) : String(localized: "Pull", bundle: .module), icon: "arrow.down.to.line"),
-                    alternate: MenuItem(title: String(localized: "Pull with rebase", bundle: .module), icon: "arrow.down.to.line")
+                    primary: MenuItem(title: branch.behind > 0 ? String(localized: "Pull \(n(branch.behind, "commit"))", bundle: .module) : String(localized: "Pull", bundle: .module), icon: "arrow.down.to.line", enabled: true) { window.sync.pull() },
+                    alternate: MenuItem(title: String(localized: "Pull with rebase", bundle: .module), icon: "arrow.down.to.line", enabled: true) { window.sync.pull(mode: .rebase) }
                 )
             }
         }
-        MenuItem(title: String(localized: "New branch from \(branch.name)\u{2026}", bundle: .module), icon: "plus")
-        MenuItem(title: String(localized: "Rename\u{2026}", bundle: .module), icon: "pencil")
-        MenuItem(title: branch.upstream == nil ? String(localized: "Set upstream\u{2026}", bundle: .module) : String(localized: "Change upstream\u{2026}", bundle: .module), icon: "link")
+        MenuItem(title: String(localized: "New branch from \(branch.name)\u{2026}", bundle: .module), icon: "plus", enabled: true) { window.sync.newBranch(from: branch.name) }
+        MenuItem(title: String(localized: "Rename\u{2026}", bundle: .module), icon: "pencil", enabled: true) { window.sync.rename(branch.name) }
+        MenuItem(title: branch.upstream == nil ? String(localized: "Set upstream\u{2026}", bundle: .module) : String(localized: "Change upstream\u{2026}", bundle: .module), icon: "link", enabled: true) { window.sync.editUpstream(branch.name) }
         if let upstream = branch.upstream {
             AlternateMenuItem(
-                primary: MenuItem(title: String(localized: "Delete \(branch.name)\u{2026}", bundle: .module), icon: "trash", destructive: true),
-                alternate: MenuItem(title: String(localized: "Delete here and on \(upstream.split(separator: "/").first.map(String.init) ?? upstream)\u{2026}", bundle: .module), icon: "trash", destructive: true)
+                primary: MenuItem(title: String(localized: "Delete \(branch.name)\u{2026}", bundle: .module), icon: "trash", enabled: !current, destructive: true) { window.sync.confirmDelete(branch) },
+                alternate: MenuItem(title: String(localized: "Delete here and on \(upstream.split(separator: "/").first.map(String.init) ?? upstream)\u{2026}", bundle: .module), icon: "trash", enabled: !current, destructive: true) { window.sync.confirmDelete(branch, remoteToo: true) }
             )
         } else {
-            MenuItem(title: String(localized: "Delete \(branch.name)\u{2026}", bundle: .module), icon: "trash", destructive: true)
+            MenuItem(title: String(localized: "Delete \(branch.name)\u{2026}", bundle: .module), icon: "trash", enabled: !current, destructive: true) { window.sync.confirmDelete(branch) }
         }
         Divider()
         MenuItem(title: String(localized: "Show in history", bundle: .module), icon: "clock.arrow.circlepath", enabled: true) { window.store.showRef(branch.name) }
@@ -155,15 +155,15 @@ struct RemoteBranchMenu: View {
     var body: some View {
         let head = window.headName
         let local = window.store.snapshot?.branches.contains { $0.name == remote.name } ?? false
-        MenuItem(title: local ? String(localized: "Switch to \(remote.name)", bundle: .module) : String(localized: "Check out as \(remote.name)", bundle: .module), icon: "arrow.triangle.branch")
+        MenuItem(title: local ? String(localized: "Switch to \(remote.name)", bundle: .module) : String(localized: "Check out as \(remote.name)", bundle: .module), icon: "arrow.triangle.branch", enabled: true) { window.sync.checkOut(remote: remote) }
         MenuItem(title: String(localized: "Merge \(remote.fullName) into \(head)\u{2026}", bundle: .module), icon: "arrow.triangle.merge")
         MenuItem(title: String(localized: "Rebase \(head) onto \(remote.fullName)\u{2026}", bundle: .module), icon: "arrow.triangle.swap")
-        MenuItem(title: String(localized: "New branch from \(remote.fullName)\u{2026}", bundle: .module), icon: "plus")
+        MenuItem(title: String(localized: "New branch from \(remote.fullName)\u{2026}", bundle: .module), icon: "plus", enabled: true) { window.sync.newBranch(from: remote.fullName) }
         Divider()
         MenuItem(title: String(localized: "Show in history", bundle: .module), icon: "clock.arrow.circlepath", enabled: true) { window.store.showRef(remote.fullName) }
         MenuItem(title: String(localized: "Copy name", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(remote.fullName) }
         Divider()
-        MenuItem(title: String(localized: "Delete \(remote.name) on \(remote.remote)\u{2026}", bundle: .module), icon: "trash", destructive: true)
+        MenuItem(title: String(localized: "Delete \(remote.name) on \(remote.remote)\u{2026}", bundle: .module), icon: "trash", enabled: true, destructive: true) { window.sync.confirmDeleteRemote(remote: remote.remote, name: remote.name) }
     }
 }
 
@@ -173,15 +173,15 @@ struct TagMenu: View {
 
     var body: some View {
         MenuItem(title: String(localized: "Show in history", bundle: .module), icon: "clock.arrow.circlepath", enabled: true) { window.store.showRef(tag.name) }
-        MenuItem(title: String(localized: "Check out \(tag.name)", bundle: .module), icon: "mappin.and.ellipse")
-        MenuItem(title: String(localized: "New branch from \(tag.name)\u{2026}", bundle: .module), icon: "arrow.triangle.branch")
-        MenuItem(title: String(localized: "Push \(tag.name) to origin", bundle: .module), icon: "arrow.up.to.line")
+        MenuItem(title: String(localized: "Check out \(tag.name)", bundle: .module), icon: "mappin.and.ellipse", enabled: true) { window.sync.confirmDetach(tag.target, subject: nil) }
+        MenuItem(title: String(localized: "New branch from \(tag.name)\u{2026}", bundle: .module), icon: "arrow.triangle.branch", enabled: true) { window.sync.newBranch(from: tag.name) }
+        MenuItem(title: String(localized: "Push \(tag.name) to \(window.sync.defaultRemote ?? "origin")", bundle: .module), icon: "arrow.up.to.line", enabled: window.sync.defaultRemote != nil) { window.sync.pushTag(tag.name) }
         MenuItem(title: String(localized: "Export archive\u{2026}", bundle: .module), icon: "archivebox")
         Divider()
         MenuItem(title: String(localized: "Copy name", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(tag.name) }
         AlternateMenuItem(
-            primary: MenuItem(title: String(localized: "Delete \(tag.name)\u{2026}", bundle: .module), icon: "trash", destructive: true),
-            alternate: MenuItem(title: String(localized: "Delete here and on origin\u{2026}", bundle: .module), icon: "trash", destructive: true)
+            primary: MenuItem(title: String(localized: "Delete \(tag.name)\u{2026}", bundle: .module), icon: "trash", enabled: true, destructive: true) { window.sync.confirmDeleteTag(tag) },
+            alternate: MenuItem(title: String(localized: "Delete here and on \(window.sync.defaultRemote ?? "origin")\u{2026}", bundle: .module), icon: "trash", enabled: window.sync.defaultRemote != nil, destructive: true) { window.sync.confirmDeleteTag(tag, remoteToo: true) }
         )
     }
 }
@@ -191,12 +191,12 @@ struct RemoteMenu: View {
     let window: WindowModel
 
     var body: some View {
-        MenuItem(title: String(localized: "Fetch \(remote.name)", bundle: .module), icon: "arrow.triangle.2.circlepath")
-        MenuItem(title: String(localized: "Edit \(remote.name)\u{2026}", bundle: .module), icon: "pencil")
-        MenuItem(title: String(localized: "Prune stale branches", bundle: .module), icon: "trash")
+        MenuItem(title: String(localized: "Fetch \(remote.name)", bundle: .module), icon: "arrow.triangle.2.circlepath", enabled: true) { window.sync.fetch(remote: remote.name) }
+        MenuItem(title: String(localized: "Edit \(remote.name)\u{2026}", bundle: .module), icon: "pencil", enabled: true) { window.sync.editRemote(remote.name) }
+        MenuItem(title: String(localized: "Prune stale branches", bundle: .module), icon: "trash", enabled: true) { window.sync.pruneRemote(remote.name) }
         Divider()
         MenuItem(title: String(localized: "Copy URL", bundle: .module), icon: "doc.on.doc", enabled: true) { window.copy(remote.fetchURL, label: String(localized: "URL", bundle: .module)) }
-        MenuItem(title: String(localized: "Remove \(remote.name)\u{2026}", bundle: .module), icon: "trash", destructive: true)
+        MenuItem(title: String(localized: "Remove \(remote.name)\u{2026}", bundle: .module), icon: "trash", enabled: true, destructive: true) { window.sync.confirmRemoveRemote(remote.name) }
     }
 }
 

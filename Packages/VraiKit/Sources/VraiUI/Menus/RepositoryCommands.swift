@@ -153,31 +153,31 @@ public struct RepositoryCommands: Commands {
         let behind = branch?.behind ?? 0
         let ahead = branch?.ahead ?? 0
         let expert = app.preferences.expert
-        Button(String(localized: "Fetch", bundle: .module)) {}
+        Button(String(localized: "Fetch", bundle: .module)) { window?.sync.fetch() }
             .keyboardShortcut("f", modifiers: [.command, .shift])
-            .disabled(true)
+            .disabled(window == nil)
             .modifierKeyAlternate(.option) {
-                Button(String(localized: "Fetch all remotes and prune", bundle: .module)) {}
+                Button(String(localized: "Fetch all remotes and prune", bundle: .module)) { window?.sync.fetch(all: true) }
                     .keyboardShortcut("f", modifiers: [.command, .shift, .option])
-                    .disabled(true)
+                    .disabled(window == nil)
             }
-        Button(behind > 0 ? String(localized: "Pull \(n(behind, "commit"))", bundle: .module) : String(localized: "Pull", bundle: .module)) {}
+        Button(behind > 0 ? String(localized: "Pull \(n(behind, "commit"))", bundle: .module) : String(localized: "Pull", bundle: .module)) { window?.sync.pull() }
             .keyboardShortcut("l", modifiers: [.command, .shift])
-            .disabled(true)
+            .disabled(branch == nil)
             .modifierKeyAlternate(.option) {
-                Button(String(localized: "Pull with rebase", bundle: .module)) {}
+                Button(String(localized: "Pull with rebase", bundle: .module)) { window?.sync.pull(mode: .rebase) }
                     .keyboardShortcut("l", modifiers: [.command, .shift, .option])
-                    .disabled(true)
+                    .disabled(branch == nil)
             }
-        Button(ahead > 0 ? String(localized: "Push \(n(ahead, "commit"))", bundle: .module) : String(localized: "Push", bundle: .module)) {}
+        Button(ahead > 0 ? String(localized: "Push \(n(ahead, "commit"))", bundle: .module) : String(localized: "Push", bundle: .module)) { window?.sync.push() }
             .keyboardShortcut("p", modifiers: [.command, .shift])
-            .disabled(true)
+            .disabled(branch == nil)
             .modifierKeyAlternate(.option) {
-                Button(String(localized: "Force push with lease", bundle: .module)) {}
+                Button(String(localized: "Force push with lease", bundle: .module)) { window?.sync.push(force: .withLease) }
                     .keyboardShortcut("p", modifiers: [.command, .shift, .option])
-                    .disabled(true)
+                    .disabled(branch == nil)
             }
-        Button(String(localized: "Fetch, pull and push with options\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Fetch, pull and push with options\u{2026}", bundle: .module)) { window?.sync.openSync(.push) }.disabled(window == nil)
         Divider()
         Button(String(localized: "Stash changes\u{2026}", bundle: .module)) {}
             .keyboardShortcut("s", modifiers: [.command, .shift])
@@ -189,9 +189,9 @@ public struct RepositoryCommands: Commands {
             }
         Divider()
         Menu(String(localized: "Remotes", bundle: .module)) {
-            Button(String(localized: "Add remote\u{2026}", bundle: .module)) {}.disabled(true)
+            Button(String(localized: "Add remote\u{2026}", bundle: .module)) { window?.sync.addRemote() }.disabled(window == nil)
             ForEach(window?.store.snapshot?.remotes ?? []) { remote in
-                Button(String(localized: "Edit \(remote.name)\u{2026}", bundle: .module)) {}.disabled(true)
+                Button(String(localized: "Edit \(remote.name)\u{2026}", bundle: .module)) { window?.sync.editRemote(remote.name) }
             }
         }
         Button(String(localized: "Add worktree\u{2026}", bundle: .module)) {}.disabled(true)
@@ -230,14 +230,14 @@ public struct RepositoryCommands: Commands {
     @ViewBuilder var branchItems: some View {
         let head = window?.headName ?? ""
         let branch = window?.store.snapshot?.currentBranch
-        Button(String(localized: "New branch\u{2026}", bundle: .module)) {}
+        Button(String(localized: "New branch\u{2026}", bundle: .module)) { window?.sync.newBranch() }
             .keyboardShortcut("b", modifiers: [.command, .shift])
-            .disabled(true)
+            .disabled(window?.store.snapshot == nil)
         Button(String(localized: "Switch to\u{2026}", bundle: .module)) {}
             .keyboardShortcut("b")
             .disabled(true)
-        Button(String(localized: "Rename \(head)\u{2026}", bundle: .module)) {}.disabled(true)
-        Button(branch?.upstream == nil ? String(localized: "Set upstream\u{2026}", bundle: .module) : String(localized: "Change upstream\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Rename \(head)\u{2026}", bundle: .module)) { if let branch { window?.sync.rename(branch.name) } }.disabled(branch == nil)
+        Button(branch?.upstream == nil ? String(localized: "Set upstream\u{2026}", bundle: .module) : String(localized: "Change upstream\u{2026}", bundle: .module)) { if let branch { window?.sync.editUpstream(branch.name) } }.disabled(branch == nil)
         Divider()
         Button(String(localized: "Merge into \(head)\u{2026}", bundle: .module)) {}
             .keyboardShortcut("m", modifiers: [.command, .shift])
@@ -260,7 +260,7 @@ public struct RepositoryCommands: Commands {
         Button(String(localized: "Cherry-pick selected", bundle: .module)) {}.disabled(true)
         Button(String(localized: "Revert selected", bundle: .module)) {}.disabled(true)
         Button(String(localized: "Reset \(head) to selected\u{2026}", bundle: .module)) {}.disabled(true)
-        Button(String(localized: "Tag selected\u{2026}", bundle: .module)) {}.disabled(true)
+        Button(String(localized: "Tag selected\u{2026}", bundle: .module)) { if let id = window?.store.selection?.commitID { window?.sync.newTag(target: id.rawValue) } }.disabled(window?.store.selection?.commitID == nil)
         if app.preferences.expert {
             Divider()
             Button(String(localized: "Reword selected in place\u{2026}", bundle: .module)) {}.disabled(true)

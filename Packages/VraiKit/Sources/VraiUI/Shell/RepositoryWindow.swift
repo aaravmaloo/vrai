@@ -117,6 +117,7 @@ struct RepositoryShell: View {
         .environment(\.captureMode, app.launch.capture)
         .modifier(AlertHost(center: window.alerts))
         .modifier(SheetHost(center: window.sheets))
+        .modifier(SyncWiring(window: window))
         .focusedSceneValue(\.windowModel, window)
         .tint(Color.Vrai.accent)
         .onChange(of: store.snapshotError) { _, error in

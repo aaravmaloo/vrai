@@ -326,21 +326,6 @@ struct CommitList: View {
     }
 
     func confirmCheckout(_ commit: Commit) {
-        let dirty = store.snapshot?.working.count ?? 0
-        var message = String(localized: "You won't be on a branch. Commits you make there are easy to lose unless you create a branch for them.", bundle: .module)
-        if dirty == 1 {
-            message += " " + String(localized: "Your uncommitted change comes along.", bundle: .module)
-        } else if dirty > 1 {
-            message += " " + String(localized: "Your \(n(dirty, "uncommitted change")) come along.", bundle: .module)
-        }
-        window.alerts.present(AlertRequest(
-            title: String(localized: "Check out \(commit.id.short)?", bundle: .module),
-            message: message,
-            actions: [
-                AlertAction(title: String(localized: "Check out \(commit.id.short)", bundle: .module), enabled: false),
-                AlertAction(title: String(localized: "Create branch here\u{2026}", bundle: .module), enabled: false),
-                AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel)
-            ]
-        ))
+        window.sync.confirmDetach(commit.id, subject: commit.subject)
     }
 }

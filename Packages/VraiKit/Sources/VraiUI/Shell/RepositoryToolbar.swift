@@ -10,45 +10,67 @@ struct RepositoryToolbar: ToolbarContent {
             ToolbarTitle(window: window)
         }
         .sharedBackgroundVisibility(.hidden)
+        ToolbarSpacer(.flexible)
         if window.widthClass.isNarrow {
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem {
                 ToolbarCapsule(label: String(localized: "Actions", bundle: .module)) {
                     NarrowActions(window: window)
                 }
+                .toolbarSlot(last: true)
             }
             .sharedBackgroundVisibility(.hidden)
         } else {
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem {
                 ToolbarCapsule(label: String(localized: "Sync", bundle: .module)) {
                     SyncButtons(window: window)
                 }
+                .toolbarSlot()
             }
             .sharedBackgroundVisibility(.hidden)
             if window.widthClass >= .regular {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem {
                     ToolbarCapsule(label: String(localized: "Branch", bundle: .module)) {
                         BranchButtons(window: window)
                     }
+                    .toolbarSlot()
                 }
                 .sharedBackgroundVisibility(.hidden)
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem {
                     ToolbarCapsule(label: String(localized: "Stash", bundle: .module)) {
                         ToolbarIconButton(icon: "tray.and.arrow.down", label: window.optionDown ? String(localized: "Stash including untracked files", bundle: .module) : String(localized: "Stash changes", bundle: .module), shortcut: "\u{21E7}\u{2318}S", enabled: false)
                     }
+                    .toolbarSlot()
                 }
                 .sharedBackgroundVisibility(.hidden)
             }
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem {
                 ToolbarField(window: window)
+                    .toolbarSlot()
             }
             .sharedBackgroundVisibility(.hidden)
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem {
                 ToolbarCapsule(label: String(localized: "Panels", bundle: .module)) {
                     PanelButtons(window: window)
                 }
+                .toolbarSlot(last: true)
             }
             .sharedBackgroundVisibility(.hidden)
         }
+    }
+}
+
+enum ToolbarLayout {
+    static let systemGap = Vrai.Space.s8
+    static let groupGap = Vrai.Space.s12
+    static let systemEdge = Vrai.Space.s8
+    static let edge = Vrai.Space.s12
+    static let glyph = Vrai.Size.icon - Vrai.Space.s2
+}
+
+extension View {
+    func toolbarSlot(last: Bool = false) -> some View {
+        padding(.leading, ToolbarLayout.groupGap - ToolbarLayout.systemGap)
+            .padding(.trailing, last ? ToolbarLayout.edge - ToolbarLayout.systemEdge : 0)
     }
 }
 
@@ -62,30 +84,45 @@ struct ToolbarCapsule<Content: View>: View {
         }
         .padding(.horizontal, Vrai.Space.s2)
         .frame(height: Vrai.Size.toolbarItem)
+        .fixedSize()
         .glassEffect(.regular, in: Capsule())
         .accessibilityElement(children: .contain)
         .accessibilityLabel(label)
     }
 }
 
+struct ToolbarGlyph: View {
+    let icon: String
+
+    var body: some View {
+        Symbol(icon, font: Font.Vrai.title3)
+            .frame(width: ToolbarLayout.glyph, height: ToolbarLayout.glyph)
+    }
+}
+
 struct ToolbarButtonStyle: ButtonStyle {
     var active = false
+    var counted = false
 
     func makeBody(configuration: Configuration) -> some View {
-        StyledBody(configuration: configuration, active: active)
+        StyledBody(configuration: configuration, active: active, counted: counted)
     }
 
     struct StyledBody: View {
         let configuration: Configuration
         let active: Bool
+        let counted: Bool
         @Environment(\.isEnabled) private var enabled
         @State private var hovering = false
 
         var body: some View {
             configuration.label
                 .foregroundStyle(!enabled ? Color.Vrai.textDisabled : active ? Color.Vrai.accentText : Color.Vrai.text)
-                .padding(.horizontal, Vrai.Space.s8)
-                .frame(minWidth: Metrics.toolbarButtonMin, minHeight: Metrics.toolbarButton, maxHeight: Metrics.toolbarButton)
+                .padding(.leading, Vrai.Space.s8)
+                .padding(.trailing, counted ? Vrai.Space.s10 : Vrai.Space.s8)
+                .frame(minWidth: Metrics.toolbarButtonMin)
+                .frame(height: Metrics.toolbarButton)
+                .fixedSize()
                 .background(active ? Color.Vrai.accentSoft : configuration.isPressed ? Color.Vrai.fillActive : (hovering && enabled ? Color.Vrai.fillHover : Color.clear), in: Capsule())
                 .contentShape(Capsule())
                 .onHover { hovering = $0 }
@@ -104,14 +141,16 @@ struct ToolbarIconButton: View {
     var action: () -> Void = {}
 
     var body: some View {
+        let counted = badge.map { $0 != 0 } ?? false
         Button(action: action) {
             HStack(spacing: Vrai.Space.s4) {
                 if busy {
                     Spinner()
+                        .frame(width: ToolbarLayout.glyph, height: ToolbarLayout.glyph)
                 } else {
-                    Symbol(icon, font: Font.Vrai.title3)
+                    ToolbarGlyph(icon: icon)
                 }
-                if let badge, badge != 0 {
+                if let badge, counted {
                     Text(String(badge))
                         .font(Font.Vrai.captionStrong)
                         .monospacedDigit()
@@ -119,7 +158,7 @@ struct ToolbarIconButton: View {
                 }
             }
         }
-        .buttonStyle(ToolbarButtonStyle(active: active))
+        .buttonStyle(ToolbarButtonStyle(active: active, counted: counted))
         .disabled(!enabled)
         .help(shortcut.map { label + "  " + $0 } ?? label)
         .accessibilityLabel(label)
@@ -219,9 +258,10 @@ struct SyncButtons: View {
     var body: some View {
         let labels = SyncLabels(window: window)
         let alt = window.optionDown
-        ToolbarIconButton(icon: "arrow.triangle.2.circlepath", label: labels.fetch, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}F" : "\u{21E7}\u{2318}F", busy: window.store.busy.contains("fetch"), enabled: false)
-        ToolbarIconButton(icon: "arrow.down.to.line", label: labels.pull, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}L" : "\u{21E7}\u{2318}L", badge: alt ? nil : labels.behind, busy: window.store.busy.contains("pull"), enabled: false)
-        ToolbarIconButton(icon: "arrow.up.to.line", label: labels.push, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}P" : "\u{21E7}\u{2318}P", badge: alt ? nil : labels.ahead, busy: window.store.busy.contains("push"), enabled: false)
+        let sync = window.sync
+        ToolbarIconButton(icon: "arrow.triangle.2.circlepath", label: sync.busyLabel(.fetch) ?? labels.fetch, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}F" : "\u{21E7}\u{2318}F", busy: sync.isBusy(.fetch)) { alt ? sync.fetch(all: true) : sync.fetch() }
+        ToolbarIconButton(icon: "arrow.down.to.line", label: sync.busyLabel(.pull) ?? labels.pull, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}L" : "\u{21E7}\u{2318}L", badge: alt ? nil : labels.behind, busy: sync.isBusy(.pull), enabled: labels.onBranch) { alt ? sync.pull(mode: .rebase) : sync.pull() }
+        ToolbarIconButton(icon: "arrow.up.to.line", label: sync.busyLabel(.push) ?? labels.push, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}P" : "\u{21E7}\u{2318}P", badge: alt ? nil : labels.ahead, busy: sync.isBusy(.push), enabled: labels.onBranch) { alt ? sync.push(force: .withLease) : sync.push() }
     }
 }
 
@@ -230,7 +270,7 @@ struct BranchButtons: View {
 
     var body: some View {
         let alt = window.optionDown
-        ToolbarIconButton(icon: "arrow.triangle.branch", label: String(localized: "New branch", bundle: .module), shortcut: "\u{21E7}\u{2318}B", enabled: false)
+        ToolbarIconButton(icon: "arrow.triangle.branch", label: String(localized: "New branch", bundle: .module), shortcut: "\u{21E7}\u{2318}B") { window.sync.newBranch() }
         ToolbarIconButton(icon: "arrow.triangle.merge", label: alt ? String(localized: "Merge with a merge commit", bundle: .module) : String(localized: "Merge", bundle: .module), shortcut: "\u{21E7}\u{2318}M", enabled: false)
         ToolbarIconButton(icon: "arrow.triangle.swap", label: alt ? String(localized: "Interactive rebase", bundle: .module) : String(localized: "Rebase", bundle: .module), shortcut: alt ? "\u{2325}\u{21E7}\u{2318}R" : "\u{21E7}\u{2318}R", enabled: false)
     }
@@ -266,6 +306,7 @@ struct ToolbarField: View {
         .foregroundStyle(Color.Vrai.textTertiary)
         .padding(.horizontal, Vrai.Space.s12)
         .frame(width: showText ? Vrai.Size.field : nil, height: Vrai.Size.toolbarItem)
+        .fixedSize()
         .glassEffect(.regular, in: Capsule())
         .help(String(localized: "Command palette", bundle: .module))
         .accessibilityElement(children: .ignore)
@@ -281,12 +322,10 @@ struct NarrowActions: View {
     var body: some View {
         let labels = SyncLabels(window: window)
         Menu {
-            Button(labels.fetch, systemImage: "arrow.triangle.2.circlepath") {}.disabled(true)
-            Button(labels.pull, systemImage: "arrow.down.to.line") {}.disabled(true)
-            Button(labels.push, systemImage: "arrow.up.to.line") {}.disabled(true)
+            SyncMenuItems(window: window, labels: labels)
         } label: {
             HStack(spacing: Vrai.Space.s4) {
-                Symbol("arrow.up.arrow.down", font: Font.Vrai.title3)
+                ToolbarGlyph(icon: "arrow.up.arrow.down")
                 if labels.ahead + labels.behind > 0 {
                     Text(String(labels.ahead + labels.behind))
                         .font(Font.Vrai.captionStrong)
@@ -296,13 +335,13 @@ struct NarrowActions: View {
             }
         }
         .menuStyle(.button)
-        .buttonStyle(ToolbarButtonStyle())
+        .buttonStyle(ToolbarButtonStyle(counted: labels.ahead + labels.behind > 0))
         .menuIndicator(.hidden)
         .fixedSize()
         .help(String(localized: "Sync", bundle: .module))
         ToolbarIconButton(icon: "magnifyingglass", label: String(localized: "Search", bundle: .module), enabled: false)
         Menu {
-            Button(String(localized: "New branch\u{2026}", bundle: .module), systemImage: "arrow.triangle.branch") {}.disabled(true)
+            Button(String(localized: "New branch\u{2026}", bundle: .module), systemImage: "arrow.triangle.branch") { window.sync.newBranch() }
             Button(String(localized: "Merge\u{2026}", bundle: .module), systemImage: "arrow.triangle.merge") {}.disabled(true)
             Button(String(localized: "Rebase\u{2026}", bundle: .module), systemImage: "arrow.triangle.swap") {}.disabled(true)
             Button(String(localized: "Stash changes\u{2026}", bundle: .module), systemImage: "tray.and.arrow.down") {}.disabled(true)
@@ -320,7 +359,7 @@ struct NarrowActions: View {
             }
             Button(String(localized: "Settings\u{2026}", bundle: .module), systemImage: "gearshape") { openSettings() }
         } label: {
-            Symbol("ellipsis", font: Font.Vrai.title3)
+            ToolbarGlyph(icon: "ellipsis")
         }
         .menuStyle(.button)
         .buttonStyle(ToolbarButtonStyle())
