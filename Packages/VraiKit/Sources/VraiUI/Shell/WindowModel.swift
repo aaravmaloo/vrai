@@ -21,6 +21,7 @@ public final class WindowModel {
     public let changes = ChangesModel()
     public let console = ConsoleModel()
     public let palette = PaletteModel()
+    public let switcher = SwitcherModel()
     public let now: Date?
     public var pane: Pane = .list
     public var columns: NavigationSplitViewVisibility = .all
@@ -32,6 +33,7 @@ public final class WindowModel {
     public var listFocused = false
     public var optionDown = false
     public var focusFilter = false
+    public var switchRequest: RepositoryReference?
 
     public init(reference: RepositoryReference, store: RepositoryStore, preferences: Preferences, now: Date?) {
         self.reference = reference
@@ -48,6 +50,20 @@ public final class WindowModel {
 
     public func toggleSidebar() {
         columns = sidebarShown ? .detailOnly : .all
+    }
+
+    public func toggleSwitcher() {
+        if switcher.open {
+            switcher.dismiss()
+            return
+        }
+        palette.dismiss()
+        switcher.present()
+    }
+
+    func inherit(_ previous: WindowModel) {
+        columns = previous.columns
+        widthClass = previous.widthClass
     }
 
     public func copy(_ text: String, label: String? = nil) {

@@ -16,7 +16,7 @@ struct SettingsLogicTests {
         let all = ShortcutCatalog.groups.flatMap(\.items)
         let keys = Set(all.flatMap(\.keys))
         let appendixB = ["\u{2318}K", "\u{2318}\u{21A9}", "\u{21E7}\u{2318}F", "\u{2325}\u{2318}\u{21A9}", "\u{21E7}\u{2318}L", "Space", "\u{21E7}\u{2318}P", "\u{2318}Z", "\u{21E7}\u{2318}B", "\u{2318}J", "\u{21E7}\u{2318}M", "\u{2303}\u{2318}S", "\u{21E7}\u{2318}R", "\u{2325}\u{2318}0", "\u{21E7}\u{2318}S", "\u{2325}\u{2318}E", "\u{2318}1", "\u{2318}2", "\u{2318}3", "\u{2318},", "\u{2318}O", "\u{21E7}\u{2318}O", "\u{2325}\u{2318}N"]
-        let menuBar = ["\u{2325}\u{21E7}\u{2318}F", "\u{2325}\u{21E7}\u{2318}L", "\u{2325}\u{21E7}\u{2318}P", "\u{2318}C", "\u{2325}\u{2318}C", "\u{2318}F", "\u{2318}B", "\u{2325}\u{21E7}\u{2318}R", "\u{21E7}\u{2318}A", "\u{21E7}\u{2318}1", "\u{2318}4", "\u{2318}W", "\u{2318}M", "\u{2318}H", "\u{2318}Q"]
+        let menuBar = ["\u{2325}\u{21E7}\u{2318}F", "\u{2325}\u{21E7}\u{2318}L", "\u{2325}\u{21E7}\u{2318}P", "\u{2318}C", "\u{2325}\u{2318}C", "\u{2318}F", "\u{2318}B", "\u{2325}\u{21E7}\u{2318}R", "\u{21E7}\u{2318}A", "\u{21E7}\u{2318}1", "\u{2318}4", "\u{2318}T", "\u{2318}W", "\u{2318}M", "\u{2318}H", "\u{2318}Q"]
         for shortcut in appendixB + menuBar {
             #expect(keys.contains(shortcut), "missing \(shortcut)")
         }
@@ -75,10 +75,87 @@ struct SettingsLogicTests {
 
     @Test func accountItemsMergeSavedAccountsWithRemoteHosts() {
         let saved = SignedInAccount(url: "https://github.com", username: "avery-chen", signedIn: Date(timeIntervalSince1970: 1_791_720_000))
-        let items = AccountList.items(accounts: [saved].compactMap { $0 }, windows: [], active: nil)
-        #expect(items.count == 1)
-        #expect(items.first?.status == .ok)
-        #expect(items.first?.host == "github.com")
+        let remotes = [
+            Remote(name: "origin", fetchURL: "https://avery@github.com/vrai-app/vrai.git", pushURL: nil, headBranch: nil, prune: false),
+            Remote(name: "mirror", fetchURL: "https://git.example.com/vrai.git", pushURL: nil, headBranch: nil, prune: false),
+            Remote(name: "ssh", fetchURL: "git@github.com:vrai-app/vrai.git", pushURL: nil, headBranch: nil, prune: false)
+        ]
+        let hosts = AccountList.hosts(accounts: [saved].compactMap { $0 }, remotes: remotes, managed: false)
+        #expect(hosts.map(\.host) == ["github.com", "git.example.com"])
+        #expect(hosts.first?.remote == "origin")
+        #expect(hosts.first?.probe == "https://avery@github.com/vrai-app/vrai.git")
+        #expect(hosts.first?.hint == "avery")
+        #expect(hosts.first?.repository == "vrai-app/vrai")
+
+        let checking = AccountList.items(hosts: hosts, lookups: [:])
+        #expect(checking.map(\.status) == [.checking, .checking])
+        let looked = AccountList.items(hosts: hosts, lookups: [
+            "https://github.com": AccountLookup(usernames: ["avery", "mira"], managed: ["mira"]),
+            "https://git.example.com": AccountLookup()
+        ])
+        #expect(looked.map(\.status) == [.ok, .ok, .none])
+        #expect(looked.map(\.username) == ["avery", "mira", nil])
+        #expect(looked.map(\.managed) == [false, true, false])
+        #expect(Set(looked.map(\.id)).count == 3)
+        let expired = AccountList.items(hosts: hosts, lookups: ["https://github.com": AccountLookup(usernames: ["avery"])], failing: ["github.com"])
+        #expect(expired.first?.status == .expired)
+        #expect(expired.last?.status == .checking)
+
+        let managed = AccountList.hosts(accounts: [], remotes: [], managed: true)
+        #expect(managed.map(\.url) == ["https://github.com"])
+        #expect(AccountList.items(hosts: managed, lookups: [:]).isEmpty)
+        #expect(AccountList.items(hosts: managed, lookups: ["https://github.com": AccountLookup()]).isEmpty)
+        #expect(AccountList.items(hosts: managed, lookups: ["https://github.com": AccountLookup(usernames: ["avery"], managed: ["avery"])]).first?.status == .ok)
+        #expect(AccountList.hosts(accounts: [], remotes: remotes, managed: true).first?.optional == false)
+    }
+
+    @Test func passwordChoicesListWhatIsInstalled() {
+        let manager = CredentialManager(executable: URL(filePath: CredentialManager.packagePath))
+        let keychain = CredentialSetup(helpers: CredentialHelper.effective(["osxkeychain", "osxkeychain"]), keychainAvailable: true)
+        #expect(CredentialChoices.selection(keychain) == "keychain")
+        #expect(CredentialChoices.options(keychain).map(\.value) == ["keychain", "store", ""])
+        #expect(AccountsCopy.summary(keychain) == "git uses osxkeychain.")
+        #expect(AccountsCopy.storage(keychain, environment: [:]) == "git's osxkeychain helper keeps tokens in your login keychain.")
+
+        let gcm = CredentialSetup(helpers: CredentialHelper.effective(["osxkeychain", "", CredentialManager.packagePath]), manager: manager, managerVersion: "2.6.1", keychainAvailable: true)
+        #expect(gcm.managerActive)
+        #expect(CredentialChoices.selection(gcm) == "manager")
+        #expect(CredentialChoices.options(gcm).map(\.value) == ["manager", "keychain", "store", ""])
+        #expect(CredentialChoices.options(gcm).first?.label == "Git Credential Manager")
+        #expect(AccountsCopy.summary(gcm) == "git uses Git Credential Manager 2.6.1.")
+        #expect(AccountsCopy.storage(gcm, environment: [:]) == "Git Credential Manager keeps tokens in your login keychain.")
+        var plaintext = gcm
+        plaintext.managerStore = "plaintext"
+        #expect(AccountsCopy.storage(plaintext, environment: [:]) == "Git Credential Manager keeps tokens in its plaintext store.")
+
+        let installedNotChosen = CredentialSetup(helpers: CredentialHelper.effective(["osxkeychain"]), manager: manager, keychainAvailable: true)
+        #expect(!installedNotChosen.managerActive)
+        #expect(CredentialChoices.options(installedNotChosen).map(\.value) == ["manager", "keychain", "store", ""])
+
+        let missing = CredentialSetup(helpers: CredentialHelper.effective(["/usr/local/share/gcm-core/git-credential-manager"]), keychainAvailable: false)
+        #expect(!missing.managerActive)
+        #expect(CredentialChoices.selection(missing) == "/usr/local/share/gcm-core/git-credential-manager")
+        #expect(CredentialChoices.options(missing).map(\.value) == ["store", "/usr/local/share/gcm-core/git-credential-manager", ""])
+
+        let nothing = CredentialSetup(helpers: [], keychainAvailable: true)
+        #expect(CredentialChoices.selection(nothing) == "")
+        #expect(AccountsCopy.summary(nothing) == "No helper is set, so git asks for a password every time.")
+        #expect(AccountsCopy.summary(nil) == "Reading credential.helper\u{2026}")
+
+        let cache = CredentialSetup(helpers: CredentialHelper.effective(["cache --timeout=900", "store --file=~/.vrai-credentials"]), keychainAvailable: true)
+        #expect(CredentialChoices.options(cache).map(\.value) == ["keychain", "store", "cache", ""])
+        #expect(AccountsCopy.summary(cache) == "git asks cache and store, in that order.")
+        let store = CredentialSetup(helpers: CredentialHelper.effective(["store --file=~/.vrai-credentials"]))
+        #expect(AccountsCopy.storage(store, environment: ["HOME": "/Users/avery"]) == "git credential-store keeps tokens unencrypted in /Users/avery/.vrai-credentials.")
+        #expect(AccountsCopy.storage(nothing, environment: [:]) == "No credential helper is set, so git saves no tokens and asks every time.")
+    }
+
+    @Test func passwordFooterNamesWhereTheHelperComesFrom() {
+        let system = ConfigEntry(scope: .system, origin: "file:/Library/Developer/CommandLineTools/usr/share/git-core/gitconfig", key: "credential.helper", value: "osxkeychain")
+        let global = ConfigEntry(scope: .global, origin: "file:/Users/avery/.gitconfig", key: "credential.helper", value: "osxkeychain")
+        #expect(AccountsCopy.origin([system, global], file: "~/.gitconfig", environment: [:]) == "Stored in ~/.gitconfig as credential.helper.")
+        #expect(AccountsCopy.origin([], file: "~/.gitconfig", environment: [:]) == "Stored in ~/.gitconfig as credential.helper.")
+        #expect(AccountsCopy.origin([system], file: "~/.gitconfig", environment: [:]) == "Set in /Library/Developer/CommandLineTools/usr/share/git-core/gitconfig as credential.helper. A new choice goes in ~/.gitconfig.")
     }
 
     @Test func settingsErrorCopyCoversConfigFailures() {

@@ -248,6 +248,7 @@ struct Badge: View {
 struct AheadBehind: View {
     let ahead: Int
     let behind: Int
+    @Environment(\.backgroundProminence) private var prominence
 
     var body: some View {
         HStack(spacing: Vrai.Space.s6) {
@@ -256,7 +257,7 @@ struct AheadBehind: View {
                     Symbol("arrow.up", font: Font.Vrai.overline)
                     Text(String(ahead))
                 }
-                .foregroundStyle(Color.Vrai.accentText)
+                .foregroundStyle(prominence == .increased ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.Vrai.accentText))
             }
             if behind > 0 {
                 HStack(spacing: Metrics.hairline) {
@@ -447,39 +448,32 @@ struct SegmentedControl<Value: Hashable>: View {
     var small = true
 
     var body: some View {
-        HStack(spacing: Vrai.Space.s2) {
+        Picker(selection: $selection) {
             ForEach(items) { item in
-                let on = item.value == selection
-                Button {
-                    selection = item.value
-                } label: {
-                    HStack(spacing: Vrai.Space.s6) {
-                        if let icon = item.icon { Symbol(icon, font: Font.Vrai.callout) }
-                        if let title = item.title { Text(title).font(Font.Vrai.callout) }
-                    }
-                    .foregroundStyle(on ? Color.Vrai.text : Color.Vrai.textSecondary)
-                    .padding(.horizontal, small ? Vrai.Space.s8 : Vrai.Space.s10)
-                    .frame(maxHeight: .infinity)
-                    .background {
-                        if on {
-                            RoundedRectangle(cornerRadius: small ? Vrai.Radius.xs : Vrai.Radius.sm, style: .continuous)
-                                .fill(Color.Vrai.surfaceRaised)
-                                .overlay(RoundedRectangle(cornerRadius: small ? Vrai.Radius.xs : Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline / 2))
-                                .shadow(color: Color.Vrai.separator, radius: Metrics.hairline, y: Metrics.hairline)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .help(item.label)
-                .accessibilityLabel(item.label)
-                .accessibilityAddTraits(on ? .isSelected : [])
+                segment(item)
+                    .help(item.label)
+                    .tag(item.value)
             }
+        } label: {
+            EmptyView()
         }
-        .padding(Vrai.Space.s2)
-        .frame(height: small ? Vrai.Size.controlSm : Vrai.Size.control)
-        .background(Color.Vrai.fill, in: RoundedRectangle(cornerRadius: small ? Vrai.Radius.sm : Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: small ? Vrai.Radius.sm : Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
+        .labelsHidden()
+        .pickerStyle(.segmented)
+        .controlSize(small ? .small : .regular)
         .fixedSize()
+    }
+
+    @ViewBuilder func segment(_ item: SegmentItem<Value>) -> some View {
+        if let icon = item.icon, let title = item.title {
+            Label(title, systemImage: icon)
+                .labelStyle(.titleAndIcon)
+                .accessibilityLabel(item.label)
+        } else if let icon = item.icon {
+            Image(systemName: icon)
+                .accessibilityLabel(item.label)
+        } else {
+            Text(item.title ?? item.label)
+                .accessibilityLabel(item.label)
+        }
     }
 }

@@ -21,19 +21,22 @@ public struct RecentRepository: Codable, Hashable, Sendable, Identifiable {
     public var path: String
     public var name: String
     public var lastOpened: Date
+    public var remote: String?
 
     public var id: String { path }
 
-    public init(path: String, name: String, lastOpened: Date) {
+    public init(path: String, name: String, lastOpened: Date, remote: String? = nil) {
         self.path = path
         self.name = name
         self.lastOpened = lastOpened
+        self.remote = remote
     }
 
     enum CodingKeys: String, CodingKey {
         case path
         case name
         case lastOpened
+        case remote
     }
 
     public init(from decoder: Decoder) throws {
@@ -42,6 +45,7 @@ public struct RecentRepository: Codable, Hashable, Sendable, Identifiable {
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? URL(filePath: path).lastPathComponent
         let seconds = try container.decodeIfPresent(Double.self, forKey: .lastOpened) ?? 0
         lastOpened = Date(timeIntervalSince1970: seconds)
+        remote = try container.decodeIfPresent(String.self, forKey: .remote)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -49,6 +53,7 @@ public struct RecentRepository: Codable, Hashable, Sendable, Identifiable {
         try container.encode(path, forKey: .path)
         try container.encode(name, forKey: .name)
         try container.encode(lastOpened.timeIntervalSince1970.rounded(), forKey: .lastOpened)
+        try container.encodeIfPresent(remote, forKey: .remote)
     }
 }
 
@@ -62,7 +67,8 @@ struct RecentsFile: Codable {
 public final class AppModel {
     public let launch: LaunchOptions
     public let preferences: Preferences
-    public private(set) var recents: [RecentRepository] = []
+    public internal(set) var recents: [RecentRepository] = []
+    public internal(set) var directoryStatus: [String: RecentStatus] = [:]
     public internal(set) var gitExecutable: GitExecutable?
     public internal(set) var gitError: GitError?
     public private(set) var pendingOpen: URL?
@@ -73,8 +79,11 @@ public final class AppModel {
     @ObservationIgnored private var stores: [String: RepositoryStore] = [:]
     @ObservationIgnored private var colors: [String: BranchColors] = [:]
     @ObservationIgnored private var requested: Set<String> = []
+    @ObservationIgnored var directoryRefresh: Task<Void, Never>?
+    @ObservationIgnored var directoryRefreshed: Date?
 
-    public static let maximumRecents = 20
+    public static let maximumRecents = 100
+    public static let shownRecents = 20
 
     public init(launch: LaunchOptions) {
         PerfLog.sinceLaunch("launch.model.start")
@@ -167,6 +176,10 @@ public final class AppModel {
         return store
     }
 
+    public func isOpen(_ reference: RepositoryReference) -> Bool {
+        stores[reference.path] != nil
+    }
+
     public func release(_ reference: RepositoryReference) {
         guard let store = stores.removeValue(forKey: reference.path) else { return }
         saveColors(store.branchColors, for: reference)
@@ -174,8 +187,9 @@ public final class AppModel {
     }
 
     public func noteOpened(_ reference: RepositoryReference) {
+        let remote = recents.first { $0.path == reference.path }?.remote
         var list = recents.filter { $0.path != reference.path }
-        list.insert(RecentRepository(path: reference.path, name: reference.name, lastOpened: now), at: 0)
+        list.insert(RecentRepository(path: reference.path, name: reference.name, lastOpened: now, remote: remote), at: 0)
         recents = Array(list.prefix(Self.maximumRecents))
         saveRecents()
     }
@@ -194,7 +208,7 @@ public final class AppModel {
         return decoded.repositories
     }
 
-    private func saveRecents() {
+    func saveRecents() {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
         guard let data = try? encoder.encode(RecentsFile(repositories: recents)) else { return }

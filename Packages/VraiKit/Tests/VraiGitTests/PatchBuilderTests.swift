@@ -220,6 +220,41 @@ struct LineSelectionTests {
         #expect(selection.deletions == 1 && selection.additions == 0)
     }
 
+    static let twoHunks = PatchBuilderTests.file("""
+    diff --git a/f.txt b/f.txt
+    index 1111111..2222222 100644
+    --- a/f.txt
+    +++ b/f.txt
+    @@ -1,3 +1,3 @@
+     one
+    -two
+    +TWO
+    @@ -10,3 +10,4 @@
+     ten
+    -eleven
+    +ELEVEN
+    +twelve
+
+    """)
+
+    @Test func shiftClickExtendsAcrossHunks() {
+        var selection = LineSelection(file: Self.twoHunks, side: .unstaged)
+        selection.click(LineID(hunk: 0, line: 2))
+        selection.click(LineID(hunk: 1, line: 2), extending: true)
+        #expect(selection.sorted == [LineID(hunk: 0, line: 2), LineID(hunk: 1, line: 1), LineID(hunk: 1, line: 2)])
+    }
+
+    @Test func draggingSelectsEveryChangedLineInRangeInEitherDirection() {
+        var selection = LineSelection(file: Self.twoHunks, side: .unstaged)
+        selection.drag(from: LineID(hunk: 1, line: 3), to: LineID(hunk: 0, line: 0))
+        #expect(selection.sorted == [LineID(hunk: 0, line: 1), LineID(hunk: 0, line: 2), LineID(hunk: 1, line: 1), LineID(hunk: 1, line: 2), LineID(hunk: 1, line: 3)])
+        #expect(selection.anchor == LineID(hunk: 1, line: 3))
+        selection.drag(from: LineID(hunk: 1, line: 3), to: LineID(hunk: 1, line: 2))
+        #expect(selection.sorted == [LineID(hunk: 1, line: 2), LineID(hunk: 1, line: 3)])
+        selection.drag(from: LineID(hunk: 0, line: 0), to: LineID(hunk: 0, line: 1), keeping: [LineID(hunk: 1, line: 3), LineID(hunk: 1, line: 0)])
+        #expect(selection.sorted == [LineID(hunk: 0, line: 1), LineID(hunk: 1, line: 3)])
+    }
+
     @Test func hunkAndFileSelectionsPickEveryChangedLine() {
         let hunk = LineSelection.hunk(0, in: PatchBuilderTests.mixed, side: .unstaged)
         #expect(hunk.count == 4)

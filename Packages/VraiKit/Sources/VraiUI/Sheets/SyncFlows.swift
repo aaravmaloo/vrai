@@ -304,7 +304,7 @@ extension SyncModel {
 
     func signedIn(_ target: SignInTarget, username: String, retry: (@MainActor () -> Void)?) {
         SettingsAccounts.record(target, username: username, preferences: preferences)
-        let stored = SyncHub.shared.sandbox != nil ? String(localized: "The token is in the sandbox credential store.", bundle: .module) : String(localized: "The token is in your login keychain.", bundle: .module)
+        let stored = String(localized: "Git saved the token with your credential helper.", bundle: .module)
         let again = retry == nil ? "" : " " + String(localized: "Trying again.", bundle: .module)
         toasts.show(Toast(message: String(localized: "Signed in to \(target.host) as \(username)", bundle: .module), detail: stored + again, icon: "checkmark.seal"))
         surfaced = false

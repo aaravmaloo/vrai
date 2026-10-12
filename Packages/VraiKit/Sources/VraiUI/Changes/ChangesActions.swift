@@ -204,8 +204,28 @@ extension WindowModel {
             applyLines(selection.side == .staged ? .unstage : .stage, selection: selection)
             return
         }
+        if changes.isMultiple {
+            toggleStage(picks: Array(changes.selected))
+            return
+        }
         guard let pick = changes.pick, !pick.conflict, let file = store.snapshot?.working.first(where: { $0.path == pick.path }) else { return }
         toggleStage(file)
+    }
+
+    func toggleStage(picks: [ChangesPick]) {
+        let files = picks.filter { !$0.conflict }
+        let unstaged = ChangesSelectionPaths.unique(files.filter { $0.side == .unstaged }.map(\.path))
+        if !unstaged.isEmpty {
+            stageFiles(unstaged)
+        } else {
+            unstageFiles(ChangesSelectionPaths.unique(files.map(\.path)))
+        }
+    }
+
+    func selectedPaths() -> [String] {
+        let order = changeGroups.picks
+        let picks = changes.isMultiple ? FilePicks.ordered(changes.selected, in: order) : changes.pick.map { [$0] } ?? []
+        return ChangesSelectionPaths.unique(picks.filter { !$0.conflict }.map(\.path))
     }
 
     func confirmDiscard(_ paths: [String]) {
@@ -402,5 +422,12 @@ extension WindowModel {
         show(.changes)
         guard let path = store.snapshot?.working.first(where: { $0.status == .conflicted })?.path else { return }
         changes.select(ChangesPick(path: path, side: .unstaged, conflict: true), store: store, narrow: widthClass.isNarrow)
+    }
+}
+
+enum ChangesSelectionPaths {
+    static func unique(_ paths: [String]) -> [String] {
+        var seen = Set<String>()
+        return paths.filter { seen.insert($0).inserted }
     }
 }

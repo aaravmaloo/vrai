@@ -24,6 +24,12 @@ public struct RepositoryWindowRoot: View {
                     .environment(model.store)
                     .environment(model.toasts)
                     .environment(model.preferences)
+                    .onChange(of: model.switchRequest) { _, next in
+                        guard let next else { return }
+                        model.switchRequest = nil
+                        if next != reference { reference = next }
+                    }
+                    .id(ObjectIdentifier(model))
             } else if let missing {
                 RepositoryGoneView(name: missing.lastPathComponent, path: missing.path(percentEncoded: false)) {
                     self.missing = nil
@@ -90,7 +96,10 @@ public struct RepositoryWindowRoot: View {
         do {
             let store = try app.store(for: reference)
             let window = WindowModel(reference: reference, store: store, preferences: app.preferences, now: app.launch.now)
+            let previous = model
+            if let previous { window.inherit(previous) }
             model = window
+            if let previous, previous.reference != reference { app.release(previous.reference) }
             if app.launch.isSandboxed, let delay = app.launch.openDelay {
                 try? await store.refresh()
                 try? await Task.sleep(for: .milliseconds(delay))
@@ -98,10 +107,18 @@ public struct RepositoryWindowRoot: View {
             await store.open()
             app.saveColors(store.branchColors, for: reference)
         } catch let error as GitError {
-            failure = error
+            fail(error)
         } catch {
-            failure = GitError(.gitNotFound)
+            fail(GitError(.gitNotFound))
         }
+    }
+
+    func fail(_ error: GitError) {
+        if let previous = model {
+            app.release(previous.reference)
+            model = nil
+        }
+        failure = error
     }
 }
 
@@ -130,6 +147,7 @@ struct RepositoryShell: View {
         .navigationTitle(window.repositoryName)
         .toolbar(removing: .title)
         .toolbar { RepositoryToolbar(window: window) }
+        .overlay { SwitcherHost() }
         .overlay { PaletteHost() }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
             let next = WidthClass(width: width)
@@ -152,7 +170,6 @@ struct RepositoryShell: View {
         .modifier(SyncWiring(window: window))
         .settingsWiring(window)
         .focusedSceneValue(\.windowModel, window)
-        .tint(Color.Vrai.accent)
         .onChange(of: store.snapshotError) { _, error in
             guard let error, store.snapshot != nil, !RepositoryGone.check(window.reference.path) else { return }
             window.alerts.present(error) { Task { try? await store.refresh() } }

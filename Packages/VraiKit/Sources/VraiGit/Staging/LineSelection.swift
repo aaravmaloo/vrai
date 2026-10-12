@@ -88,11 +88,8 @@ public struct LineSelection: Sendable, Hashable {
     public mutating func click(_ id: LineID, extending: Bool = false, toggling: Bool = false) {
         guard isSelectable(id) else { return }
         var next: Set<LineID> = extending || toggling ? lines : []
-        if extending, let anchor, anchor.hunk == id.hunk {
-            for line in min(anchor.line, id.line)...max(anchor.line, id.line) {
-                let candidate = LineID(hunk: id.hunk, line: line)
-                if isSelectable(candidate) { next.insert(candidate) }
-            }
+        if extending, let anchor {
+            next.formUnion(selectable(from: anchor, to: id))
         } else if lines.contains(id), lines.count == 1 {
             next.remove(id)
         } else if toggling, lines.contains(id) {
@@ -102,6 +99,25 @@ public struct LineSelection: Sendable, Hashable {
         }
         anchor = id
         lines = next
+    }
+
+    public func selectable(from start: LineID, to end: LineID) -> [LineID] {
+        let low = min(start, end)
+        let high = max(start, end)
+        guard !file.hunks.isEmpty, low.hunk < file.hunks.count else { return [] }
+        var out: [LineID] = []
+        for hunk in max(0, low.hunk)...min(high.hunk, file.hunks.count - 1) {
+            for line in file.hunks[hunk].lines.indices {
+                let id = LineID(hunk: hunk, line: line)
+                if id >= low, id <= high, isSelectable(id) { out.append(id) }
+            }
+        }
+        return out
+    }
+
+    public mutating func drag(from start: LineID, to end: LineID, keeping base: Set<LineID> = []) {
+        anchor = start
+        lines = base.filter(isSelectable).union(selectable(from: start, to: end))
     }
 
     public mutating func select(_ ids: some Sequence<LineID>) {

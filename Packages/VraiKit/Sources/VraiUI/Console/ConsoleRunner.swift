@@ -129,6 +129,7 @@ extension WindowModel {
     }
 
     public func openPalette(_ mode: PaletteMode = .everything, query: String = "") {
+        switcher.dismiss()
         palette.present(mode, query: query)
     }
 }

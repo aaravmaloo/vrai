@@ -9,6 +9,19 @@ private func dynamic(_ light: NSColor, _ dark: NSColor) -> Color {
     })
 }
 
+private func systemAccent(alpha: CGFloat = 1, darkAlpha: CGFloat? = nil, light: CGFloat = 0, dark: CGFloat = 0) -> Color {
+    Color(nsColor: NSColor(name: nil) { appearance in
+        let isDark = appearance.bestMatch(from: [.darkAqua, .vibrantDark, .accessibilityHighContrastDarkAqua]) != nil
+        var base = NSColor.systemBlue
+        appearance.performAsCurrentDrawingAppearance {
+            base = NSColor.controlAccentColor.usingColorSpace(.sRGB) ?? NSColor.systemBlue
+        }
+        let shift = isDark ? dark : light
+        let shifted = shift == 0 ? base : (base.blended(withFraction: abs(shift), of: shift > 0 ? .white : .black) ?? base)
+        return shifted.withAlphaComponent(isDark ? darkAlpha ?? alpha : alpha)
+    })
+}
+
 public extension Color {
     enum Vrai {
         public static let bg = dynamic(NSColor(srgbRed: 1.0000, green: 1.0000, blue: 1.0000, alpha: 1.000), NSColor(srgbRed: 0.0902, green: 0.0902, blue: 0.1020, alpha: 1.000))
@@ -29,13 +42,13 @@ public extension Color {
         public static let textTertiary = dynamic(NSColor(srgbRed: 0.3647, green: 0.3647, blue: 0.4078, alpha: 1.000), NSColor(srgbRed: 0.6314, green: 0.6314, blue: 0.6745, alpha: 1.000))
         public static let textDisabled = dynamic(NSColor(srgbRed: 0.6471, green: 0.6471, blue: 0.6863, alpha: 1.000), NSColor(srgbRed: 0.3569, green: 0.3569, blue: 0.3961, alpha: 1.000))
         public static let onAccent = dynamic(NSColor(srgbRed: 1.0000, green: 1.0000, blue: 1.0000, alpha: 1.000), NSColor(srgbRed: 1.0000, green: 1.0000, blue: 1.0000, alpha: 1.000))
-        public static let accent = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 1.000), NSColor(srgbRed: 0.2392, green: 0.3843, blue: 0.9608, alpha: 1.000))
-        public static let accentHover = dynamic(NSColor(srgbRed: 0.1804, green: 0.3137, blue: 0.8902, alpha: 1.000), NSColor(srgbRed: 0.2627, green: 0.4039, blue: 0.9647, alpha: 1.000))
-        public static let accentActive = dynamic(NSColor(srgbRed: 0.1529, green: 0.2745, blue: 0.8118, alpha: 1.000), NSColor(srgbRed: 0.2078, green: 0.3412, blue: 0.9020, alpha: 1.000))
-        public static let accentText = dynamic(NSColor(srgbRed: 0.1647, green: 0.2941, blue: 0.8588, alpha: 1.000), NSColor(srgbRed: 0.5608, green: 0.6471, blue: 1.0000, alpha: 1.000))
-        public static let accentSoft = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 0.120), NSColor(srgbRed: 0.3529, green: 0.4706, blue: 1.0000, alpha: 0.200))
-        public static let accentSoftStrong = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 0.170), NSColor(srgbRed: 0.3529, green: 0.4706, blue: 1.0000, alpha: 0.270))
-        public static let focus = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 1.000), NSColor(srgbRed: 0.5608, green: 0.6471, blue: 1.0000, alpha: 1.000))
+        public static let accent = systemAccent()
+        public static let accentHover = systemAccent(light: -0.1, dark: 0.08)
+        public static let accentActive = systemAccent(light: -0.2, dark: -0.12)
+        public static let accentText = systemAccent()
+        public static let accentSoft = systemAccent(alpha: 0.12, darkAlpha: 0.2)
+        public static let accentSoftStrong = systemAccent(alpha: 0.17, darkAlpha: 0.27)
+        public static let focus = systemAccent()
         public static let success = dynamic(NSColor(srgbRed: 0.0863, green: 0.4745, blue: 0.2275, alpha: 1.000), NSColor(srgbRed: 0.2980, green: 0.7804, blue: 0.4549, alpha: 1.000))
         public static let successSoft = dynamic(NSColor(srgbRed: 0.0863, green: 0.6275, blue: 0.2745, alpha: 0.110), NSColor(srgbRed: 0.2980, green: 0.7804, blue: 0.4549, alpha: 0.120))
         public static let warning = dynamic(NSColor(srgbRed: 0.5608, green: 0.3608, blue: 0.0000, alpha: 1.000), NSColor(srgbRed: 0.9098, green: 0.6902, blue: 0.2902, alpha: 1.000))
@@ -43,7 +56,7 @@ public extension Color {
         public static let danger = dynamic(NSColor(srgbRed: 0.7843, green: 0.1255, blue: 0.1686, alpha: 1.000), NSColor(srgbRed: 1.0000, green: 0.4392, blue: 0.4392, alpha: 1.000))
         public static let dangerSoft = dynamic(NSColor(srgbRed: 0.8392, green: 0.1255, blue: 0.1725, alpha: 0.090), NSColor(srgbRed: 1.0000, green: 0.4392, blue: 0.4392, alpha: 0.120))
         public static let onDanger = dynamic(NSColor(srgbRed: 1.0000, green: 1.0000, blue: 1.0000, alpha: 1.000), NSColor(srgbRed: 0.1020, green: 0.0431, blue: 0.0471, alpha: 1.000))
-        public static let lane1 = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 1.000), NSColor(srgbRed: 0.5608, green: 0.6471, blue: 1.0000, alpha: 1.000))
+        public static let lane1 = systemAccent()
         public static let lane2 = dynamic(NSColor(srgbRed: 0.7216, green: 0.2392, blue: 0.0431, alpha: 1.000), NSColor(srgbRed: 1.0000, green: 0.6078, blue: 0.3294, alpha: 1.000))
         public static let lane3 = dynamic(NSColor(srgbRed: 0.0863, green: 0.4745, blue: 0.2902, alpha: 1.000), NSColor(srgbRed: 0.3098, green: 0.8157, blue: 0.5412, alpha: 1.000))
         public static let lane4 = dynamic(NSColor(srgbRed: 0.7529, green: 0.0941, blue: 0.4157, alpha: 1.000), NSColor(srgbRed: 1.0000, green: 0.4745, blue: 0.7216, alpha: 1.000))
@@ -64,7 +77,7 @@ public extension Color {
         public static let diffDelBg = dynamic(NSColor(srgbRed: 0.8392, green: 0.1255, blue: 0.1725, alpha: 0.080), NSColor(srgbRed: 1.0000, green: 0.4392, blue: 0.4392, alpha: 0.110))
         public static let diffDelWord = dynamic(NSColor(srgbRed: 0.8392, green: 0.1255, blue: 0.1725, alpha: 0.170), NSColor(srgbRed: 1.0000, green: 0.4392, blue: 0.4392, alpha: 0.220))
         public static let diffDelGutter = dynamic(NSColor(srgbRed: 0.8392, green: 0.1255, blue: 0.1725, alpha: 0.130), NSColor(srgbRed: 1.0000, green: 0.4392, blue: 0.4392, alpha: 0.130))
-        public static let diffHunkBg = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 0.060), NSColor(srgbRed: 0.4706, green: 0.5686, blue: 1.0000, alpha: 0.080))
+        public static let diffHunkBg = systemAccent(alpha: 0.06, darkAlpha: 0.08)
         public static let conflictOurs = dynamic(NSColor(srgbRed: 0.1843, green: 0.3216, blue: 0.9020, alpha: 1.000), NSColor(srgbRed: 0.5608, green: 0.6471, blue: 1.0000, alpha: 1.000))
         public static let conflictOursBg = dynamic(NSColor(srgbRed: 0.2118, green: 0.3569, blue: 0.9490, alpha: 0.080), NSColor(srgbRed: 0.3529, green: 0.4706, blue: 1.0000, alpha: 0.130))
         public static let conflictTheirs = dynamic(NSColor(srgbRed: 0.4275, green: 0.2078, blue: 0.8392, alpha: 1.000), NSColor(srgbRed: 0.7333, green: 0.6078, blue: 1.0000, alpha: 1.000))

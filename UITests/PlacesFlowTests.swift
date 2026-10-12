@@ -360,8 +360,13 @@ struct PlacesFixture {
     }
 
     @MainActor
+    static func sidebarRow(_ app: XCUIApplication, _ label: String) -> XCUIElement {
+        sidebar(app).descendants(matching: .any).matching(NSPredicate(format: "label == %@ AND elementType IN %@", label, [XCUIElement.ElementType.button.rawValue, XCUIElement.ElementType.cell.rawValue, XCUIElement.ElementType.outlineRow.rawValue])).firstMatch
+    }
+
+    @MainActor
     static func sidebarItem(_ app: XCUIApplication, _ label: String) -> XCUIElement {
-        let item = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+        let item = sidebarRow(app, label)
         if item.waitForExistence(timeout: 10) { reveal(app, item) }
         return item
     }
@@ -423,7 +428,7 @@ struct PlacesFixture {
 
     @MainActor @discardableResult
     static func expert(_ app: XCUIApplication) -> Bool {
-        let reflog = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", "Reflog")).firstMatch
+        let reflog = sidebarRow(app, "Reflog")
         if reflog.waitForExistence(timeout: 2) { return false }
         for _ in 0..<2 {
             focus(app)
@@ -437,7 +442,7 @@ struct PlacesFixture {
     @MainActor
     static func expertOff(_ app: XCUIApplication) {
         revealSidebar(app)
-        let reflog = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", "Reflog")).firstMatch
+        let reflog = sidebarRow(app, "Reflog")
         guard reflog.waitForExistence(timeout: 2) else {
             app.typeKey("e", modifierFlags: [.command, .option])
             return

@@ -44,4 +44,9 @@ extension Preferences {
     public func forget(_ account: SignedInAccount) {
         accounts.removeAll { $0.id == account.id }
     }
+
+    public func forget(url: String, username: String) {
+        guard let target = SignedInAccount(url: url, username: username, signedIn: Date()) else { return }
+        accounts.removeAll { $0.url.lowercased() == target.url.lowercased() && $0.username == target.username }
+    }
 }

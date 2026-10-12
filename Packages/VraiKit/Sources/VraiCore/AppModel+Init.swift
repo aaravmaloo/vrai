@@ -119,10 +119,12 @@ extension AppModel {
         return status
     }
 
-    public func recentStatuses() async -> [String: RecentStatus] {
+    public func recentStatuses(for list: [RecentRepository]? = nil) async -> [String: RecentStatus] {
         var out: [String: RecentStatus] = [:]
-        for recent in recents {
-            out[recent.path] = await recentStatus(at: URL(filePath: recent.path, directoryHint: .isDirectory))
+        for recent in list ?? recents {
+            let status = await recentStatus(at: URL(filePath: recent.path, directoryHint: .isDirectory))
+            out[recent.path] = status
+            directoryStatus[recent.path] = status
         }
         return out
     }

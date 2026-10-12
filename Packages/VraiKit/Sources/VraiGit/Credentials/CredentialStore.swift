@@ -46,13 +46,45 @@ public struct CredentialStore: Sendable {
         try await git.run(command)
     }
 
-    public func fill(url: String, username: String? = nil) async throws -> Credential? {
+    public static let nonInteractive: [String: String] = [
+        "GIT_ASKPASS": "/usr/bin/false",
+        "SSH_ASKPASS": "/usr/bin/false",
+        "GIT_TERMINAL_PROMPT": "0",
+        "GCM_INTERACTIVE": "never"
+    ]
+
+    public func fillCommand(url: String, username: String? = nil) throws -> GitCommand {
         var command = self.command("fill", access: .read)
         command.stdin = try Self.input(url: url, username: username, password: nil)
-        command.environment["GIT_ASKPASS"] = "/usr/bin/false"
-        command.environment["SSH_ASKPASS"] = "/usr/bin/false"
-        command.environment["GIT_TERMINAL_PROMPT"] = "0"
-        let result = try await git.runAllowingFailure(command, background: true)
+        for (key, value) in Self.nonInteractive { command.environment[key] = value }
+        command.hidesOutput = true
+        return command
+    }
+
+    public func account(url: String, username: String? = nil) async throws -> String? {
+        let result = try await git.runAllowingFailure(try fillCommand(url: url, username: username), background: true)
+        guard result.exitCode == 0 else { return nil }
+        return Self.username(in: result.stdout)
+    }
+
+    static func username(in output: Data) -> String? {
+        let user = Array("username=".utf8)
+        let secret = Array("password=".utf8)
+        var name: String?
+        var hasSecret = false
+        for line in output.split(separator: UInt8(ascii: "\n"), omittingEmptySubsequences: true) {
+            if line.starts(with: user) {
+                name = String(decoding: line.dropFirst(user.count), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+            } else if line.starts(with: secret) {
+                hasSecret = line.count > secret.count
+            }
+        }
+        guard hasSecret, let name, !name.isEmpty else { return nil }
+        return name
+    }
+
+    public func fill(url: String, username: String? = nil) async throws -> Credential? {
+        let result = try await git.runAllowingFailure(try fillCommand(url: url, username: username), background: true)
         guard result.exitCode == 0 else { return nil }
         var fields: [String: String] = [:]
         for line in result.output.split(separator: "\n") {

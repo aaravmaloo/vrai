@@ -12,15 +12,22 @@ public struct SettingsView: View {
     public var body: some View {
         @Bindable var hub = SettingsHub.shared
         let context = hub.context(for: app)
-        TabView(selection: $hub.pane) {
+        TabView(selection: $hub.pane.animation(Animation.Vrai.outSlow)) {
             ForEach(SettingsPane.allCases) { pane in
-                Tab(pane.title, systemImage: pane.icon, value: pane) {
+                Tab(value: pane) {
                     SettingsPaneHost(pane: pane, context: context)
+                } label: {
+                    Label {
+                        Text(pane.title)
+                    } icon: {
+                        Image(systemName: pane.icon)
+                            .symbolEffect(.bounce, value: hub.pane == pane)
+                    }
                 }
                 .accessibilityIdentifier("settings.tab." + pane.rawValue)
             }
         }
-        .frame(width: SettingsMetrics.width, height: SettingsMetrics.height)
+        .windowResizeAnchor(.top)
         .modifier(SettingsHosts(context: context))
         .environment(app.preferences)
         .environment(\.expert, app.preferences.expert)
@@ -28,7 +35,6 @@ public struct SettingsView: View {
         .environment(\.captureMode, app.launch.capture)
         .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
         .accessibilityHostLabel()
-        .tint(Color.Vrai.accent)
         .task { await context.reload() }
         .onChange(of: active) { _, value in
             if value { Task { await context.reload() } }
@@ -69,6 +75,7 @@ struct SettingsPaneHost: View {
     let pane: SettingsPane
     let context: SettingsContext
     @State private var width: CGFloat = Vrai.Size.sheetWide
+    @State private var content: CGFloat?
 
     var body: some View {
         Group {
@@ -84,6 +91,11 @@ struct SettingsPaneHost: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.Vrai.bg)
+        .onPreferenceChange(SettingsContentHeightKey.self) { next in
+            guard let next, next != content else { return }
+            withAnimation(content == nil ? nil : Animation.Vrai.outSlow) { content = next }
+        }
+        .frame(width: SettingsMetrics.width, height: SettingsMetrics.height(for: content, pane: pane))
         .environment(\.settingsNarrow, width < SettingsMetrics.narrowBelow)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         .accessibilityElement(children: .contain)

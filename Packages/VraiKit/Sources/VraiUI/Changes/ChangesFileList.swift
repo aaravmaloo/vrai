@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import VraiCore
 import VraiGit
@@ -8,9 +9,12 @@ struct ChangesFileList: View {
     @Environment(WindowModel.self) private var window
     @Environment(\.widthClass) private var widthClass
     @FocusState private var focused: Bool
+    @State private var frames = FileFrames()
+    @State private var dragging: FileDrag?
 
     var body: some View {
         let changes = window.changes
+        let order = groups.picks
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 0) {
@@ -24,16 +28,23 @@ struct ChangesFileList: View {
                                 ChangeFileRow(
                                     file: file,
                                     kind: kind,
-                                    selected: changes.pick == pick,
+                                    selected: changes.isSelected(pick),
                                     onToggle: { window.toggleStage(file) },
                                     onDiscard: { window.confirmDiscard([file.path]) }
                                 )
                                 .id(pick)
+                                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(FileFrames.space)) } action: { frames.record(pick, $0) }
                                 .onTapGesture {
                                     focused = true
-                                    changes.select(pick, store: store, narrow: widthClass.isNarrow)
+                                    click(pick, order: order)
                                 }
-                                .contextMenu { WorkingFileMenu(file: file, window: window) }
+                                .contextMenu {
+                                    if changes.isMultiple, changes.selected.contains(pick) {
+                                        WorkingSelectionMenu(picks: FilePicks.ordered(changes.selected, in: order), window: window)
+                                    } else {
+                                        WorkingFileMenu(file: file, window: window)
+                                    }
+                                }
                                 .accessibilityAction { changes.select(pick, store: store, narrow: widthClass.isNarrow) }
                                 .accessibilityIdentifier("change-row-" + kind.rawValue + "-" + file.path)
                             }
@@ -42,6 +53,12 @@ struct ChangesFileList: View {
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(Text("Changed files", bundle: .module))
+                .coordinateSpace(.named(FileFrames.space))
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 4, coordinateSpace: .named(FileFrames.space))
+                        .onChanged { value in drag(value, order: order) }
+                        .onEnded { _ in dragging = nil }
+                )
                 .padding(.horizontal, Vrai.Space.s4)
                 .padding(.top, Vrai.Space.s4)
                 .padding(.bottom, Vrai.Space.s8)
@@ -59,14 +76,15 @@ struct ChangesFileList: View {
             guard window.changes.focusRequest == window.changes.focusHandled else { return }
             Task { @MainActor in focused = true }
         }
-        .onKeyPress(.downArrow) { move(1) }
-        .onKeyPress(.upArrow) { move(-1) }
+        .onKeyPress(keys: [.downArrow, .upArrow]) { press in
+            move(press.key == .downArrow ? 1 : -1, extend: press.modifiers.contains(.shift))
+        }
         .onKeyPress(.space) {
             window.toggleSelectionStaging()
             return .handled
         }
         .onKeyPress(.rightArrow) {
-            guard let pick = changes.pick, !pick.conflict, changes.isLineLevel else { return .ignored }
+            guard let pick = changes.pick, !pick.conflict, !changes.isMultiple, changes.isLineLevel else { return .ignored }
             changes.diffFocusRequest += 1
             return .handled
         }
@@ -91,20 +109,78 @@ struct ChangesFileList: View {
         }
     }
 
-    func move(_ step: Int) -> KeyPress.Result {
+    func click(_ pick: ChangesPick, order: [ChangesPick]) {
+        let changes = window.changes
+        let flags = NSEvent.modifierFlags
+        if flags.contains(.shift) {
+            changes.extend(to: pick, order: order, store: store)
+        } else if flags.contains(.command) {
+            changes.toggle(pick, order: order, store: store)
+        } else {
+            changes.select(pick, store: store, narrow: widthClass.isNarrow)
+        }
+    }
+
+    func drag(_ value: DragGesture.Value, order: [ChangesPick]) {
+        let changes = window.changes
+        if dragging == nil {
+            frames.keep(order)
+            guard let start = frames.pick(at: value.startLocation.y) else { return }
+            focused = true
+            dragging = FileDrag(start: start, base: NSEvent.modifierFlags.contains(.command) ? (changes.isMultiple ? changes.selected : Set(changes.pick.map { [$0] } ?? [])) : [])
+        }
+        guard let drag = dragging, let target = frames.pick(at: value.location.y) else { return }
+        changes.drag(from: drag.start, to: target, order: order, keeping: drag.base, store: store)
+    }
+
+    func move(_ step: Int, extend: Bool) -> KeyPress.Result {
         let changes = window.changes
         let picks = groups.picks
         guard !picks.isEmpty else { return .ignored }
         let index = changes.pick.flatMap { picks.firstIndex(of: $0) } ?? (step > 0 ? -1 : picks.count)
         let next = picks[max(0, min(picks.count - 1, index + step))]
-        changes.select(next, store: store, narrow: false)
+        if extend {
+            changes.extend(to: next, order: picks, store: store)
+        } else {
+            changes.select(next, store: store, narrow: false)
+        }
         return .handled
     }
 
     func discardSelected() -> KeyPress.Result {
-        guard let pick = window.changes.pick, !pick.conflict else { return .ignored }
-        window.confirmDiscard([pick.path])
+        let paths = window.selectedPaths()
+        guard !paths.isEmpty else { return .ignored }
+        window.confirmDiscard(paths)
         return .handled
+    }
+}
+
+struct FileDrag {
+    let start: ChangesPick
+    let base: Set<ChangesPick>
+}
+
+final class FileFrames {
+    static let space = "changes-file-rows"
+    private var frames: [ChangesPick: ClosedRange<CGFloat>] = [:]
+
+    func record(_ pick: ChangesPick, _ frame: CGRect) {
+        guard frame.height > 0 else { return }
+        frames[pick] = frame.minY...frame.maxY
+    }
+
+    func keep(_ order: [ChangesPick]) {
+        let live = Set(order)
+        frames = frames.filter { live.contains($0.key) }
+    }
+
+    func pick(at y: CGFloat) -> ChangesPick? {
+        if let hit = frames.first(where: { $0.value.contains(y) }) { return hit.key }
+        return frames.min { distance($0.value, y) < distance($1.value, y) }?.key
+    }
+
+    private func distance(_ range: ClosedRange<CGFloat>, _ y: CGFloat) -> CGFloat {
+        y < range.lowerBound ? range.lowerBound - y : y - range.upperBound
     }
 }
 

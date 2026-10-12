@@ -44,7 +44,7 @@ public actor GitProcess {
         do {
             let outcome = try await invocation.run()
             let result = GitResult(command: command, exitCode: outcome.status, stdout: outcome.stdout, stderr: outcome.stderr, startedAt: started, duration: clock.now - begin)
-            report(ConsoleEntry(source: source, command: command.display, cwd: workingDirectory.path(percentEncoded: false), startedAt: started, duration: result.duration, exitCode: outcome.status, stdout: outcome.stdout, stderr: outcome.stderr, background: background, cancelled: outcome.cancelled, acceptedExitCodes: command.acceptedExitCodes))
+            report(ConsoleEntry(source: source, command: command.display, cwd: workingDirectory.path(percentEncoded: false), startedAt: started, duration: result.duration, exitCode: outcome.status, stdout: command.hidesOutput ? Data() : outcome.stdout, stderr: outcome.stderr, background: background, cancelled: outcome.cancelled, acceptedExitCodes: command.acceptedExitCodes))
             if outcome.cancelled { throw GitError(.cancelled, result: result) }
             return result
         } catch let error as GitError {

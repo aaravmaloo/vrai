@@ -48,13 +48,13 @@ struct CommitChangesItems: View {
             window?.commitFromMenu()
         }
         .keyboardShortcut(.return)
-        .disabled(!(window?.canCommit ?? false))
+        .disabled(!(window?.canCommit ?? false) || window?.switcher.open == true)
         .modifierKeyAlternate(.option) {
             Button(String(localized: "Commit and push", bundle: .module)) {
                 window?.commitNow(andPush: true)
             }
             .keyboardShortcut(.return, modifiers: [.command, .option])
-            .disabled(!(window?.canCommit ?? false))
+            .disabled(!(window?.canCommit ?? false) || window?.switcher.open == true)
         }
         Button(String(localized: "Amend last commit", bundle: .module)) {
             window?.startAmend()

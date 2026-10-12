@@ -56,7 +56,7 @@ struct AppearancePane: View {
                     ) { preferences.diffMode = $0 }
                 }
                 SettingsRow(String(localized: "Code size", bundle: .module), stacked: true) {
-                    SettingsSlider(label: String(localized: "Code size", bundle: .module), value: preferences.codeSize, range: 11...15, step: 1, format: { String(localized: "\($0) pt", bundle: .module) }, id: "settings.codeSize") { preferences.codeSize = $0 }
+                    SettingsSlider(label: String(localized: "Code size", bundle: .module), value: preferences.codeSize, range: 8...28, step: 1, format: { String(localized: "\($0) pt", bundle: .module) }, id: "settings.codeSize") { preferences.codeSize = $0 }
                 }
                 SettingsRow(String(localized: "Show whitespace", bundle: .module), description: String(localized: "Marks spaces and tabs in changed lines.", bundle: .module)) {
                     SettingsSwitch(label: String(localized: "Show whitespace", bundle: .module), isOn: preferences.whitespace, id: "settings.whitespace") { preferences.whitespace = $0 }

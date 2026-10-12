@@ -34,6 +34,7 @@ enum ShortcutCatalog {
                 item(String(localized: "Force push with lease", bundle: .module), "\u{2325}\u{21E7}\u{2318}P"),
                 item(String(localized: "Stash changes", bundle: .module), "\u{21E7}\u{2318}S"),
                 item(String(localized: "Undo", bundle: .module), "\u{2318}Z"),
+                item(String(localized: "Switch repository", bundle: .module), "\u{2318}T"),
                 item(String(localized: "Open a repository", bundle: .module), "\u{2318}O"),
                 item(String(localized: "Clone a repository", bundle: .module), "\u{21E7}\u{2318}O"),
                 item(String(localized: "New repository", bundle: .module), "\u{2325}\u{2318}N")

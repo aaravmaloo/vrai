@@ -222,6 +222,20 @@ struct StashMenu: View {
     }
 }
 
+struct WorkingSelectionMenu: View {
+    let picks: [ChangesPick]
+    let window: WindowModel
+
+    var body: some View {
+        let files = picks.filter { !$0.conflict }
+        let paths = ChangesSelectionPaths.unique(files.map(\.path))
+        let staging = files.contains { $0.side == .unstaged }
+        MenuItem(title: staging ? String(localized: "Stage \(n(paths.count, "file"))", bundle: .module) : String(localized: "Unstage \(n(paths.count, "file"))", bundle: .module), icon: staging ? "plus" : "minus", enabled: !paths.isEmpty) { window.toggleStage(picks: files) }
+        MenuItem(title: String(localized: "Discard \(n(paths.count, "file"))\u{2026}", bundle: .module), icon: "arrow.uturn.backward", enabled: !paths.isEmpty, destructive: true) { window.confirmDiscard(paths) }
+        MenuItem(title: String(localized: "Stash \(n(paths.count, "file"))\u{2026}", bundle: .module), icon: "tray.and.arrow.down", enabled: !paths.isEmpty) { RewriteActions.openStash(window, paths: paths) }
+    }
+}
+
 struct WorkingFileMenu: View {
     let file: WorkingFile
     let window: WindowModel

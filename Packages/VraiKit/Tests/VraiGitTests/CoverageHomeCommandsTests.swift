@@ -146,12 +146,41 @@ struct CoverageHomeCommandsTests {
         #expect(store.socket == nil)
         #expect(CredentialHelper("store --file ~/.vrai-credentials").file == "~/.vrai-credentials")
         #expect(CredentialHelper("store").file == nil)
-        #expect(CredentialHelper("manager").kind == .other)
+        #expect(CredentialHelper("manager").kind == .manager)
+        #expect(CredentialHelper("manager-core").kind == .manager)
+        #expect(CredentialHelper("/usr/local/share/gcm-core/git-credential-manager").kind == .manager)
+        #expect(CredentialHelper("/usr/local/share/gcm-core/git-credential-manager-core").kind == .manager)
+        #expect(CredentialHelper("/usr/local/share/gcm-core/git-credential-manager").displayName == "Git Credential Manager")
+        #expect(CredentialHelper("/opt/tools/git-credential-vault --team").displayName == "vault")
         #expect(CredentialHelper("!f() { echo password=x; }; f").kind == .other)
         #expect(CredentialHelper.effective(["osxkeychain", "", "cache", "store"]).map(\.kind) == [.cache, .store])
         #expect(CredentialHelper.effective(["osxkeychain"]).map(\.kind) == [.keychain])
         #expect(CredentialHelper.effective(["osxkeychain", ""]).isEmpty)
         #expect(CredentialHelper.effective([]).isEmpty)
+        #expect(CredentialHelper.effective(["osxkeychain", "osxkeychain"]).map(\.value) == ["osxkeychain"])
+        #expect(CredentialHelper.effective(["osxkeychain", " osxkeychain ", "store"]).map(\.kind) == [.keychain, .store])
+        #expect(CredentialHelper.displayNames(CredentialHelper.effective(["osxkeychain", "/usr/libexec/git-core/git-credential-osxkeychain"])) == ["osxkeychain"])
+    }
+
+    @Test func credentialManagerConfigMatchesConfigure() {
+        let manager = CredentialManager(executable: URL(filePath: CredentialManager.packagePath))
+        #expect(CredentialHelperCommands.choose(manager: manager, azureConfigured: false).map(\.arguments) == [
+            ["config", "--global", "--unset-all", "credential.helper"],
+            ["config", "--global", "--add", "credential.helper", ""],
+            ["config", "--global", "--add", "credential.helper", "/usr/local/share/gcm-core/git-credential-manager"],
+            ["config", "--global", "credential.https://dev.azure.com.useHttpPath", "true"]
+        ])
+        #expect(CredentialHelperCommands.choose(manager: manager, azureConfigured: true).count == 3)
+        #expect(CredentialHelperCommands.chooseNone.map(\.arguments) == [
+            ["config", "--global", "--unset-all", "credential.helper"],
+            ["config", "--global", "--add", "credential.helper", ""]
+        ])
+        #expect(CredentialHelperCommands.choose(.manager).isEmpty)
+        #expect(CredentialHelperCommands.isConfigured(manager: manager, in: ["", CredentialManager.packagePath]))
+        #expect(CredentialHelperCommands.isConfigured(manager: manager, in: ["osxkeychain", "", CredentialManager.packagePath, "store"]))
+        #expect(!CredentialHelperCommands.isConfigured(manager: manager, in: [CredentialManager.packagePath]))
+        #expect(!CredentialHelperCommands.isConfigured(manager: manager, in: ["", CredentialManager.packagePath, ""]))
+        #expect(!CredentialHelperCommands.isConfigured(manager: manager, in: ["", "osxkeychain"]))
     }
 
     @Test func credentialHelperCommands() {

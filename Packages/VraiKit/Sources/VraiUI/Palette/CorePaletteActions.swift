@@ -40,6 +40,7 @@ enum CorePaletteActions {
         out.append(PaletteAction(id: "a:file:open", title: String(localized: "Open\u{2026}", bundle: .module), icon: "folder", shortcut: "\u{2318}O", detail: file) {
             OpenPanel.choose(app: app) { context.openRepository($0) }
         })
+        out.append(PaletteAction(id: "a:file:switch", title: String(localized: "Switch repository\u{2026}", bundle: .module), icon: "arrow.left.arrow.right", shortcut: "\u{2318}T", detail: file) { window.toggleSwitcher() })
         for (index, recent) in app.recents.enumerated() {
             out.append(PaletteAction(id: "a:file:recent:\(index)", title: String(localized: "Open recent", bundle: .module) + " \u{203A} " + recent.name, icon: "clock", keywords: [recent.path], detail: PathText.abbreviated(recent.path)) {
                 context.openRepository(app.request(RepositoryReference(path: recent.path)))

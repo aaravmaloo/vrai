@@ -319,7 +319,7 @@ struct AuditLab {
 
     @MainActor
     static func sidebarItem(_ app: XCUIApplication, _ label: String) -> XCUIElement {
-        let item = sidebar(app).buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+        let item = sidebar(app).descendants(matching: .any).matching(NSPredicate(format: "label == %@ AND elementType IN %@", label, [XCUIElement.ElementType.button.rawValue, XCUIElement.ElementType.cell.rawValue, XCUIElement.ElementType.outlineRow.rawValue])).firstMatch
         if item.waitForExistence(timeout: 10) { PlacesFixture.reveal(app, item) }
         return item
     }

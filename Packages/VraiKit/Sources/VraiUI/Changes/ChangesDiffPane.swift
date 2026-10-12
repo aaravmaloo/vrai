@@ -14,7 +14,12 @@ struct ChangesDiffPane: View {
     var body: some View {
         let changes = window.changes
         Group {
-            if let pick = changes.pick {
+            if changes.isMultiple {
+                VStack(spacing: 0) {
+                    if widthClass.isNarrow { backBar }
+                    selectionSummary
+                }
+            } else if let pick = changes.pick {
                 if pick.conflict {
                     VStack(spacing: 0) {
                         if widthClass.isNarrow { backBar }
@@ -37,6 +42,25 @@ struct ChangesDiffPane: View {
         }
         .background(Color.Vrai.bg)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { paneWidth = $0 }
+    }
+
+    var selectionSummary: some View {
+        let paths = window.selectedPaths()
+        let staging = window.changes.selected.contains { !$0.conflict && $0.side == .unstaged }
+        return EmptyStateView(icon: "doc.on.doc", title: String(localized: "\(n(paths.count, "file")) selected", bundle: .module), message: String(localized: "Space stages or unstages them. Delete discards them.", bundle: .module), small: true) {
+            HStack(spacing: Vrai.Space.s8) {
+                VraiButton(title: staging ? String(localized: "Stage \(n(paths.count, "file"))", bundle: .module) : String(localized: "Unstage \(n(paths.count, "file"))", bundle: .module), icon: staging ? "plus" : "minus", variant: .primary, size: .small) {
+                    window.toggleStage(picks: Array(window.changes.selected))
+                }
+                .accessibilityIdentifier("changes-selection-stage")
+                VraiButton(title: String(localized: "Discard\u{2026}", bundle: .module), icon: "arrow.uturn.backward", variant: .secondary, size: .small) {
+                    window.confirmDiscard(paths)
+                }
+                .disabled(paths.isEmpty)
+                .accessibilityIdentifier("changes-selection-discard")
+            }
+        }
+        .accessibilityIdentifier("changes-selection-summary")
     }
 
     var backBar: some View {

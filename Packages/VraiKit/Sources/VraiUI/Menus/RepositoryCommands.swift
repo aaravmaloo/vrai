@@ -31,8 +31,11 @@ public struct RepositoryCommands: Commands {
             .keyboardShortcut("o")
             Button(String(localized: "Clone\u{2026}", bundle: .module)) { AppSheets.present(.clone(url: nil), window: window, app: app, openWindow: openWindow) }
                 .keyboardShortcut("o", modifiers: [.command, .shift])
+            Button(String(localized: "Switch repository\u{2026}", bundle: .module)) { window?.toggleSwitcher() }
+                .keyboardShortcut("t")
+                .disabled(window == nil)
             Menu(String(localized: "Open recent", bundle: .module)) {
-                ForEach(app.recents) { recent in
+                ForEach(app.recents.prefix(AppModel.shownRecents)) { recent in
                     Button(recent.name) { openWindow(value: app.request(RepositoryReference(path: recent.path))) }
                 }
             }

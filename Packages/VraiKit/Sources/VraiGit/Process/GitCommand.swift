@@ -21,6 +21,7 @@ public struct GitCommand: Sendable, Hashable {
     public var environment: [String: String]
     public var editor: String?
     public var sequenceEditor: String?
+    public var hidesOutput = false
 
     public init(
         _ arguments: [String],

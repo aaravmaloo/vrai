@@ -16,19 +16,16 @@ struct SidebarView: View {
                 .padding(.horizontal, Vrai.Space.s6)
                 .padding(.bottom, Vrai.Space.s4)
             ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        workspace
-                        branches
-                        remotes
-                        tags
-                        worktrees
-                        submodules
-                    }
-                    .padding(.horizontal, Vrai.Space.s4)
-                    .padding(.bottom, Vrai.Space.s8)
+                List(selection: selection) {
+                    workspace
+                    branches
+                    remotes
+                    tags
+                    worktrees
+                    submodules
                 }
-                .scrollIndicators(.automatic)
+                .listStyle(.sidebar)
+                .environment(\.sidebarRowSize, rowSize)
                 .onChange(of: window.expandedSections) { old, new in
                     guard let key = SidebarAnchor.revealed.first(where: { new[$0] == true && old[$0] != true }) else { return }
                     Task { proxy.scrollTo(SidebarAnchor(key: key)) }
@@ -58,23 +55,66 @@ struct SidebarView: View {
 
     var snapshot: RepositorySnapshot? { store.snapshot }
 
-    var historySelected: Bool { store.view == .history && store.sidebarSelection == nil }
+    var rowSize: SidebarRowSize {
+        switch preferences.density {
+        case .compact: .small
+        case .regular: .medium
+        case .comfortable: .large
+        }
+    }
+
+    var selectedKey: String? {
+        switch store.view {
+        case .changes: return SidebarKey.view(.changes)
+        case .stashes: return SidebarKey.view(.stashes)
+        case .reflog: return SidebarKey.view(.reflog)
+        case .refs: return SidebarKey.view(.refs)
+        case .worktrees: return PlacesActions.selectedWorktree(store).map(PlacesActions.worktreeKey)
+        case .submodules: return PlacesActions.selectedSubmodule(store).map(PlacesActions.submoduleKey)
+        case .history: return store.sidebarSelection ?? SidebarKey.view(.history)
+        case .blame, .fileHistory: return store.sidebarSelection
+        }
+    }
+
+    var selection: Binding<String?> {
+        Binding(get: { selectedKey }, set: { key in
+            guard let key, key != selectedKey else { return }
+            choose(key)
+        })
+    }
+
+    func choose(_ key: String) {
+        if let view = SidebarKey.parseView(key) {
+            if view == .history { store.sidebarSelection = nil }
+            window.show(view)
+        } else if key == "head" {
+            pick(key, ref: "HEAD")
+        } else if key.hasPrefix("branch:") {
+            pick(key, ref: String(key.dropFirst("branch:".count)))
+        } else if key.hasPrefix("remote:") {
+            pick(key, ref: String(key.dropFirst("remote:".count)))
+        } else if key.hasPrefix("tag:") {
+            pick(key, ref: String(key.dropFirst("tag:".count)))
+        } else if key.hasPrefix("worktree:") {
+            PlacesActions.showWorktree(window, path: String(key.dropFirst("worktree:".count)))
+        } else if key.hasPrefix("submodule:") {
+            PlacesActions.showSubmodule(window, path: String(key.dropFirst("submodule:".count)))
+        }
+    }
 
     @ViewBuilder var workspace: some View {
         SidebarSection(title: String(localized: "Workspace", bundle: .module), key: "workspace", collapsible: false) {
-            SidebarItem(icon: "clock.arrow.circlepath", label: String(localized: "History", bundle: .module), selected: historySelected) {
-                store.sidebarSelection = nil
-                window.show(.history)
-            }
-            SidebarItem(icon: "square.and.pencil", label: String(localized: "Changes", bundle: .module), count: snapshot?.working.count, tone: snapshot?.conflicts.isEmpty == false ? .danger : nil, selected: store.view == .changes) {
-                window.show(.changes)
-            }
-            SidebarItem(icon: "tray.full", label: String(localized: "Stashes", bundle: .module), count: snapshot?.stashes.count, selected: store.view == .stashes) {
-                window.show(.stashes)
-            }
+            SidebarItem(icon: "clock.arrow.circlepath", label: String(localized: "History", bundle: .module))
+                .tag(SidebarKey.view(.history))
+            SidebarItem(icon: "square.and.pencil", label: String(localized: "Changes", bundle: .module), count: snapshot?.working.count, tone: snapshot?.conflicts.isEmpty == false ? .danger : nil)
+                .tag(SidebarKey.view(.changes))
+            SidebarItem(icon: "tray.full", label: String(localized: "Stashes", bundle: .module), count: snapshot?.stashes.count)
+                .tag(SidebarKey.view(.stashes))
             if preferences.expert {
-                SidebarItem(icon: "clock", label: String(localized: "Reflog", bundle: .module), selected: store.view == .reflog) { window.show(.reflog) }
-                SidebarItem(icon: "point.3.connected.trianglepath.dotted", label: String(localized: "Refs", bundle: .module), selected: store.view == .refs) { window.show(.refs) }
+                SidebarItem(icon: "clock", label: String(localized: "Reflog", bundle: .module))
+                    .tag(SidebarKey.view(.reflog))
+                SidebarItem(icon: "point.3.connected.trianglepath.dotted", label: String(localized: "Refs", bundle: .module))
+                    .tag(SidebarKey.view(.refs))
             }
         }
     }
@@ -98,14 +138,14 @@ struct SidebarView: View {
             let tree = BranchTree(names: names)
             SidebarSection(title: String(localized: "Branches", bundle: .module), key: "branches", count: names.count, action: (icon: "plus", label: String(localized: "New branch", bundle: .module)), perform: { window.sync.newBranch() }) {
                 if case .detached(let id) = snapshot.head {
-                    SidebarItem(icon: "mappin.and.ellipse", label: String(localized: "HEAD at \(id.short)", bundle: .module), tone: .warning, current: true, selected: store.sidebarSelection == "head", help: String(localized: "Detached HEAD", bundle: .module)) {
-                        pick("head", ref: "HEAD")
-                    }
+                    SidebarItem(icon: "mappin.and.ellipse", label: String(localized: "HEAD at \(id.short)", bundle: .module), tone: .warning, current: true, help: String(localized: "Detached HEAD", bundle: .module))
+                        .tag("head")
                 }
                 if case .unborn(let name) = snapshot.head {
                     SidebarItem(icon: "arrow.triangle.branch", iconColor: Color.Vrai.lane(0), label: name, detail: String(localized: "no commits yet", bundle: .module), current: true, muted: true)
+                        .selectionDisabled()
                 }
-                BranchTreeView(node: tree.root, depth: 0, snapshot: snapshot, pick: pick)
+                BranchTreeView(node: tree.root, snapshot: snapshot)
             }
         }
     }
@@ -114,35 +154,41 @@ struct SidebarView: View {
         if let snapshot, !snapshot.remotes.isEmpty {
             SidebarSection(title: String(localized: "Remotes", bundle: .module), key: "remotes", count: snapshot.remotes.count, action: (icon: "plus", label: String(localized: "Add remote", bundle: .module)), perform: { window.sync.addRemote() }) {
                 ForEach(snapshot.remotes) { remote in
-                    let showBranches = preferences.showRemotes
-                    let open = showBranches && (window.expandedFolders["remote:" + remote.name] ?? false)
-                    SidebarItem(icon: "network", label: remote.name, detail: PathText.remoteDetail(remote.fetchURL), expanded: showBranches ? open : nil, help: remote.fetchURL, trailing: SyncSidebar.badge(for: remote, snapshot: snapshot)) {
-                        if showBranches { window.expandedFolders["remote:" + remote.name] = !open }
-                    }
-                    .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.editRemote(remote.name) })
-                    .contextMenu { RemoteMenu(remote: remote, window: window) }
-                    if open {
-                        ForEach(snapshot.remoteBranches.filter { $0.remote == remote.name }.sorted { $0.name < $1.name }) { branch in
-                            SidebarItem(icon: "cloud", iconColor: Color.Vrai.lane(branch.colorIndex), label: branch.name, depth: 1, selected: store.sidebarSelection == "remote:" + branch.fullName, help: branch.fullName) {
-                                pick("remote:" + branch.fullName, ref: branch.fullName)
+                    let row = SidebarItem(icon: "network", label: remote.name, detail: PathText.remoteDetail(remote.fetchURL), help: remote.fetchURL, trailing: SyncSidebar.badge(for: remote, snapshot: snapshot))
+                        .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.editRemote(remote.name) })
+                        .contextMenu { RemoteMenu(remote: remote, window: window) }
+                    if preferences.showRemotes {
+                        DisclosureGroup(isExpanded: folder("remote:" + remote.name, default: false)) {
+                            ForEach(snapshot.remoteBranches.filter { $0.remote == remote.name }.sorted { $0.name < $1.name }) { branch in
+                                SidebarItem(icon: "cloud", iconColor: Color.Vrai.lane(branch.colorIndex), label: branch.name, help: branch.fullName)
+                                    .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.checkOut(remote: branch) })
+                                    .contextMenu { RemoteBranchMenu(remote: branch, window: window) }
+                                    .tag("remote:" + branch.fullName)
                             }
-                            .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.checkOut(remote: branch) })
-                            .contextMenu { RemoteBranchMenu(remote: branch, window: window) }
+                        } label: {
+                            row
                         }
+                        .selectionDisabled()
+                    } else {
+                        row
+                            .selectionDisabled()
                     }
                 }
             }
         }
     }
 
+    func folder(_ key: String, default value: Bool) -> Binding<Bool> {
+        Binding(get: { window.expandedFolders[key] ?? value }, set: { window.expandedFolders[key] = $0 })
+    }
+
     @ViewBuilder var tags: some View {
         if let snapshot, !snapshot.tags.isEmpty {
             SidebarSection(title: String(localized: "Tags", bundle: .module), key: "tags", count: snapshot.tags.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "New tag", bundle: .module)), perform: { window.sync.newTag() }) {
                 ForEach(snapshot.tags.sorted { $0.name.compare($1.name, options: .numeric) == .orderedDescending }.prefix(500)) { tag in
-                    SidebarItem(icon: "tag", label: tag.name, detail: tag.annotated ? nil : String(localized: "lightweight", bundle: .module), selected: store.sidebarSelection == "tag:" + tag.name) {
-                        pick("tag:" + tag.name, ref: tag.name)
-                    }
-                    .contextMenu { TagMenu(tag: tag, window: window) }
+                    SidebarItem(icon: "tag", label: tag.name, detail: tag.annotated ? nil : String(localized: "lightweight", bundle: .module))
+                        .contextMenu { TagMenu(tag: tag, window: window) }
+                        .tag("tag:" + tag.name)
                 }
             }
         }
@@ -152,8 +198,9 @@ struct SidebarView: View {
         if let snapshot, snapshot.worktrees.count > 1 {
             SidebarSection(title: String(localized: "Worktrees", bundle: .module), key: "worktrees", count: snapshot.worktrees.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "Add worktree", bundle: .module)), perform: { PlacesActions.openAddWorktree(window) }) {
                 ForEach(snapshot.worktrees) { worktree in
-                    SidebarItem(icon: "rectangle.on.rectangle", label: URL(filePath: worktree.path).lastPathComponent, detail: worktree.branch ?? String(localized: "detached", bundle: .module), selected: PlacesActions.selectedWorktree(store) == worktree.path, help: worktree.path, trailing: worktree.locked ? AnyView(Symbol("lock", font: Font.Vrai.callout).foregroundStyle(Color.Vrai.textTertiary)) : nil) { PlacesActions.showWorktree(window, path: worktree.path) }
+                    SidebarItem(icon: "rectangle.on.rectangle", label: URL(filePath: worktree.path).lastPathComponent, detail: worktree.branch ?? String(localized: "detached", bundle: .module), help: worktree.path, trailing: worktree.locked ? AnyView(Image(systemName: "lock").foregroundStyle(.secondary)) : nil)
                         .contextMenu { WorktreeMenu(worktree: worktree, window: window, opener: PlacesOpener(app: app, openWindow: openWindow)) }
+                        .tag(PlacesActions.worktreeKey(worktree.path))
                 }
             }
         }
@@ -163,11 +210,21 @@ struct SidebarView: View {
         if let snapshot, !snapshot.submodules.isEmpty {
             SidebarSection(title: String(localized: "Submodules", bundle: .module), key: "submodules", count: snapshot.submodules.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "Add submodule", bundle: .module)), perform: { PlacesActions.openAddSubmodule(window) }) {
                 ForEach(snapshot.submodules) { module in
-                    SidebarItem(icon: "shippingbox", label: URL(filePath: module.path).lastPathComponent, selected: PlacesActions.selectedSubmodule(store) == module.path, help: module.path, trailing: Self.submoduleBadge(module)) { PlacesActions.showSubmodule(window, path: module.path) }
+                    SidebarItem(icon: "shippingbox", label: URL(filePath: module.path).lastPathComponent, help: module.path, trailing: Self.submoduleBadge(module))
                         .contextMenu { SubmoduleMenu(module: module, window: window, opener: PlacesOpener(app: app, openWindow: openWindow)) }
+                        .tag(PlacesActions.submoduleKey(module.path))
                 }
             }
         }
+    }
+}
+
+enum SidebarKey {
+    static func view(_ view: RepositoryView) -> String { "view:" + view.rawValue }
+
+    static func parseView(_ key: String) -> RepositoryView? {
+        guard key.hasPrefix("view:") else { return nil }
+        return RepositoryView(rawValue: String(key.dropFirst("view:".count)))
     }
 }
 
@@ -219,10 +276,7 @@ struct BranchTree {
 
 struct BranchTreeView: View {
     let node: BranchTree.Node
-    let depth: Int
     let snapshot: RepositorySnapshot
-    let pick: (String, String) -> Void
-    @Environment(RepositoryStore.self) private var store
     @Environment(WindowModel.self) private var window
 
     var body: some View {
@@ -232,19 +286,17 @@ struct BranchTreeView: View {
             }
         }
         ForEach(node.dirs.values.sorted { $0.key < $1.key }, id: \.key) { child in
-            let open = window.expandedFolders[child.key] ?? true
-            SidebarItem(icon: "folder", label: child.label, depth: depth, expanded: open, muted: true) {
-                window.expandedFolders[child.key] = !open
+            DisclosureGroup(isExpanded: Binding(get: { window.expandedFolders[child.key] ?? true }, set: { window.expandedFolders[child.key] = $0 })) {
+                BranchTreeView(node: child, snapshot: snapshot)
+            } label: {
+                SidebarItem(icon: "folder", label: child.label, muted: true)
             }
-            if open {
-                BranchTreeView(node: child, depth: depth + 1, snapshot: snapshot, pick: pick)
-            }
+            .selectionDisabled()
         }
     }
 
     func branchRow(_ branch: Branch) -> some View {
         let current = snapshot.head == .branch(branch.name)
-        let key = "branch:" + branch.name
         var trailing: AnyView?
         if branch.ahead > 0 || branch.behind > 0 {
             trailing = AnyView(AheadBehind(ahead: branch.ahead, behind: branch.behind))
@@ -254,18 +306,15 @@ struct BranchTreeView: View {
         return SidebarItem(
             icon: "arrow.triangle.branch",
             iconColor: Color.Vrai.lane(branch.colorIndex),
-            label: depth > 0 ? (branch.name.split(separator: "/").last.map(String.init) ?? branch.name) : branch.name,
-            depth: depth,
+            label: branch.name.contains("/") ? (branch.name.split(separator: "/").last.map(String.init) ?? branch.name) : branch.name,
             current: current,
-            selected: store.sidebarSelection == key,
             help: current ? String(localized: "\(branch.name), checked out", bundle: .module) : branch.name,
             trailing: trailing
-        ) {
-            pick(key, branch.name)
-        }
+        )
         .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.switchTo(branch.name) })
         .contextMenu { BranchMenu(branch: branch, window: window) }
         .modifier(RewriteBranchDrop(branch: branch, current: current, window: window))
+        .tag("branch:" + branch.name)
     }
 }
 
@@ -282,51 +331,46 @@ struct SidebarSection<Content: View>: View {
     @State private var hovering = false
 
     var body: some View {
-        let open = !collapsible || (window.expandedSections[key] ?? defaultOpen)
-        VStack(alignment: .leading, spacing: Metrics.hairline) {
-            HStack(spacing: Vrai.Space.s4) {
-                Button {
-                    if collapsible { window.expandedSections[key] = !open }
-                } label: {
-                    HStack(spacing: Vrai.Space.s6) {
-                        Text(title)
-                            .font(Font.Vrai.captionStrong)
-                            .lineLimit(1)
-                        if let count {
-                            Text(String(count))
-                                .font(Font.Vrai.caption)
-                                .monospacedDigit()
-                                .opacity(0.8)
-                        }
-                        if collapsible {
-                            Symbol("chevron.right", font: Font.Vrai.caption)
-                                .rotationEffect(.degrees(open ? 90 : 0))
-                                .opacity(!open || hovering ? 1 : 0)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .foregroundStyle(Color.Vrai.textTertiary)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(.isHeader)
-                .accessibilityValue(collapsible ? (open ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module)) : Text(verbatim: ""))
-                .accessibilityIdentifier("sidebar-section-" + key)
-                if let action {
-                    IconButton(icon: action.icon, label: action.label, small: true) { perform?() }
-                        .disabled(perform == nil)
-                        .opacity(hovering ? 1 : 0)
-                }
-            }
-            .padding(.leading, Vrai.Space.s10)
-            .padding(.trailing, Vrai.Space.s6)
-            .frame(height: Vrai.Space.s24)
-            .onHover { hovering = $0 }
-            if open {
+        if collapsible {
+            Section(isExpanded: Binding(get: { window.expandedSections[key] ?? defaultOpen }, set: { window.expandedSections[key] = $0 })) {
                 content()
+            } header: {
+                header
+            }
+        } else {
+            Section {
+                content()
+            } header: {
+                header
             }
         }
-        .padding(.top, Vrai.Space.s10)
+    }
+
+    var header: some View {
+        HStack(spacing: Vrai.Space.s6) {
+            Text(title)
+                .lineLimit(1)
+            if let count {
+                Text(String(count))
+                    .monospacedDigit()
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer(minLength: 0)
+            if let action, let perform {
+                Button(action: perform) {
+                    Image(systemName: action.icon)
+                }
+                .buttonStyle(.borderless)
+                .help(action.label)
+                .accessibilityLabel(action.label)
+                .opacity(hovering ? 1 : 0)
+            }
+        }
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityIdentifier("sidebar-section-" + key)
         .id(SidebarAnchor(key: key))
     }
 }
@@ -342,125 +386,68 @@ struct SidebarItem: View {
     let label: String
     var detail: String?
     var count: Int?
-    var depth = 0
-    var expanded: Bool?
     var tone: Tone?
     var current = false
     var muted = false
-    var selected = false
     var help: String?
     var trailing: AnyView?
-    var action: () -> Void = {}
-    @Environment(Preferences.self) private var preferences
+    @Environment(\.backgroundProminence) private var prominence
 
-    init(icon: String, iconColor: Color? = nil, label: String, detail: String? = nil, count: Int? = nil, depth: Int = 0, expanded: Bool? = nil, tone: Tone? = nil, current: Bool = false, muted: Bool = false, selected: Bool = false, help: String? = nil, trailing: AnyView? = nil, action: @escaping () -> Void = {}) {
+    init(icon: String, iconColor: Color? = nil, label: String, detail: String? = nil, count: Int? = nil, tone: Tone? = nil, current: Bool = false, muted: Bool = false, help: String? = nil, trailing: AnyView? = nil) {
         self.icon = icon
         self.iconColor = iconColor
         self.label = label
         self.detail = detail
         self.count = count
-        self.depth = depth
-        self.expanded = expanded
         self.tone = tone
         self.current = current
         self.muted = muted
-        self.selected = selected
         self.help = help
         self.trailing = trailing
-        self.action = action
-    }
-
-    var rowHeight: CGFloat {
-        switch preferences.density {
-        case .compact: Vrai.Size.rowCompact
-        case .regular: Vrai.Size.row
-        case .comfortable: Vrai.Size.rowComfortable
-        }
     }
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: Vrai.Space.s6) {
-                ZStack {
-                    if let expanded {
-                        Symbol("chevron.right", font: Font.Vrai.caption)
-                            .foregroundStyle(Color.Vrai.textTertiary)
-                            .rotationEffect(.degrees(expanded ? 90 : 0))
-                    }
-                }
-                .frame(width: Vrai.Space.s12)
-                Symbol(icon, font: Font.Vrai.title3)
-                    .foregroundStyle(tone?.color ?? iconColor ?? Color.Vrai.accentText)
-                    .frame(width: Vrai.Space.s20)
+        HStack(spacing: Vrai.Space.s6) {
+            Label {
                 Text(label)
-                    .font(current ? Font.Vrai.headline : Font.Vrai.body)
-                    .foregroundStyle(muted ? Color.Vrai.textTertiary : Color.Vrai.text)
+                    .fontWeight(current ? .semibold : nil)
+                    .foregroundStyle(muted ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
                     .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                if let detail {
-                    Text(detail)
-                        .font(Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                        .lineLimit(1)
-                        .frame(maxWidth: Vrai.Size.sidebar * 0.4, alignment: .trailing)
-                        .fixedSize(horizontal: true, vertical: false)
-                }
-                if let trailing { trailing }
-                if let count, count != 0 {
-                    Text(String(count))
-                        .font(Font.Vrai.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(Color.Vrai.textTertiary)
+            } icon: {
+                if prominence == .increased {
+                    Image(systemName: icon)
+                } else if let color = tone?.color ?? iconColor {
+                    Image(systemName: icon)
+                        .foregroundStyle(color)
+                } else {
+                    Image(systemName: icon)
                 }
             }
-            .padding(.leading, Vrai.Space.s2 + CGFloat(depth) * Vrai.Space.s16)
-            .padding(.trailing, Vrai.Space.s8)
-            .frame(height: rowHeight)
-            .contentShape(Rectangle())
+            Spacer(minLength: 0)
+            if let detail {
+                Text(detail)
+                    .font(Font.Vrai.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .frame(maxWidth: Vrai.Size.sidebar * 0.4, alignment: .trailing)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            if let trailing { trailing }
         }
-        .buttonStyle(.plain)
-        .hoverHighlight(radius: Vrai.Radius.md, selected: selected, selectedFill: Color.Vrai.accentSoftStrong)
+        .badge(count ?? 0)
         .help(help ?? label)
+        .accessibilityElement(children: .combine)
         .accessibilityLabel(label)
-        .accessibilityAddTraits(selected ? .isSelected : [])
-        .accessibilityValue(expanded.map { $0 ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module) } ?? Text(verbatim: count.map { $0 == 0 ? "" : String($0) } ?? ""))
+        .accessibilityValue(Text(verbatim: count.map { $0 == 0 ? "" : String($0) } ?? ""))
     }
 }
 
 struct RepositorySwitcher: View {
     @Environment(WindowModel.self) private var window
-    @Environment(AppModel.self) private var app
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        Menu {
-            Section(String(localized: "Recent repositories", bundle: .module)) {
-                ForEach(app.recents) { recent in
-                    Button {
-                        openWindow(value: app.request(RepositoryReference(path: recent.path)))
-                    } label: {
-                        Label(recent.name, systemImage: "folder")
-                    }
-                }
-            }
-            Divider()
-            Button {
-                AppSheets.present(.open, window: window, app: app, openWindow: openWindow)
-            } label: {
-                Label(String(localized: "Open\u{2026}", bundle: .module), systemImage: "folder")
-            }
-            Button {
-                AppSheets.present(.clone(url: nil), window: window, app: app, openWindow: openWindow)
-            } label: { Label(String(localized: "Clone\u{2026}", bundle: .module), systemImage: "square.and.arrow.down") }
-            Button {
-                AppSheets.present(.newRepository(folder: nil), window: window, app: app, openWindow: openWindow)
-            } label: { Label(String(localized: "New repository\u{2026}", bundle: .module), systemImage: "folder.badge.plus") }
-            Divider()
-            Button {
-                openWindow(id: "welcome")
-            } label: {
-                Label(String(localized: "Welcome window", bundle: .module), systemImage: "macwindow")
-            }
+        Button {
+            window.toggleSwitcher()
         } label: {
             HStack(spacing: Vrai.Space.s8) {
                 RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
@@ -490,10 +477,11 @@ struct RepositorySwitcher: View {
             .padding(.vertical, Vrai.Space.s4)
             .contentShape(Rectangle())
         }
-        .menuStyle(.button)
         .buttonStyle(.plain)
-        .menuIndicator(.hidden)
-        .hoverHighlight(radius: Vrai.Radius.md, hoverFill: Color.Vrai.fillHover)
+        .hoverHighlight(radius: Vrai.Radius.md, selected: window.switcher.open, selectedFill: Color.Vrai.fillActive, hoverFill: Color.Vrai.fillHover)
         .help(window.reference.path)
+        .accessibilityLabel(window.repositoryName)
+        .accessibilityHint(Text("Switch repository", bundle: .module))
+        .accessibilityIdentifier("sidebar-repository")
     }
 }

@@ -15,6 +15,8 @@ struct WorkingDiffView: View {
     @Environment(WindowModel.self) private var window
     @State private var hoveredHunk: Int?
     @State private var scrollTarget: LineID?
+    @State private var frames = LineFrames()
+    @State private var dragging: LineDrag?
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -28,13 +30,13 @@ struct WorkingDiffView: View {
                         Section {
                             if mode == .split {
                                 ForEach(Array(IndexedSplitRow.rows(hunk).enumerated()), id: \.offset) { _, row in
-                                    SelectableSplitLine(row: row, hunk: index, language: language, whitespace: whitespace, metrics: metrics, selectable: selectable, selection: selection, onClick: click)
+                                    SelectableSplitLine(row: row, hunk: index, language: language, whitespace: whitespace, metrics: metrics, selectable: selectable, selection: selection, frames: frames, onClick: click, onDrag: drag, onDragEnd: endDrag)
                                         .onHover { if $0 { hoveredHunk = index } }
                                 }
                             } else {
                                 ForEach(Array(hunk.lines.enumerated()), id: \.offset) { offset, line in
                                     let id = LineID(hunk: index, line: offset)
-                                    SelectableUnifiedLine(line: line, id: id, language: language, wrap: wrap, whitespace: whitespace, metrics: metrics, selectable: selectable && (line.kind == .add || line.kind == .del), selected: selection?.contains(id) ?? false, onClick: click)
+                                    SelectableUnifiedLine(line: line, id: id, language: language, wrap: wrap, whitespace: whitespace, metrics: metrics, selectable: selectable && (line.kind == .add || line.kind == .del), draggable: selectable, selected: selection?.contains(id) ?? false, frames: frames, onClick: click, onDrag: drag, onDragEnd: endDrag)
                                         .frame(minWidth: geometry.size.width, alignment: .leading)
                                         .id(id)
                                         .onHover { if $0 { hoveredHunk = index } }
@@ -57,6 +59,7 @@ struct WorkingDiffView: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(Text("Lines", bundle: .module))
                 .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
+                .coordinateSpace(.named(LineFrames.space))
             }
             .onHover { if !$0 { hoveredHunk = nil } }
             .onChange(of: scrollTarget) { _, target in
@@ -127,6 +130,71 @@ struct WorkingDiffView: View {
         let flags = NSEvent.modifierFlags
         window.changes.click(id, extending: flags.contains(.shift), toggling: flags.contains(.command))
         window.changes.listFocusRequest += 1
+    }
+
+    func drag(_ start: LineID, _ location: CGPoint) {
+        guard selectable else { return }
+        if dragging == nil {
+            let keep = NSEvent.modifierFlags.contains(.command) ? (selection?.lines ?? []) : []
+            dragging = LineDrag(start: start, base: keep)
+        }
+        guard let dragging, let target = frames.line(at: location.y, from: dragging.start) else { return }
+        window.changes.drag(from: dragging.start, to: target, keeping: dragging.base)
+    }
+
+    func endDrag() {
+        guard dragging != nil else { return }
+        dragging = nil
+        window.changes.listFocusRequest += 1
+    }
+}
+
+struct LineDrag {
+    let start: LineID
+    let base: Set<LineID>
+}
+
+final class LineFrames {
+    static let space = "changes-diff-lines"
+    private var frames: [LineID: ClosedRange<CGFloat>] = [:]
+
+    func record(_ ids: [LineID], _ frame: CGRect) {
+        guard frame.height > 0 else { return }
+        for id in ids { frames[id] = frame.minY...frame.maxY }
+    }
+
+    func line(at y: CGFloat, from start: LineID) -> LineID? {
+        let downward = frames[start].map { y >= $0.lowerBound } ?? true
+        let hits = frames.filter { $0.value.contains(y) }.map(\.key)
+        if let hit = downward ? hits.max() : hits.min() { return hit }
+        let nearest = frames.min { distance($0.value, y) < distance($1.value, y) }
+        return nearest?.key
+    }
+
+    private func distance(_ range: ClosedRange<CGFloat>, _ y: CGFloat) -> CGFloat {
+        y < range.lowerBound ? range.lowerBound - y : y - range.upperBound
+    }
+}
+
+struct GutterDrag: ViewModifier {
+    let enabled: Bool
+    let ids: [LineID]
+    let frames: LineFrames
+    let onDrag: (LineID, CGPoint) -> Void
+    let onDragEnd: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(LineFrames.space)) } action: { frames.record(ids, $0) }
+            .gesture(
+                DragGesture(minimumDistance: 3, coordinateSpace: .named(LineFrames.space))
+                    .onChanged { value in
+                        guard enabled, let start = ids.first else { return }
+                        onDrag(start, value.location)
+                    }
+                    .onEnded { _ in onDragEnd() },
+                including: enabled ? .all : .subviews
+            )
     }
 }
 
@@ -232,8 +300,12 @@ struct SelectableUnifiedLine: View {
     let whitespace: Bool
     let metrics: DiffMetrics
     let selectable: Bool
+    let draggable: Bool
     let selected: Bool
+    let frames: LineFrames
     let onClick: (LineID) -> Void
+    let onDrag: (LineID, CGPoint) -> Void
+    let onDragEnd: () -> Void
     @State private var hovering = false
     @Environment(\.captureMode) private var capture
 
@@ -251,6 +323,7 @@ struct SelectableUnifiedLine: View {
             .background(gutter)
             .contentShape(Rectangle())
             .onTapGesture { if selectable { onClick(id) } }
+            .modifier(GutterDrag(enabled: draggable, ids: [id], frames: frames, onDrag: onDrag, onDragEnd: onDragEnd))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(gutterLabel)
             .accessibilityAddTraits(selectable ? [.isButton] : [.isStaticText])
@@ -370,7 +443,10 @@ struct SelectableSplitLine: View {
     let metrics: DiffMetrics
     let selectable: Bool
     let selection: LineSelection?
+    let frames: LineFrames
     let onClick: (LineID) -> Void
+    let onDrag: (LineID, CGPoint) -> Void
+    let onDragEnd: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -392,6 +468,7 @@ struct SelectableSplitLine: View {
                     .background(selected ? Color.Vrai.accentSoftStrong : change ? (old ? Color.Vrai.diffDelGutter : Color.Vrai.diffAddGutter) : Color.clear)
                     .contentShape(Rectangle())
                     .onTapGesture { if selectable, change { onClick(id) } }
+                    .modifier(GutterDrag(enabled: selectable, ids: [id], frames: frames, onDrag: onDrag, onDragEnd: onDragEnd))
                     .accessibilityAddTraits(selectable && change ? [.isButton] : [.isStaticText])
                     .accessibilityAction { if selectable, change { onClick(id) } }
                     .accessibilityIdentifier("gutter-\(hunk)-\(entry.index)")

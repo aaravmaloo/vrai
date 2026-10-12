@@ -47,6 +47,31 @@ extension AppModel {
         return preferences.noteSignedIn(url: url, username: username, at: now)
     }
 
+    public var credentialManagerCandidates: [String] {
+        if let sandbox = launch.sandbox { return [sandbox.appending(path: "bin/" + CredentialManager.name).path(percentEncoded: false)] }
+        return CredentialManager.standardLocations + CredentialManager.searchPath(environment.base)
+    }
+
+    public func locateCredentialManager(_ helpers: [CredentialHelper]) -> CredentialManager? {
+        CredentialManager.locate(configured: launch.isSandboxed ? [] : helpers, candidates: credentialManagerCandidates)
+    }
+
+    public func credentialAccounts(_ setup: CredentialSetup) throws -> CredentialAccounts {
+        CredentialAccounts(store: try credentials(), manager: setup.managerActive ? setup.manager : nil)
+    }
+
+    public func signInWithCredentialManager(url: String, setup: CredentialSetup, known: [String]) async throws -> String? {
+        let accounts = try await credentialAccounts(setup).signIn(url: url)
+        let added = accounts.first { name in !known.contains { $0.caseInsensitiveCompare(name) == .orderedSame } } ?? accounts.first
+        if let added { preferences.noteSignedIn(url: url, username: added, at: now) }
+        return added
+    }
+
+    public func signOut(url: String, username: String, setup: CredentialSetup) async throws {
+        try await credentialAccounts(setup).signOut(url: url, username: username)
+        preferences.forget(url: url, username: username)
+    }
+
     @discardableResult
     public func useGit(at path: String?) throws -> GitExecutable {
         let executable: GitExecutable

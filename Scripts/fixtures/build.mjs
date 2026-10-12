@@ -235,7 +235,7 @@ function buildHistory(repo, model, keys, submodules) {
   }
   for (const [p, lines] of Object.entries(design.root)) rootBase.set(p, { lines });
   for (const [p, lines] of Object.entries(K.EXTRA_ROOT_FILES)) rootBase.set(p, { lines });
-  rootBase.set("Resources/AppIcon.png", { binary: fs.readFileSync(path.join(vraiRoot, "App/Assets.xcassets/AppIcon.appiconset/icon_128.png")) });
+  rootBase.set("Resources/AppIcon.png", { binary: fs.readFileSync(path.join(vraiRoot, "Scripts/fixtures/assets/icon_128.png")) });
   rootBase.set(".gitmodules", { lines: submodules.flatMap((s) => ["[submodule \"" + s.path + "\"]", "\tpath = " + s.path, "\turl = " + s.url, "\tbranch = " + s.branch]) });
   for (const s of submodules) rootBase.set(s.path, { gitlink: s.recorded });
 
@@ -500,7 +500,7 @@ const scenarios = {
     writeFile(dir, "link-target.txt", "plain file that becomes a symlink\n");
     writeFile(dir, "conflict.txt", "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\n");
     writeFile(dir, "deleted-by-them.txt", "keep me\n");
-    fs.writeFileSync(path.join(dir, "image.png"), fs.readFileSync(path.join(vraiRoot, "App/Assets.xcassets/AppIcon.appiconset/icon_16.png")));
+    fs.writeFileSync(path.join(dir, "image.png"), fs.readFileSync(path.join(vraiRoot, "Scripts/fixtures/assets/icon_16.png")));
     git(dir, ["add", "-A"]);
     commit("Add the edge cases", 30);
     git(dir, ["switch", "-q", "-c", "other"]);
@@ -522,7 +522,7 @@ const scenarios = {
     fs.chmodSync(path.join(dir, "script.sh"), 0o755);
     fs.rmSync(path.join(dir, "link-target.txt"));
     fs.symlinkSync("Résumé.md", path.join(dir, "link-target.txt"));
-    fs.writeFileSync(path.join(dir, "image.png"), fs.readFileSync(path.join(vraiRoot, "App/Assets.xcassets/AppIcon.appiconset/icon_32.png")));
+    fs.writeFileSync(path.join(dir, "image.png"), fs.readFileSync(path.join(vraiRoot, "Scripts/fixtures/assets/icon_32.png")));
     writeFile(dir, "staged new.txt", "staged\n");
     git(dir, ["add", "--", "staged new.txt"]);
     writeFile(dir, "staged new.txt", "staged\nthen changed\n");

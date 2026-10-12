@@ -56,7 +56,6 @@ public struct WelcomeView: View {
         .environment(app.preferences)
         .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
         .accessibilityHostLabel()
-        .tint(Color.Vrai.accent)
         .onAppear { AppSheets.register(app: app, openWindow: openWindow) }
         .perfLaunch("launch")
     }
@@ -70,7 +69,7 @@ struct WelcomeContent: View {
     @State private var model = WelcomeModel.shared
     @FocusState private var listFocused: Bool
 
-    var recents: [RecentRepository] { app.recents.sorted { $0.lastOpened > $1.lastOpened } }
+    var recents: [RecentRepository] { Array(app.recents.sorted { $0.lastOpened > $1.lastOpened }.prefix(AppModel.shownRecents)) }
 
     var body: some View {
         @Bindable var preferences = app.preferences
@@ -178,7 +177,6 @@ struct WelcomeContent: View {
                 .environment(app)
                 .environment(app.preferences)
                 .environment(\.longTailRoom, LongTailMetrics.welcomeSheetRoom)
-                .tint(Color.Vrai.accent)
                 .accessibilityHostLabel(scope: .any)
         }
         .alert(
@@ -193,7 +191,7 @@ struct WelcomeContent: View {
             Text("Vrai can't find a repository at \(app.displayPath(URL(filePath: recent.path))). It may have been moved, renamed or deleted.", bundle: .module)
         }
         .task(id: app.recents.map(\.path)) {
-            model.statuses = await app.recentStatuses()
+            model.statuses = await app.recentStatuses(for: recents)
         }
     }
 
@@ -225,7 +223,7 @@ struct WelcomeContent: View {
 
     func remove(_ recent: RecentRepository) {
         app.removeRecent(recent)
-        model.selected = max(0, min(model.selected, app.recents.count - 1))
+        model.selected = max(0, min(model.selected, recents.count - 1))
     }
 }
 
@@ -488,7 +486,6 @@ public struct AboutView: View {
         .frame(width: Vrai.Size.alert)
         .background(Color.Vrai.surface)
         .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
-        .tint(Color.Vrai.accent)
     }
 
     var gitLine: String {

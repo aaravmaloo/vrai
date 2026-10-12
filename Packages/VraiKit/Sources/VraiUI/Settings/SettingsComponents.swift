@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import VraiCore
 import VraiGit
@@ -21,10 +22,29 @@ enum SettingsMetrics {
     static let previewDiff = Vrai.Space.s64 * 2 + Vrai.Space.s24
     static let width = Vrai.Size.sheetWide
     static let height = Vrai.Size.sheet - Vrai.Space.s24
+    static let minimumHeight = Vrai.Size.sheet / 2
+    static var maximumHeight: CGFloat {
+        let screen = NSScreen.main?.visibleFrame.height ?? Vrai.Size.sheet * 2
+        return max(minimumHeight, min(screen * 0.8, Vrai.Size.sheetWide + Vrai.Space.s64))
+    }
+
+    static func height(for content: CGFloat?, pane: SettingsPane) -> CGFloat {
+        guard pane != .shortcuts, let content else { return pane == .shortcuts ? maximumHeight : height }
+        return min(max(content, minimumHeight), maximumHeight)
+    }
+}
+
+struct SettingsContentHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat? = nil
+
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
+        if let next = nextValue() { value = max(value ?? 0, next) }
+    }
 }
 
 struct SettingsForm<Content: View>: View {
     @ViewBuilder var content: () -> Content
+    @State private var height: CGFloat?
 
     var body: some View {
         Form {
@@ -32,7 +52,14 @@ struct SettingsForm<Content: View>: View {
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)
+        .scrollBounceBehavior(.basedOnSize)
         .background(Color.Vrai.bg)
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            (geometry.contentSize.height + geometry.contentInsets.top + geometry.contentInsets.bottom).rounded(.up)
+        } action: { _, next in
+            if next > 0, next != height { height = next }
+        }
+        .preference(key: SettingsContentHeightKey.self, value: height)
     }
 }
 

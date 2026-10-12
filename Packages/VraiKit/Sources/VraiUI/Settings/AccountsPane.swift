@@ -2,47 +2,102 @@ import SwiftUI
 import VraiCore
 import VraiGit
 
+struct AccountHost: Hashable, Sendable {
+    var host: String
+    var url: String
+    var probe: String
+    var hint: String?
+    var remote: String?
+    var repository: String
+    var optional = false
+}
+
 struct AccountItem: Identifiable, Hashable {
     enum Status: Hashable {
+        case checking
         case ok
         case expired
         case none
     }
 
-    var host: String
-    var url: String
+    var entry: AccountHost
     var username: String?
-    var account: SignedInAccount?
+    var managed = false
     var status: Status
-    var remote: String?
-    var repository: String
+
+    var host: String { entry.host }
+    var url: String { entry.url }
+    var remote: String? { entry.remote }
+    var repository: String { entry.repository }
 
     var id: String { url + "\u{0}" + (username ?? "") }
 }
 
+struct AccountProbeKey: Hashable {
+    var hosts: [AccountHost]
+    var accounts: [SignedInAccount]
+    var setup: CredentialSetup?
+    var refresh: Int
+}
+
 enum AccountList {
-    @MainActor static func items(accounts: [SignedInAccount], windows: [WindowModel], active: WindowModel?) -> [AccountItem] {
+    @MainActor static func failing(_ windows: [WindowModel]) -> Set<String> {
         var failing: Set<String> = []
         for window in windows {
             if case .authFailed(let host?) = window.store.snapshot?.network { failing.insert(host.lowercased()) }
         }
-        func expired(_ host: String) -> Bool {
-            let bare = host.split(separator: ":").first.map(String.init) ?? host
-            return failing.contains(host.lowercased()) || failing.contains(bare.lowercased())
+        return failing
+    }
+
+    static func isFailing(_ host: String, in failing: Set<String>) -> Bool {
+        let bare = host.split(separator: ":").first.map(String.init) ?? host
+        return failing.contains(host.lowercased()) || failing.contains(bare.lowercased())
+    }
+
+    static func hosts(accounts: [SignedInAccount], remotes: [Remote], managed: Bool) -> [AccountHost] {
+        var hosts: [AccountHost] = []
+        func add(_ entry: AccountHost) {
+            if let index = hosts.firstIndex(where: { $0.host.lowercased() == entry.host.lowercased() }) {
+                if hosts[index].remote == nil, entry.remote != nil {
+                    hosts[index].remote = entry.remote
+                    hosts[index].probe = entry.probe
+                    hosts[index].hint = hosts[index].hint ?? entry.hint
+                }
+                if hosts[index].repository.isEmpty { hosts[index].repository = entry.repository }
+                hosts[index].optional = hosts[index].optional && entry.optional
+                return
+            }
+            hosts.append(entry)
         }
-        var items: [AccountItem] = accounts.map { account in
-            AccountItem(host: account.host, url: account.url, username: account.username, account: account, status: expired(account.host) ? .expired : .ok, remote: nil, repository: "")
+        for account in accounts {
+            add(AccountHost(host: account.host, url: account.url, probe: account.url, remote: nil, repository: ""))
         }
-        let remotes = active?.store.snapshot?.remotes ?? []
         for remote in remotes {
             let address = remote.pushURL ?? remote.fetchURL
             guard let parsed = RemoteURL(address), parsed.kind == .network, parsed.scheme == "https" || parsed.scheme == "http", let host = parsed.hostAndPort else { continue }
-            if let index = items.firstIndex(where: { $0.host.lowercased() == host.lowercased() }) {
-                items[index].remote = items[index].remote ?? remote.name
-                items[index].repository = items[index].repository.isEmpty ? parsed.repositoryPath : items[index].repository
+            add(AccountHost(host: host, url: (parsed.scheme ?? "https") + "://" + host, probe: address, hint: parsed.user, remote: remote.name, repository: parsed.repositoryPath))
+        }
+        if managed {
+            add(AccountHost(host: "github.com", url: CredentialManager.defaultURL, probe: CredentialManager.defaultURL, repository: "", optional: true))
+        }
+        return hosts
+    }
+
+    static func items(hosts: [AccountHost], lookups: [String: AccountLookup], failing: Set<String> = []) -> [AccountItem] {
+        var items: [AccountItem] = []
+        for entry in hosts {
+            let expired = isFailing(entry.host, in: failing)
+            let lookup = lookups[entry.url]
+            let names = lookup?.usernames ?? []
+            if names.isEmpty {
+                guard !entry.optional else { continue }
+                let status: AccountItem.Status = expired ? .expired : (lookup == nil ? .checking : .none)
+                items.append(AccountItem(entry: entry, username: entry.hint, status: status))
                 continue
             }
-            items.append(AccountItem(host: host, url: (parsed.scheme ?? "https") + "://" + host, username: parsed.user, account: nil, status: expired(host) ? .expired : .none, remote: remote.name, repository: parsed.repositoryPath))
+            for name in names {
+                items.append(AccountItem(entry: entry, username: name, managed: lookup?.managed.contains(name) == true, status: expired ? .expired : .ok))
+            }
         }
         return items
     }
@@ -64,12 +119,17 @@ struct AccountsForm: View {
     @Environment(Preferences.self) private var preferences
     @Environment(\.settingsNarrow) private var narrow
     @State private var signingOut: String?
+    @State private var signingIn: String?
+    @State private var login: Task<Void, Never>?
+    @State private var setup: CredentialSetup?
+    @State private var lookups: [String: AccountLookup] = [:]
+    @State private var refresh = 0
 
     var hub: SettingsHub { SettingsHub.shared }
     var file: String { context.app.globalConfigDisplay }
 
-    var items: [AccountItem] {
-        AccountList.items(accounts: preferences.accounts, windows: hub.openWindows, active: hub.activeWindow)
+    var hosts: [AccountHost] {
+        AccountList.hosts(accounts: preferences.accounts, remotes: hub.activeWindow?.store.snapshot?.remotes ?? [], managed: setup?.managerActive == true)
     }
 
     var sshFolder: String {
@@ -77,7 +137,8 @@ struct AccountsForm: View {
     }
 
     var body: some View {
-        let list = items
+        let hosts = hosts
+        let list = AccountList.items(hosts: hosts, lookups: lookups, failing: AccountList.failing(hub.openWindows))
         let signing = git.signing
         SettingsForm {
             if let failing = list.first(where: { $0.status == .expired }) {
@@ -96,11 +157,19 @@ struct AccountsForm: View {
                     SettingsRow(String(localized: "No accounts yet", bundle: .module), description: String(localized: "Open a repository with an HTTPS remote to sign in to its host, or sign in when git asks.", bundle: .module), icon: "globe")
                 } else {
                     ForEach(list) { item in
-                        AccountRow(item: item, busy: signingOut == item.id, signIn: { signIn(item) }, signOut: { signOut(item) })
+                        AccountRow(
+                            item: item,
+                            busy: signingOut == item.id,
+                            waiting: signingIn == item.id,
+                            locked: signingIn != nil,
+                            signIn: { signIn(item) },
+                            signOut: { signOut(item) },
+                            cancel: { login?.cancel() }
+                        )
                     }
                 }
             }
-            CredentialHelperSection(context: context, git: git)
+            CredentialHelperSection(context: context, git: git, setup: setup)
             SettingsSection(String(localized: "SSH keys", bundle: .module), footer: String(localized: "Keys live in \(sshFolder). ssh-agent loads them from your keychain.", bundle: .module)) {
                 if context.sshKeys.isEmpty {
                     SettingsRow(String(localized: "No SSH keys yet", bundle: .module), description: String(localized: "Create one in Terminal with ssh-keygen -t ed25519.", bundle: .module), icon: "key")
@@ -146,12 +215,32 @@ struct AccountsForm: View {
                 }
             }
         }
+        .task(id: git.revision) {
+            setup = await git.credentialSetup { context.app.locateCredentialManager($0) }
+        }
+        .task(id: AccountProbeKey(hosts: hosts, accounts: preferences.accounts, setup: setup, refresh: refresh)) {
+            await probe(hosts)
+        }
+        .onDisappear { login?.cancel() }
     }
 
     var storageFooter: String {
-        context.app.launch.isSandboxed
-            ? String(localized: "Tokens are stored in the sandbox credential store, $VRAI_SANDBOX/git-credentials.", bundle: .module)
-            : String(localized: "Tokens are stored in your login keychain through git's osxkeychain credential helper.", bundle: .module)
+        guard let setup else { return String(localized: "Reading credential.helper\u{2026}", bundle: .module) }
+        return AccountsCopy.storage(setup, environment: context.app.environment.base)
+    }
+
+    func probe(_ hosts: [AccountHost]) async {
+        guard let setup, let accounts = try? context.app.credentialAccounts(setup) else { return }
+        let found = await withTaskGroup(of: (String, AccountLookup).self) { group in
+            for host in hosts {
+                group.addTask { (host.url, await accounts.lookup(url: host.probe, username: host.hint)) }
+            }
+            var found: [String: AccountLookup] = [:]
+            for await (url, lookup) in group { found[url] = lookup }
+            return found
+        }
+        guard !Task.isCancelled else { return }
+        lookups = found
     }
 
     func keyDescription(_ key: SSHKey, signing: SigningSettings) -> String {
@@ -176,6 +265,10 @@ struct AccountsForm: View {
     }
 
     func signIn(_ item: AccountItem) {
+        if let setup, setup.managerActive, CredentialManager.isGitHub(host: item.host) {
+            signInInBrowser(item, setup: setup)
+            return
+        }
         guard let window = context.window else { return }
         let fresh = item.status == .none
         let target = SignInTarget(
@@ -189,13 +282,38 @@ struct AccountsForm: View {
         window.sheets.present { SignInSheet(again: target, retry: nil) }
     }
 
+    func signInInBrowser(_ item: AccountItem, setup: CredentialSetup) {
+        guard signingIn == nil else { return }
+        signingIn = item.id
+        let known = lookups[item.url]?.usernames ?? []
+        let host = RemoteURL(item.url)?.host ?? item.host
+        login = Task { @MainActor in
+            defer {
+                signingIn = nil
+                login = nil
+            }
+            do {
+                let added = try await context.app.signInWithCredentialManager(url: item.url, setup: setup, known: known)
+                refresh += 1
+                guard let added else { return }
+                context.toast(String(localized: "Signed in to \(host) as \(added)", bundle: .module), detail: AccountsCopy.storage(setup, environment: context.app.environment.base), icon: "checkmark.seal")
+            } catch let error as GitError where error.code == .cancelled {
+                return
+            } catch {
+                context.fail(error)
+            }
+        }
+    }
+
     func signOut(_ item: AccountItem) {
-        guard let account = item.account else { return }
+        guard let name = item.username, let setup else { return }
+        let host = RemoteURL(item.url)?.host ?? item.host
         signingOut = item.id
         context.run {
             defer { signingOut = nil }
-            try await context.app.signOut(account)
-            context.toast(String(localized: "Signed out of \(account.displayHost)", bundle: .module), detail: String(localized: "Remotes that use SSH keep working. HTTPS remotes ask you to sign in.", bundle: .module), icon: "person.crop.circle")
+            try await context.app.signOut(url: item.entry.probe, username: name, setup: setup)
+            refresh += 1
+            context.toast(String(localized: "Signed out of \(host)", bundle: .module), detail: String(localized: "Remotes that use SSH keep working. HTTPS remotes ask you to sign in.", bundle: .module), icon: "person.crop.circle")
         }
     }
 }
@@ -209,15 +327,22 @@ enum SyncCopyBridge {
 struct AccountRow: View {
     let item: AccountItem
     let busy: Bool
+    let waiting: Bool
+    let locked: Bool
     let signIn: () -> Void
     let signOut: () -> Void
+    let cancel: () -> Void
 
     var detail: String {
         let name = item.username ?? ""
+        if waiting { return String(localized: "Waiting for your browser\u{2026}", bundle: .module) }
         switch item.status {
+        case .checking:
+            if let remote = item.remote { return String(localized: "Used by \(remote). Checking with git\u{2026}", bundle: .module) }
+            return String(localized: "Checking with git\u{2026}", bundle: .module)
         case .ok:
-            if let account = item.account { return String(localized: "\(name), signed in \(SettingsCopy.day(account.signedIn))", bundle: .module) }
-            return name
+            if let remote = item.remote { return String(localized: "Used by \(remote). Signed in as \(name)", bundle: .module) }
+            return String(localized: "Signed in as \(name)", bundle: .module)
         case .expired:
             return name.isEmpty ? String(localized: "The server no longer accepts the saved token", bundle: .module) : String(localized: "\(name), the server no longer accepts the saved token", bundle: .module)
         case .none:
@@ -248,20 +373,26 @@ struct AccountRow: View {
             if item.status == .expired {
                 Badge(text: String(localized: "Expired", bundle: .module), tone: .danger)
             }
-            switch item.status {
-            case .ok:
-                if busy {
-                    Spinner()
-                } else {
+            if waiting {
+                Spinner()
+                VraiButton(title: String(localized: "Cancel", bundle: .module), size: .small, action: cancel)
+                    .accessibilityIdentifier("settings.signInCancel." + item.host)
+            } else if busy || item.status == .checking {
+                Spinner()
+            } else {
+                switch item.status {
+                case .ok:
                     VraiButton(title: String(localized: "Sign out", bundle: .module), size: .small, action: signOut)
                         .accessibilityIdentifier("settings.signOut." + item.host)
+                case .expired:
+                    VraiButton(title: String(localized: "Sign in again", bundle: .module), variant: .primary, size: .small, action: signIn)
+                        .disabled(locked)
+                        .accessibilityIdentifier("settings.signIn." + item.host)
+                case .none, .checking:
+                    VraiButton(title: String(localized: "Sign in\u{2026}", bundle: .module), size: .small, action: signIn)
+                        .disabled(locked)
+                        .accessibilityIdentifier("settings.signIn." + item.host)
                 }
-            case .expired:
-                VraiButton(title: String(localized: "Sign in again", bundle: .module), variant: .primary, size: .small, action: signIn)
-                    .accessibilityIdentifier("settings.signIn." + item.host)
-            case .none:
-                VraiButton(title: String(localized: "Sign in\u{2026}", bundle: .module), size: .small, action: signIn)
-                    .accessibilityIdentifier("settings.signIn." + item.host)
             }
         }
         .padding(.vertical, Vrai.Space.s4)

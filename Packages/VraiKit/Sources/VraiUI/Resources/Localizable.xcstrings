@@ -548,6 +548,9 @@
     "%@ s" : {
 
     },
+    "%@ selected" : {
+
+    },
     "%@ squashed" : {
 
     },
@@ -657,16 +660,6 @@
     },
     "%@, checked out" : {
 
-    },
-    "%@, signed in %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@, signed in %2$@"
-          }
-        }
-      }
     },
     "%@, the server no longer accepts the saved token" : {
 
@@ -949,6 +942,9 @@
 
     },
     "Add a note to this commit" : {
+
+    },
+    "Add a repository" : {
 
     },
     "Add co-author" : {
@@ -1363,6 +1359,9 @@
     "Checking the signature…" : {
 
     },
+    "Checking with git…" : {
+
+    },
     "Checking…" : {
 
     },
@@ -1692,6 +1691,9 @@
     "Copied %@" : {
 
     },
+    "Copied the install command" : {
+
+    },
     "Copied the public key" : {
 
     },
@@ -1720,6 +1722,9 @@
 
     },
     "Copy hash" : {
+
+    },
+    "Copy install command" : {
 
     },
     "Copy name" : {
@@ -1978,6 +1983,9 @@
     "Discard %@" : {
 
     },
+    "Discard %@…" : {
+
+    },
     "Discard all changes…" : {
 
     },
@@ -2019,6 +2027,9 @@
       }
     },
     "Discards, hard resets, deleted branches and dropped stashes land here first. Restore puts them back exactly as they were." : {
+
+    },
+    "Discard…" : {
 
     },
     "Dismiss" : {
@@ -2375,6 +2386,9 @@
     "Filter refs" : {
 
     },
+    "Filter repositories" : {
+
+    },
     "Find git automatically" : {
 
     },
@@ -2523,6 +2537,15 @@
     "Git %@ is too old for Vrai" : {
 
     },
+    "Git Credential Manager" : {
+
+    },
+    "Git Credential Manager keeps tokens in its %@ store." : {
+
+    },
+    "Git Credential Manager keeps tokens in your login keychain." : {
+
+    },
     "Git LFS %@" : {
 
     },
@@ -2554,6 +2577,9 @@
 
     },
     "Git removes it from the folder and stages the deletion. A copy stays in Undo history for 14 days." : {
+
+    },
+    "Git saved the token with your credential helper." : {
 
     },
     "Git skips %@ in this checkout" : {
@@ -3301,6 +3327,9 @@
     "No contributors yet" : {
 
     },
+    "No credential helper is set, so git saves no tokens and asks every time." : {
+
+    },
     "No failed commands." : {
 
     },
@@ -3349,6 +3378,9 @@
     "No refs match." : {
 
     },
+    "No repositories match “%@”." : {
+
+    },
     "No repository is open" : {
 
     },
@@ -3395,6 +3427,9 @@
 
     },
     "Not initialized" : {
+
+    },
+    "Not installed. Install it to sign in to GitHub in your browser." : {
 
     },
     "Not on any branch now. The reflog still keeps it." : {
@@ -3659,6 +3694,9 @@
 
     },
     "Or abort it from the banner to put %@ back." : {
+
+    },
+    "Other" : {
 
     },
     "Other…" : {
@@ -4674,6 +4712,16 @@
     "Sent to the server with -o. Separate several with commas." : {
 
     },
+    "Set in %@ as credential.helper. A new choice goes in %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Set in %1$@ as credential.helper. A new choice goes in %2$@."
+          }
+        }
+      }
+    },
     "Set my changes aside and bring them back after" : {
 
     },
@@ -4845,6 +4893,9 @@
     "Signed by %@" : {
 
     },
+    "Signed in as %@" : {
+
+    },
     "Signed in to %@ as %@" : {
       "localizations" : {
         "en" : {
@@ -4914,6 +4965,9 @@
 
     },
     "Something is already there. Choose a new or empty folder." : {
+
+    },
+    "Space stages or unstages them. Delete discards them." : {
 
     },
     "Sparse checkout" : {
@@ -5219,6 +5273,12 @@
 
     },
     "Switch branch" : {
+
+    },
+    "Switch repository" : {
+
+    },
+    "Switch repository…" : {
 
     },
     "Switch that worktree to another branch first, then try again." : {
@@ -5570,12 +5630,6 @@
         }
       }
     },
-    "The token is in the sandbox credential store." : {
-
-    },
-    "The token is in your login keychain." : {
-
-    },
     "The working tree is clean, so there's nothing to stash." : {
 
     },
@@ -5745,12 +5799,6 @@
 
     },
     "Token" : {
-
-    },
-    "Tokens are stored in the sandbox credential store, $VRAI_SANDBOX/git-credentials." : {
-
-    },
-    "Tokens are stored in your login keychain through git's osxkeychain credential helper." : {
 
     },
     "Too large to keep a copy" : {
@@ -5996,8 +6044,21 @@
     "Use this git" : {
 
     },
+    "Used by %@. Checking with git…" : {
+
+    },
     "Used by %@. Not signed in" : {
 
+    },
+    "Used by %@. Signed in as %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Used by %1$@. Signed in as %2$@"
+          }
+        }
+      }
     },
     "Used by New repository and by git init." : {
 
@@ -6132,6 +6193,9 @@
 
     },
     "WIP on %@" : {
+
+    },
+    "Waiting for your browser…" : {
 
     },
     "Welcome to Vrai" : {
@@ -6351,6 +6415,9 @@
     "common ancestor" : {
 
     },
+    "current repository" : {
+
+    },
     "detached" : {
 
     },
@@ -6480,7 +6547,13 @@
     "git credential-cache keeps them for a while after you sign in." : {
 
     },
+    "git credential-cache keeps tokens in memory for a while, then forgets them." : {
+
+    },
     "git credential-store keeps them unencrypted in %@." : {
+
+    },
+    "git credential-store keeps tokens unencrypted in %@." : {
 
     },
     "git credential-store removes every HTTPS password it saved. Remotes ask you to sign in again." : {
@@ -6509,6 +6582,9 @@
       }
     },
     "git fsck reads every object." : {
+
+    },
+    "git hands tokens to %@." : {
 
     },
     "git has no history for this file" : {
@@ -6557,6 +6633,9 @@
 
     },
     "git no longer has this commit." : {
+
+    },
+    "git now asks for a password every time" : {
 
     },
     "git now remembers passwords in %@" : {
@@ -6633,6 +6712,9 @@
     "git's default" : {
 
     },
+    "git's osxkeychain helper keeps tokens in your login keychain." : {
+
+    },
     "git@github.com:owner/repo.git or https://…" : {
 
     },
@@ -6677,6 +6759,9 @@
       }
     },
     "navigate" : {
+
+    },
+    "new window" : {
 
     },
     "no commits yet" : {
@@ -6761,6 +6846,9 @@
 
     },
     "succeeded" : {
+
+    },
+    "switch" : {
 
     },
     "symbolic" : {
