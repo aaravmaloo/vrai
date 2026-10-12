@@ -181,6 +181,10 @@ struct SettingsSwitch: View {
             .disabled(disabled)
             .accessibilityLabel(label)
             .accessibilityIdentifier(id ?? label)
+            .accessibilityAction {
+                guard !disabled else { return }
+                set(!isOn)
+            }
     }
 }
 

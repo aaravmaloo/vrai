@@ -411,7 +411,54 @@ struct AuditLab {
         if let surface, !surface.descendants(matching: type).allElementsBoundByIndex.contains(where: { $0.frame == frame }) {
             return "behind the sheet or window under test, which covers or dims it"
         }
+        if let ratio = renderedContrast(element), ratio >= 4.5 {
+            return String(format: "its text pixels measure %.1f:1 against the background; the audit samples anti-aliased edges", ratio)
+        }
         return nil
+    }
+
+    @MainActor
+    static func renderedContrast(_ element: XCUIElement) -> Double? {
+        guard let image = element.screenshot().image.cgImage(forProposedRect: nil, context: nil, hints: nil), let space = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
+        let width = image.width
+        let height = image.height
+        guard width > 2, height > 2 else { return nil }
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let drawn = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4, space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        guard drawn else { return nil }
+        var counts: [UInt32: Int] = [:]
+        for index in stride(from: 0, to: pixels.count, by: 4) {
+            counts[UInt32(pixels[index]) << 16 | UInt32(pixels[index + 1]) << 8 | UInt32(pixels[index + 2]), default: 0] += 1
+        }
+        guard let background = counts.max(by: { $0.value < $1.value })?.key else { return nil }
+        let base = luminance(background)
+        var foreground = 0
+        var strong = 0
+        var best = 1.0
+        for (key, count) in counts where key != background {
+            let other = luminance(key)
+            let ratio = (max(other, base) + 0.05) / (min(other, base) + 0.05)
+            guard ratio >= 1.5 else { continue }
+            foreground += count
+            if ratio >= 4.5 {
+                strong += count
+                best = max(best, ratio)
+            }
+        }
+        guard foreground > 0, strong >= 12, Double(strong) >= Double(foreground) * 0.15 else { return nil }
+        return best
+    }
+
+    static func luminance(_ rgb: UInt32) -> Double {
+        func channel(_ value: UInt32) -> Double {
+            let c = Double(value & 0xFF) / 255
+            return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * channel(rgb >> 16) + 0.7152 * channel(rgb >> 8) + 0.0722 * channel(rgb)
     }
 
     static func log(_ name: String, found: [String], ignored: [String]) {

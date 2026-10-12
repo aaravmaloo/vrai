@@ -83,7 +83,7 @@ else
   team=""
 fi
 
-for tool in xcodegen xcodebuild git hdiutil codesign ditto; do
+for tool in xcodegen xcodebuild git hdiutil codesign ditto python3; do
   command -v "$tool" >/dev/null || fail "$tool was not found."
 done
 
@@ -93,7 +93,8 @@ export_dir="$out/export"
 app="$export_dir/Vrai.app"
 
 step "Preparing build/release (build $build, $mode)"
-rm -rf "$out"
+for _ in 1 2 3; do rm -rf "$out" 2>/dev/null && break; sleep 1; done
+[[ ! -e "$out" ]] || fail "Could not clear build/release. Close any Finder window showing it and try again."
 mkdir -p "$out" "$packages"
 (cd "$root" && xcodegen generate --quiet)
 
@@ -157,7 +158,13 @@ while IFS= read -r -d '' nested; do
 done < <(find "$app/Contents/Frameworks" -mindepth 1 -maxdepth 1 \( -name '*.framework' -o -name '*.dylib' \) ! -name Sparkle.framework -print0 2>/dev/null)
 sign "$app/Contents/MacOS/vrai-askpass" --identifier com.aaravmaloo.vrai.askpass
 sign "$app/Contents/MacOS/vrai-editor" --identifier com.aaravmaloo.vrai.editor
-sign "$app" --identifier com.aaravmaloo.vrai --entitlements "$root/App/Vrai.entitlements"
+entitlements="$root/App/Vrai.entitlements"
+if [[ "$mode" == adhoc ]]; then
+  entitlements="$out/adhoc.entitlements"
+  cp "$root/App/Vrai.entitlements" "$entitlements"
+  /usr/libexec/PlistBuddy -c "Add :com.apple.security.cs.disable-library-validation bool true" "$entitlements"
+fi
+sign "$app" --identifier com.aaravmaloo.vrai --entitlements "$entitlements"
 codesign --verify --deep --strict --verbose=2 "$app"
 
 notarize() {
@@ -184,13 +191,14 @@ else
 fi
 
 step "Building the DMG"
-stage="$out/dmg"
 dmg="$out/Vrai-$version.dmg"
-mkdir -p "$stage"
-ditto "$app" "$stage/Vrai.app"
-ln -s /Applications "$stage/Applications"
-hdiutil create -volname "Vrai $version" -srcfolder "$stage" -fs HFS+ -format UDZO -imagekey zlib-level=9 -ov "$dmg" -quiet
-rm -rf "$stage"
+tools="$root/build/tools/dmgbuild"
+if [[ ! -x "$tools/bin/dmgbuild" ]]; then
+  echo "  installing dmgbuild into build/tools"
+  python3 -m venv "$tools"
+  "$tools/bin/pip" install --quiet --disable-pip-version-check "dmgbuild==1.6.7"
+fi
+"$tools/bin/dmgbuild" -s "$root/Scripts/dmg/settings.py" -D app="$app" -D background="$root/Scripts/dmg/background.png" "Vrai $version" "$dmg" > /dev/null
 codesign --force --sign "$identity" "${timestamp[@]}" "$dmg"
 codesign --verify --verbose=2 "$dmg"
 

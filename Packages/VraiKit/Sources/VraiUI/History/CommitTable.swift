@@ -112,6 +112,7 @@ struct CommitTable<Row: View>: NSViewRepresentable {
         table.addTableColumn(column)
         table.dataSource = context.coordinator
         table.delegate = context.coordinator
+        table.setAccessibilityLabel(String(localized: "Commits", bundle: .module))
         scroll.documentView = table
         context.coordinator.table = table
         if PerfLog.isEnabled {
@@ -215,6 +216,7 @@ struct CommitTable<Row: View>: NSViewRepresentable {
             if !force, cell.model == model { return }
             cell.model = model
             cell.host.rootView = AnyView(content(model).ignoresSafeArea().environment(\.self, environment))
+            cell.host.setAccessibilityLabel(model.commit.map { $0.subject + ", " + $0.authorName } ?? String(localized: "Uncommitted changes", bundle: .module))
             shown?(row, state)
         }
 

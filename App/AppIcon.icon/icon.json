@@ -1,0 +1,34 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-srgb:0.23922,0.38431,0.96078,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "goose.svg",
+          "name" : "goose"
+        },
+        {
+          "glass" : true,
+          "image-name" : "beak.svg",
+          "name" : "beak"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.4
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}
