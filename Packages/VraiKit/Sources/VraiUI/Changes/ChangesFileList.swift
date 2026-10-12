@@ -41,6 +41,7 @@ struct ChangesFileList: View {
             }
             .listStyle(.inset)
             .scrollContentBackground(.hidden)
+            .dragSelectsRows()
             .contextMenu(forSelectionType: ChangesPick.self) { picks in
                 menu(picks)
             } primaryAction: { picks in

@@ -72,11 +72,12 @@ struct ToolbarIcon: View {
     var count = 0
     var tinted = false
     let taps: Int
+    @Environment(\.isEnabled) private var enabled
 
     var body: some View {
         symbol
             .font(.title3.weight(.regular))
-            .foregroundStyle(tinted ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+            .foregroundStyle(style)
             .frame(width: Vrai.Size.toolbarItem + Vrai.Space.s4, height: Vrai.Size.toolbarItem)
             .overlay(alignment: .topTrailing) {
                 if count > 0 {
@@ -91,6 +92,11 @@ struct ToolbarIcon: View {
                 }
             }
             .contentShape(Rectangle())
+    }
+
+    var style: AnyShapeStyle {
+        if !enabled { return AnyShapeStyle(.tertiary) }
+        return tinted ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary)
     }
 
     @ViewBuilder var symbol: some View {

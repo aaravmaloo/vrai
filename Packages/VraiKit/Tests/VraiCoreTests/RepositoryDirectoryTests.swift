@@ -225,6 +225,21 @@ struct RecentsCapTests {
         #expect(reloaded.recents.map(\.path) == app.recents.map(\.path))
     }
 
+    @Test func remembersTheLayoutOfEachRepository() throws {
+        let (app, folder) = Self.makeApp()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let first = RepositoryReference(path: "/Users/me/Developer/first")
+        let second = RepositoryReference(path: "/Users/me/Developer/second")
+        #expect(app.layout(for: first) == nil)
+        let layout = RepositoryLayout(sections: ["tags": true, "worktrees": false], folders: ["remote:origin": true, "feature/": false], view: .changes)
+        app.saveLayout(layout, for: first)
+        app.saveLayout(RepositoryLayout(view: .stashes), for: second)
+        let reloaded = AppModel(launch: LaunchOptions(sandbox: folder))
+        #expect(reloaded.layout(for: first) == layout)
+        #expect(reloaded.layout(for: second)?.view == .stashes)
+        #expect(reloaded.layout(for: second)?.sections.isEmpty == true)
+    }
+
     @Test func reopeningKeepsTheKnownRemote() throws {
         let (app, folder) = Self.makeApp()
         defer { try? FileManager.default.removeItem(at: folder) }

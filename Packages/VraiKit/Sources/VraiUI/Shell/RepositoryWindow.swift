@@ -29,6 +29,10 @@ public struct RepositoryWindowRoot: View {
                         model.switchRequest = nil
                         if next != reference { reference = next }
                     }
+                    .onChange(of: model.layout) { _, layout in
+                        guard !app.launch.isSandboxed else { return }
+                        app.saveLayout(layout, for: model.reference)
+                    }
                     .id(ObjectIdentifier(model))
             } else if let missing {
                 RepositoryGoneView(name: missing.lastPathComponent, path: missing.path(percentEncoded: false)) {
@@ -98,6 +102,7 @@ public struct RepositoryWindowRoot: View {
             let window = WindowModel(reference: reference, store: store, preferences: app.preferences, now: app.launch.now)
             let previous = model
             if let previous { window.inherit(previous) }
+            if !app.launch.isSandboxed, let layout = app.layout(for: reference) { window.restore(layout) }
             model = window
             if let previous, previous.reference != reference { app.release(previous.reference) }
             if app.launch.isSandboxed, let delay = app.launch.openDelay {
@@ -144,7 +149,7 @@ struct RepositoryShell: View {
             }
             .accessibilityHostLabel(String(localized: "Content", bundle: .module), scope: .column)
         }
-        .navigationTitle(window.repositoryName)
+        .navigationTitle("Vrai | " + window.repositoryName)
         .toolbar(removing: .title)
         .toolbar { RepositoryToolbar(window: window) }
         .overlay { SwitcherHost() }

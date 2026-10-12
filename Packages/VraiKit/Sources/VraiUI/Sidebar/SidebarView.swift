@@ -392,6 +392,7 @@ struct SidebarItem: View {
     var help: String?
     var trailing: AnyView?
     @Environment(\.backgroundProminence) private var prominence
+    @Environment(\.appearsActive) private var active
 
     init(icon: String, iconColor: Color? = nil, label: String, detail: String? = nil, count: Int? = nil, tone: Tone? = nil, current: Bool = false, muted: Bool = false, help: String? = nil, trailing: AnyView? = nil) {
         self.icon = icon
@@ -421,6 +422,7 @@ struct SidebarItem: View {
                         .foregroundStyle(color)
                 } else {
                     Image(systemName: icon)
+                        .foregroundStyle(active ? AnyShapeStyle(Color.Vrai.accent) : AnyShapeStyle(.secondary))
                 }
             }
             Spacer(minLength: 0)

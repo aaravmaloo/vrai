@@ -67,6 +67,16 @@ public final class WindowModel {
         widthClass = previous.widthClass
     }
 
+    public var layout: RepositoryLayout {
+        RepositoryLayout(sections: expandedSections, folders: expandedFolders, view: RepositoryLayout.restorable.contains(store.view) ? store.view : nil)
+    }
+
+    public func restore(_ layout: RepositoryLayout) {
+        expandedSections = layout.sections
+        expandedFolders = layout.folders
+        if let view = layout.view, RepositoryLayout.restorable.contains(view) { store.view = view }
+    }
+
     public func copy(_ text: String, label: String? = nil) {
         Clipboard.copy(text)
         toasts.show(Toast(message: String(localized: "Copied \(label ?? text)", bundle: .module), icon: "doc.on.doc", timeout: Toast.brief))

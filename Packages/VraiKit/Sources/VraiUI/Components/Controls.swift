@@ -90,6 +90,17 @@ struct IconButtonStyle: PrimitiveButtonStyle {
     var active = false
 
     func makeBody(configuration: Configuration) -> some View {
+        IconButtonBody(configuration: configuration, small: small, active: active)
+    }
+}
+
+struct IconButtonBody: View {
+    let configuration: PrimitiveButtonStyleConfiguration
+    let small: Bool
+    let active: Bool
+    @Environment(\.isEnabled) private var enabled
+
+    var body: some View {
         let size = small ? Vrai.Size.controlSm : Vrai.Size.control
         Button(role: configuration.role, action: configuration.trigger) {
             configuration.label
@@ -98,7 +109,7 @@ struct IconButtonStyle: PrimitiveButtonStyle {
         }
         .buttonStyle(.borderless)
         .controlSize(small ? .small : .regular)
-        .foregroundStyle(active ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+        .foregroundStyle(!enabled ? AnyShapeStyle(.quaternary) : active ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
     }
 }
 
@@ -124,6 +135,7 @@ struct IconMenu<Content: View>: View {
     let label: String
     var small = false
     @ViewBuilder let content: () -> Content
+    @Environment(\.isEnabled) private var enabled
 
     var body: some View {
         Menu(content: content) {
@@ -133,7 +145,7 @@ struct IconMenu<Content: View>: View {
         .buttonStyle(.borderless)
         .menuIndicator(.hidden)
         .controlSize(small ? .small : .regular)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(enabled ? AnyShapeStyle(.secondary) : AnyShapeStyle(.quaternary))
         .fixedSize()
         .help(label)
         .accessibilityLabel(label)

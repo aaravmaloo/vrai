@@ -235,6 +235,18 @@ public final class AppModel {
         guard let data = try? JSONEncoder().encode(colors) else { return }
         defaults.set(data, forKey: colorsKey(reference))
     }
+
+    private func layoutKey(_ reference: RepositoryReference) -> String { "layout:" + reference.path }
+
+    public func layout(for reference: RepositoryReference) -> RepositoryLayout? {
+        guard let data = defaults.data(forKey: layoutKey(reference)) else { return nil }
+        return try? JSONDecoder().decode(RepositoryLayout.self, from: data)
+    }
+
+    public func saveLayout(_ layout: RepositoryLayout, for reference: RepositoryReference) {
+        guard let data = try? JSONEncoder().encode(layout) else { return }
+        defaults.set(data, forKey: layoutKey(reference))
+    }
 }
 
 extension String {
