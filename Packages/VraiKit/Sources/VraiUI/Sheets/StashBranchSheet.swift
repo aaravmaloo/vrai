@@ -15,8 +15,7 @@ struct StashBranchSheet: View {
         let base = stash?.base?.short ?? ""
         RewriteSheet(
             title: String(localized: "New branch from stash", bundle: .module),
-            description: String(localized: "Starts a branch at \(base), where the stash was made, then applies and drops it. Useful when the stash no longer applies cleanly.", bundle: .module),
-            icon: "arrow.triangle.branch"
+            description: String(localized: "Starts a branch at \(base), where the stash was made, then applies and drops it. Useful when the stash no longer applies cleanly.", bundle: .module)
         ) {
             RewriteTextField(label: String(localized: "Name", bundle: .module), text: $name, placeholder: String(localized: "feature/halo-experiments", bundle: .module), mono: true, error: error, autofocus: true, identifier: "stash-branch-name")
             RewriteOptions(command: RewriteCommands.branchFromStash(index: index, name: trimmed.isEmpty ? "<name>" : trimmed))

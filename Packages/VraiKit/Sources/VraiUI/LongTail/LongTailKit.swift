@@ -36,8 +36,6 @@ extension EnvironmentValues {
 struct LongTailSheet<Content: View, Start: View, Actions: View>: View {
     let title: String
     var description: String?
-    let icon: String
-    var tone: Tone = .neutral
     var width: CGFloat = Vrai.Size.sheet
     @ViewBuilder let content: () -> Content
     @ViewBuilder let footerStart: () -> Start
@@ -64,33 +62,13 @@ struct LongTailSheet<Content: View, Start: View, Actions: View>: View {
         let limit = room
         let scrolls = limit.map { contentHeight > $0 } ?? false
         VStack(alignment: .leading, spacing: Vrai.Space.s16) {
-            HStack(alignment: .top, spacing: Vrai.Space.s12) {
-                RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .fill(tone == .neutral ? Color.Vrai.fill : tone.soft)
-                    .frame(width: Vrai.Space.s40, height: Vrai.Space.s40)
-                    .overlay {
-                        Symbol(icon, font: Font.Vrai.title1.weight(.regular))
-                            .foregroundStyle(tone == .neutral ? Color.Vrai.textSecondary : tone.color)
-                    }
-                VStack(alignment: .leading, spacing: Vrai.Space.s4) {
-                    Text(title)
-                        .font(Font.Vrai.title2)
-                        .foregroundStyle(Color.Vrai.text)
-                        .lineLimit(2)
-                        .truncationMode(.middle)
-                        .accessibilityAddTraits(.isHeader)
-                    if let description {
-                        Text(description)
-                            .font(Font.Vrai.callout)
-                            .foregroundStyle(Color.Vrai.textSecondary)
-                            .lineLimit(4)
-                            .truncationMode(.middle)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .padding(.top, Vrai.Space.s2)
+            Text(title)
+                .font(.headline)
+                .lineLimit(2)
+                .truncationMode(.middle)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            }
+                .help(description ?? "")
+                .accessibilityAddTraits(.isHeader)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: Vrai.Space.s16) {
@@ -114,15 +92,14 @@ struct LongTailSheet<Content: View, Start: View, Actions: View>: View {
         }
         .padding(Vrai.Space.s20)
         .frame(width: window?.sheetWidth(width) ?? width)
-        .background(Color.Vrai.surface)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(title)
     }
 }
 
 extension LongTailSheet where Start == EmptyView {
-    init(title: String, description: String? = nil, icon: String, tone: Tone = .neutral, width: CGFloat = Vrai.Size.sheet, @ViewBuilder content: @escaping () -> Content, @ViewBuilder actions: @escaping () -> Actions) {
-        self.init(title: title, description: description, icon: icon, tone: tone, width: width, content: content, footerStart: { EmptyView() }, actions: actions)
+    init(title: String, description: String? = nil, width: CGFloat = Vrai.Size.sheet, @ViewBuilder content: @escaping () -> Content, @ViewBuilder actions: @escaping () -> Actions) {
+        self.init(title: title, description: description, width: width, content: content, footerStart: { EmptyView() }, actions: actions)
     }
 }
 

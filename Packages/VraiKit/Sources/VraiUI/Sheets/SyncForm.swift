@@ -8,8 +8,6 @@ extension SyncForm {
     struct Sheet<Content: View, Start: View>: View {
         let title: String
         var description: String?
-        let icon: String
-        var tone: Tone = .neutral
         var width: CGFloat = Vrai.Size.sheet
         let primary: String
         var primaryEnabled = true
@@ -35,29 +33,11 @@ extension SyncForm {
             let limit = room
             let scrolls = limit.map { contentHeight > $0 } ?? false
             VStack(alignment: .leading, spacing: Vrai.Space.s16) {
-                HStack(alignment: .top, spacing: Vrai.Space.s12) {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .fill(tone == .neutral ? Color.Vrai.fill : tone.soft)
-                        .frame(width: Vrai.Space.s40, height: Vrai.Space.s40)
-                        .overlay {
-                            Symbol(icon, font: Font.Vrai.title1.weight(.regular))
-                                .foregroundStyle(tone == .neutral ? Color.Vrai.textSecondary : tone.color)
-                        }
-                    VStack(alignment: .leading, spacing: Vrai.Space.s4) {
-                        Text(title)
-                            .font(Font.Vrai.title2)
-                            .foregroundStyle(Color.Vrai.text)
-                            .accessibilityAddTraits(.isHeader)
-                        if let description {
-                            Text(description)
-                                .font(Font.Vrai.callout)
-                                .foregroundStyle(Color.Vrai.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .padding(.top, Vrai.Space.s2)
+                Text(title)
+                    .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                    .help(description ?? "")
+                    .accessibilityAddTraits(.isHeader)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
                 ScrollView(.vertical) {
                     VStack(alignment: .leading, spacing: Vrai.Space.s16) {
@@ -79,7 +59,6 @@ extension SyncForm {
                         } label: {
                             Text("Cancel", bundle: .module)
                         }
-                        .buttonStyle(VraiButtonStyle(variant: .secondary))
                         .keyboardShortcut(.cancelAction)
                         Button {
                             if draft?.submit() == true { return }
@@ -101,7 +80,6 @@ extension SyncForm {
             }
             .padding(Vrai.Space.s20)
             .frame(width: window.sheetWidth(width))
-            .background(Color.Vrai.surface)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(title)
         }
@@ -109,8 +87,8 @@ extension SyncForm {
 }
 
 extension SyncForm.Sheet where Start == EmptyView {
-    init(title: String, description: String? = nil, icon: String, tone: Tone = .neutral, width: CGFloat = Vrai.Size.sheet, primary: String, primaryEnabled: Bool = true, danger: Bool = false, busy: Bool = false, onSubmit: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
-        self.init(title: title, description: description, icon: icon, tone: tone, width: width, primary: primary, primaryEnabled: primaryEnabled, danger: danger, busy: busy, onSubmit: onSubmit, content: content, footerStart: { EmptyView() })
+    init(title: String, description: String? = nil, width: CGFloat = Vrai.Size.sheet, primary: String, primaryEnabled: Bool = true, danger: Bool = false, busy: Bool = false, onSubmit: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
+        self.init(title: title, description: description, width: width, primary: primary, primaryEnabled: primaryEnabled, danger: danger, busy: busy, onSubmit: onSubmit, content: content, footerStart: { EmptyView() })
     }
 }
 
@@ -135,14 +113,10 @@ extension SyncForm {
                     .font(Font.Vrai.caption)
                     .foregroundStyle(Color.Vrai.danger)
                     .fixedSize(horizontal: false, vertical: true)
-                } else if let hint {
-                    Text(hint)
-                        .font(Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .help(hint ?? "")
         }
     }
 
@@ -157,39 +131,22 @@ extension SyncForm {
         var autofocus = false
         var onSubmit: () -> Void = {}
         @FocusState private var focused: Bool
-        @State private var hovering = false
 
         var body: some View {
             Field(label: label, hint: hint, error: error) {
                 Group {
                     if secure {
-                        SecureField(text: $text, prompt: Text(placeholder).foregroundStyle(Color.Vrai.textTertiary)) { Text(label) }
+                        SecureField(text: $text, prompt: Text(placeholder)) { Text(label) }
                     } else {
-                        TextField(text: $text, prompt: Text(placeholder).foregroundStyle(Color.Vrai.textTertiary)) { Text(label) }
+                        TextField(text: $text, prompt: Text(placeholder)) { Text(label) }
                     }
                 }
-                .textFieldStyle(.plain)
+                .textFieldStyle(.roundedBorder)
                 .font(mono ? Font.Vrai.code : Font.Vrai.body)
-                .foregroundStyle(Color.Vrai.text)
                 .autocorrectionDisabled(mono || secure)
                 .focused($focused)
                 .onSubmit(onSubmit)
                 .accessibilityLabel(label)
-                .padding(.horizontal, Vrai.Space.s8)
-                .frame(height: Vrai.Size.control)
-                .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .strokeBorder(error != nil ? Color.Vrai.danger : focused ? Color.Vrai.focus : (hovering ? Color.Vrai.Contrast.borderStrong : Color.Vrai.Contrast.border), lineWidth: Metrics.hairline)
-                }
-                .background {
-                    if focused || error != nil {
-                        RoundedRectangle(cornerRadius: Vrai.Radius.md + Vrai.Size.focusHalo, style: .continuous)
-                            .fill(error != nil ? Color.Vrai.dangerSoft : Color.Vrai.accentSoftStrong)
-                            .padding(-Vrai.Size.focusHalo)
-                    }
-                }
-                .onHover { hovering = $0 }
             }
             .task {
                 guard autofocus else { return }
@@ -226,17 +183,10 @@ extension SyncForm {
                 .padding(.vertical, Vrai.Space.s6)
                 .padding(.horizontal, Vrai.Space.s4)
                 .frame(height: Vrai.Space.s20 * CGFloat(lines) + Vrai.Space.s12)
-                .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
+                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
-                }
-                .background {
-                    if focused {
-                        RoundedRectangle(cornerRadius: Vrai.Radius.md + Vrai.Size.focusHalo, style: .continuous)
-                            .fill(Color.Vrai.accentSoftStrong)
-                            .padding(-Vrai.Size.focusHalo)
-                    }
+                    RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
+                        .strokeBorder(focused ? Color.Vrai.focus : Color(nsColor: .separatorColor), lineWidth: focused ? Vrai.Size.line : Metrics.hairline)
                 }
             }
         }
@@ -249,69 +199,11 @@ extension SyncForm {
         var enabled = true
 
         var body: some View {
-            Toggle(isOn: $isOn) {
-                VStack(alignment: .leading, spacing: Vrai.Space.s2) {
-                    Text(label)
-                        .font(Font.Vrai.body)
-                        .foregroundStyle(Color.Vrai.text)
-                    if let description {
-                        Text(description)
-                            .font(Font.Vrai.caption)
-                            .foregroundStyle(Color.Vrai.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
-            .toggleStyle(CheckboxStyle())
+            Toggle(label, isOn: $isOn)
+            .toggleStyle(.checkbox)
+            .help(description ?? "")
             .disabled(!enabled)
             .accessibilityLabel(label)
-        }
-    }
-
-    struct CheckboxStyle: ToggleStyle {
-        func makeBody(configuration: Configuration) -> some View {
-            StyledBody(configuration: configuration)
-        }
-
-        struct StyledBody: View {
-            let configuration: ToggleStyleConfiguration
-            @Environment(\.isEnabled) private var enabled
-            @State private var hovering = false
-
-            var body: some View {
-                Button {
-                    configuration.isOn.toggle()
-                } label: {
-                    HStack(alignment: .top, spacing: Vrai.Space.s8) {
-                        RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
-                            .fill(configuration.isOn ? Color.Vrai.accent : (hovering ? Color.Vrai.fillHover : Color.Vrai.bg))
-                            .overlay {
-                                if !configuration.isOn {
-                                    RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
-                                        .strokeBorder(Color.Vrai.borderControl, lineWidth: Metrics.hairline)
-                                }
-                            }
-                            .overlay {
-                                if configuration.isOn {
-                                    Symbol("checkmark", font: Font.Vrai.overline)
-                                        .foregroundStyle(Color.Vrai.onAccent)
-                                }
-                            }
-                            .frame(width: Vrai.Space.s16, height: Vrai.Space.s16)
-                            .padding(.top, Metrics.hairline)
-                        configuration.label
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .opacity(enabled ? 1 : 0.5)
-                .onHover { hovering = $0 }
-                .accessibilityRepresentation {
-                    Toggle(isOn: configuration.$isOn) { configuration.label }
-                        .toggleStyle(.checkbox)
-                }
-            }
         }
     }
 
@@ -332,68 +224,21 @@ extension SyncForm {
         let label: String
 
         var body: some View {
-            VStack(alignment: .leading, spacing: Vrai.Space.s8) {
+            Picker(label, selection: $selection) {
                 ForEach(choices) { choice in
-                    row(choice)
-                }
-            }
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(label)
-        }
-
-        func row(_ choice: Choice<Value>) -> some View {
-            let on = choice.value == selection
-            let tint = choice.danger ? Color.Vrai.danger : Color.Vrai.accent
-            return Button {
-                selection = choice.value
-            } label: {
-                HStack(alignment: .top, spacing: Vrai.Space.s8) {
-                    Circle()
-                        .fill(on ? tint : Color.Vrai.bg)
-                        .overlay {
-                            if !on { Circle().strokeBorder(Color.Vrai.borderControl, lineWidth: Metrics.hairline) }
-                        }
-                        .overlay {
-                            if on {
-                                Circle()
-                                    .fill(Color.Vrai.onAccent)
-                                    .frame(width: Vrai.Space.s6, height: Vrai.Space.s6)
-                            }
-                        }
-                        .frame(width: Vrai.Space.s16, height: Vrai.Space.s16)
-                        .padding(.top, Metrics.hairline)
-                    VStack(alignment: .leading, spacing: Vrai.Space.s2) {
+                    HStack(spacing: Vrai.Space.s6) {
                         Text(choice.label)
-                            .font(cards ? Font.Vrai.headline : Font.Vrai.body)
-                            .foregroundStyle(Color.Vrai.text)
-                        if let description = choice.description {
-                            Text(description)
-                                .font(Font.Vrai.caption)
-                                .foregroundStyle(Color.Vrai.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+                            .foregroundStyle(choice.danger ? Color.Vrai.danger : Color.primary)
+                        if let badge = choice.badge { badge }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    if let badge = choice.badge { badge }
+                    .help(choice.description ?? "")
+                    .accessibilityLabel(choice.label)
+                    .tag(choice.value)
                 }
-                .padding(cards ? Vrai.Space.s12 : 0)
-                .background {
-                    if cards {
-                        RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                            .fill(on ? (choice.danger ? Color.Vrai.dangerSoft : Color.Vrai.accentSoft) : Color.Vrai.bg)
-                    }
-                }
-                .overlay {
-                    if cards {
-                        RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                            .strokeBorder(on ? tint : Color.Vrai.Contrast.border, lineWidth: on ? Metrics.thinStroke : Metrics.hairline)
-                    }
-                }
-                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(choice.label)
-            .accessibilityAddTraits(on ? [.isSelected, .isButton] : .isButton)
+            .labelsHidden()
+            .pickerStyle(.radioGroup)
+            .accessibilityLabel(label)
         }
     }
 
@@ -412,52 +257,19 @@ extension SyncForm {
         let label: String
 
         var body: some View {
-            let current = options.first { $0.value == selection } ?? options.first
-            Menu {
+            Picker(label, selection: $selection) {
                 ForEach(options) { option in
-                    Button {
-                        selection = option.value
-                    } label: {
-                        if option.value == selection {
-                            Label(option.label, systemImage: "checkmark")
-                        } else if let icon = option.icon {
-                            Label(option.label, systemImage: icon)
-                        } else {
-                            Text(option.label)
-                        }
+                    if let icon = option.icon {
+                        Label(option.label, systemImage: icon).tag(option.value)
+                    } else {
+                        Text(option.label).tag(option.value)
                     }
                 }
-            } label: {
-                HStack(spacing: Vrai.Space.s6) {
-                    if let icon = current?.icon {
-                        Symbol(icon, font: Font.Vrai.body)
-                            .foregroundStyle(Color.Vrai.textSecondary)
-                    }
-                    Text(current?.label ?? "")
-                        .font(Font.Vrai.body)
-                        .foregroundStyle(Color.Vrai.text)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Spacer(minLength: Vrai.Space.s4)
-                    Symbol("chevron.up.chevron.down", font: Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                }
-                .padding(.leading, Vrai.Space.s10)
-                .padding(.trailing, Vrai.Space.s6)
-                .frame(height: Vrai.Size.control)
-                .frame(maxWidth: .infinity)
-                .background(Color.Vrai.surfaceRaised, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
-                }
-                .contentShape(Rectangle())
             }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityLabel(label)
-            .accessibilityValue(current?.label ?? "")
         }
     }
 
@@ -467,36 +279,13 @@ extension SyncForm {
         let label: String
 
         var body: some View {
-            HStack(spacing: Vrai.Space.s2) {
+            Picker(label, selection: $selection) {
                 ForEach(items) { item in
-                    let on = item.value == selection
-                    Button {
-                        selection = item.value
-                    } label: {
-                        Text(item.label)
-                            .font(Font.Vrai.body)
-                            .foregroundStyle(on ? Color.Vrai.text : Color.Vrai.textSecondary)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background {
-                                if on {
-                                    RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
-                                        .fill(Color.Vrai.surfaceRaised)
-                                        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline / 2))
-                                        .shadow(color: Color.Vrai.separator, radius: Metrics.hairline, y: Metrics.hairline)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(item.label)
-                    .accessibilityAddTraits(on ? [.isSelected, .isButton] : .isButton)
+                    Text(item.label).tag(item.value)
                 }
             }
-            .padding(Vrai.Space.s2)
-            .frame(height: Vrai.Size.control)
-            .background(Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
-            .accessibilityElement(children: .contain)
+            .labelsHidden()
+            .pickerStyle(.segmented)
             .accessibilityLabel(label)
         }
     }
@@ -535,44 +324,9 @@ extension SyncForm {
         var detail: String?
         @State var open: Bool
         @ViewBuilder let content: () -> Content
-        @Environment(\.vraiReduceMotion) private var reduceMotion
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 0) {
-                Button {
-                    withAnimation(reduceMotion ? nil : Animation.Vrai.standardFast) { open.toggle() }
-                } label: {
-                    HStack(spacing: Vrai.Space.s6) {
-                        Symbol("chevron.right", font: Font.Vrai.caption)
-                            .foregroundStyle(Color.Vrai.textTertiary)
-                            .rotationEffect(.degrees(open ? 90 : 0))
-                        Text(title)
-                            .font(Font.Vrai.headline)
-                            .foregroundStyle(Color.Vrai.text)
-                        Spacer(minLength: 0)
-                        if let detail {
-                            Text(detail)
-                                .font(Font.Vrai.caption)
-                                .foregroundStyle(Color.Vrai.textTertiary)
-                        }
-                    }
-                    .padding(.horizontal, Vrai.Space.s4)
-                    .frame(height: Vrai.Size.control)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .hoverHighlight(radius: Vrai.Radius.sm, hoverFill: Color.Vrai.fillHover)
-                .accessibilityLabel(title)
-                .accessibilityValue(open ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module))
-                if open {
-                    VStack(alignment: .leading, spacing: Vrai.Space.s12) {
-                        content()
-                    }
-                    .padding(.top, Vrai.Space.s8)
-                    .padding(.bottom, Vrai.Space.s4)
-                    .padding(.leading, Vrai.Space.s20)
-                }
-            }
+            RewriteDisclosure(title: title, detail: detail, open: open, content: content)
         }
     }
 

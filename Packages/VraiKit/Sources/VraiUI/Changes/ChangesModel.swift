@@ -116,21 +116,6 @@ struct ChangeGroups {
 }
 
 enum FilePicks {
-    static func range(from start: ChangesPick, to end: ChangesPick, in order: [ChangesPick]) -> [ChangesPick] {
-        guard let first = order.firstIndex(of: start), let last = order.firstIndex(of: end) else { return [end] }
-        return Array(order[min(first, last)...max(first, last)])
-    }
-
-    static func toggled(_ target: ChangesPick, in selected: Set<ChangesPick>) -> Set<ChangesPick> {
-        var next = selected
-        if next.contains(target) {
-            if next.count > 1 { next.remove(target) }
-        } else {
-            next.insert(target)
-        }
-        return next
-    }
-
     static func resolve(_ selected: Set<ChangesPick>, in working: [WorkingFile]) -> Set<ChangesPick> {
         Set(selected.compactMap { pick in
             guard let next = ChangeGroups.resolve(pick, in: working), next.path == pick.path else { return nil }
@@ -165,7 +150,6 @@ public final class ChangesModel {
     public var noVerify = false
     public internal(set) var pick: ChangesPick?
     public internal(set) var selected: Set<ChangesPick> = []
-    @ObservationIgnored var anchor: ChangesPick?
     public internal(set) var diff: FileDiff?
     public internal(set) var diffState: LoadState = .idle
     public internal(set) var hookFailure: CommitHookFailure?
@@ -233,33 +217,16 @@ public final class ChangesModel {
         if narrow { narrowDetail = true }
         listFocusRequest += 1
         selected = [next]
-        anchor = next
         guard next != pick else { return }
         pick = next
         lines = nil
         reload(store, quiet: false)
     }
 
-    func extend(to target: ChangesPick, order: [ChangesPick], store: RepositoryStore) {
+    func setSelection(_ next: Set<ChangesPick>, lead: ChangesPick, store: RepositoryStore) {
         listFocusRequest += 1
-        let start = anchor ?? pick ?? target
-        anchor = start
-        selected = Set(FilePicks.range(from: start, to: target, in: order))
-        focus(target, store: store)
-    }
-
-    func toggle(_ target: ChangesPick, order: [ChangesPick], store: RepositoryStore) {
-        listFocusRequest += 1
-        let current = isMultiple ? selected : Set(pick.map { [$0] } ?? [])
-        selected = FilePicks.toggled(target, in: current)
-        anchor = target
-        focus(selected.contains(target) ? target : FilePicks.ordered(selected, in: order).first ?? target, store: store)
-    }
-
-    func drag(from start: ChangesPick, to target: ChangesPick, order: [ChangesPick], keeping base: Set<ChangesPick>, store: RepositoryStore) {
-        selected = base.union(FilePicks.range(from: start, to: target, in: order))
-        anchor = start
-        focus(target, store: store)
+        selected = next
+        focus(lead, store: store)
     }
 
     private func focus(_ target: ChangesPick, store: RepositoryStore) {
@@ -274,7 +241,6 @@ public final class ChangesModel {
         let resolved = ChangeGroups.resolve(pick, in: working)
         let kept = FilePicks.resolve(selected, in: working)
         selected = kept.count > 1 ? kept : Set(resolved.map { [$0] } ?? [])
-        if let current = anchor { anchor = FilePicks.resolve([current], in: working).first ?? resolved }
         if resolved != pick {
             let samePath = resolved?.path == pick?.path
             pick = resolved
@@ -400,7 +366,6 @@ public final class ChangesModel {
         loadTask?.cancel()
         self.pick = pick
         selected = [pick]
-        anchor = pick
         self.diff = diff
         lines = nil
         diffState = .loaded

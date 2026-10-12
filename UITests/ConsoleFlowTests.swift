@@ -28,14 +28,14 @@ final class ConsoleFlowTests: XCTestCase {
         console.buttons["Failed"].click()
         XCTAssertTrue(ConsoleUI.text(console, "No failed commands.").waitForExistence(timeout: 5))
         console.buttons["All"].click()
-        let field = console.textFields["Filter commands and output"]
+        let field = console.searchFields["Filter commands and output"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         ChangesFixtureCopy.type("git fetch", into: field)
         XCTAssertTrue(fetch.waitForExistence(timeout: 5))
         XCTAssertTrue(ConsoleUI.wait { entries.count == 1 })
         app.typeKey("j", modifierFlags: .command)
         XCTAssertTrue(ChangesFixtureCopy.waitUntilGone(console, timeout: 5))
-        let button = app.toolbars.buttons["Show console"].firstMatch
+        let button = app.toolbars.firstMatch.descendants(matching: .any).matching(identifier: "toolbar-console").firstMatch
         XCTAssertTrue(button.waitForExistence(timeout: 5))
         button.click()
         XCTAssertTrue(console.waitForExistence(timeout: 5))
@@ -148,7 +148,7 @@ enum ConsoleUI {
     @MainActor
     static func focusWindow(_ app: XCUIApplication) {
         app.activate()
-        let filter = app.textFields["Filter by subject, author or hash"]
+        let filter = app.searchFields["Filter by subject, author or hash"]
         guard filter.waitForExistence(timeout: 5), filter.isHittable else { return }
         filter.click()
         let focused = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasKeyboardFocus == true"), object: filter)
@@ -165,7 +165,7 @@ enum ConsoleUI {
             app.typeKey("j", modifierFlags: .command)
             if console.waitForExistence(timeout: 3) { return console }
         }
-        let button = app.toolbars.buttons["Show console"].firstMatch
+        let button = app.toolbars.firstMatch.descendants(matching: .any).matching(identifier: "toolbar-console").firstMatch
         if button.exists { button.click() }
         XCTAssertTrue(console.waitForExistence(timeout: 5), "The console didn't open")
         return console

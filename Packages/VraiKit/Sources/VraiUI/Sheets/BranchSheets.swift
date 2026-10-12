@@ -33,8 +33,6 @@ struct BranchSheet: View {
         SyncForm.Sheet(
             title: String(localized: "New branch", bundle: .module),
             description: String(localized: "A branch is a movable name for a line of commits. Its color follows it everywhere.", bundle: .module),
-            icon: "arrow.triangle.branch",
-            tone: .accent,
             primary: checkout ? String(localized: "Create and switch", bundle: .module) : String(localized: "Create branch", bundle: .module),
             primaryEnabled: ok,
             onSubmit: go
@@ -77,7 +75,6 @@ struct BranchRenameSheet: View {
     var body: some View {
         SyncForm.Sheet(
             title: String(localized: "Rename \(original)", bundle: .module),
-            icon: "pencil",
             primary: String(localized: "Rename", bundle: .module),
             primaryEnabled: ok,
             onSubmit: go
@@ -124,7 +121,6 @@ struct BranchUpstreamSheet: View {
         SyncForm.Sheet(
             title: String(localized: "Upstream for \(name)", bundle: .module),
             description: String(localized: "The remote branch that pull reads from and push writes to, and that ahead and behind counts compare against.", bundle: .module),
-            icon: "link",
             primary: String(localized: "Save", bundle: .module),
             onSubmit: go
         ) {

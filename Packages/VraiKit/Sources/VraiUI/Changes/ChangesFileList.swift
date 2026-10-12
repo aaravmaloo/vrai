@@ -9,95 +9,127 @@ struct ChangesFileList: View {
     @Environment(WindowModel.self) private var window
     @Environment(\.widthClass) private var widthClass
     @FocusState private var focused: Bool
-    @State private var frames = FileFrames()
-    @State private var dragging: FileDrag?
+    @State private var resync = false
 
     var body: some View {
         let changes = window.changes
-        let order = groups.picks
         ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(ChangeGroups.Kind.allCases, id: \.self) { kind in
-                        let files = groups.files(kind)
-                        if !files.isEmpty {
-                            ChangesGroupHeader(title: title(kind), count: files.count)
-                                .accessibilityIdentifier("changes-group-" + kind.rawValue)
-                            ForEach(files) { file in
-                                let pick = ChangesPick(path: file.path, side: ChangeGroups.side(of: kind), conflict: kind == .conflicts)
+            List(selection: selection) {
+                ForEach(ChangeGroups.Kind.allCases, id: \.self) { kind in
+                    let rows = ChangeRow.rows(kind, in: groups)
+                    if !rows.isEmpty {
+                        Section {
+                            ForEach(rows) { row in
                                 ChangeFileRow(
-                                    file: file,
+                                    file: row.file,
                                     kind: kind,
-                                    selected: changes.isSelected(pick),
-                                    onToggle: { window.toggleStage(file) },
-                                    onDiscard: { window.confirmDiscard([file.path]) }
+                                    selected: changes.isSelected(row.pick),
+                                    onToggle: { window.toggleStage(row.file) },
+                                    onDiscard: { window.confirmDiscard([row.file.path]) }
                                 )
-                                .id(pick)
-                                .onGeometryChange(for: CGRect.self) { $0.frame(in: .named(FileFrames.space)) } action: { frames.record(pick, $0) }
-                                .onTapGesture {
-                                    focused = true
-                                    click(pick, order: order)
-                                }
-                                .contextMenu {
-                                    if changes.isMultiple, changes.selected.contains(pick) {
-                                        WorkingSelectionMenu(picks: FilePicks.ordered(changes.selected, in: order), window: window)
-                                    } else {
-                                        WorkingFileMenu(file: file, window: window)
-                                    }
-                                }
-                                .accessibilityAction { changes.select(pick, store: store, narrow: widthClass.isNarrow) }
-                                .accessibilityIdentifier("change-row-" + kind.rawValue + "-" + file.path)
+                                .tag(row.pick)
+                                .modifier(NarrowClick(active: widthClass.isNarrow) { reopen(row.pick) })
+                                .accessibilityAction { changes.select(row.pick, store: store, narrow: widthClass.isNarrow) }
+                                .accessibilityIdentifier("change-row-" + kind.rawValue + "-" + row.file.path)
                             }
+                        } header: {
+                            ChangesGroupHeader(title: title(kind), count: rows.count)
+                                .accessibilityIdentifier("changes-group-" + kind.rawValue)
                         }
                     }
                 }
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel(Text("Changed files", bundle: .module))
-                .coordinateSpace(.named(FileFrames.space))
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 4, coordinateSpace: .named(FileFrames.space))
-                        .onChanged { value in drag(value, order: order) }
-                        .onEnded { _ in dragging = nil }
-                )
-                .padding(.horizontal, Vrai.Space.s4)
-                .padding(.top, Vrai.Space.s4)
-                .padding(.bottom, Vrai.Space.s8)
             }
+            .listStyle(.inset)
+            .scrollContentBackground(.hidden)
+            .contextMenu(forSelectionType: ChangesPick.self) { picks in
+                menu(picks)
+            } primaryAction: { picks in
+                open(picks)
+            }
+            .focused($focused)
+            .focusEffectDisabled()
+            .onChange(of: changes.listFocusRequest) { _, _ in focused = true }
             .onChange(of: changes.pick) { _, pick in
                 guard let pick else { return }
                 proxy.scrollTo(pick)
             }
+            .onAppear {
+                guard window.changes.focusRequest == window.changes.focusHandled else { return }
+                Task { @MainActor in focused = true }
+            }
+            .onKeyPress(.space) {
+                window.toggleSelectionStaging()
+                return .handled
+            }
+            .onKeyPress(.rightArrow) {
+                guard let pick = changes.pick, !pick.conflict, !changes.isMultiple, changes.isLineLevel else { return .ignored }
+                changes.diffFocusRequest += 1
+                return .handled
+            }
+            .onKeyPress(.return) {
+                guard widthClass.isNarrow, changes.pick != nil else { return .ignored }
+                changes.narrowDetail = true
+                return .handled
+            }
+            .onDeleteCommand {
+                let paths = window.selectedPaths()
+                guard !paths.isEmpty else { return }
+                window.confirmDiscard(paths)
+            }
+            .accessibilityLabel(Text("Changed files", bundle: .module))
+            .accessibilityIdentifier("changes-list")
         }
-        .focusable()
-        .focusEffectDisabled()
-        .focused($focused)
-        .onChange(of: changes.listFocusRequest) { _, _ in focused = true }
-        .onAppear {
-            guard window.changes.focusRequest == window.changes.focusHandled else { return }
-            Task { @MainActor in focused = true }
+    }
+
+    var current: Set<ChangesPick> {
+        let changes = window.changes
+        return changes.isMultiple ? changes.selected : Set(changes.pick.map { [$0] } ?? [])
+    }
+
+    var selection: Binding<Set<ChangesPick>> {
+        Binding(get: { resync ? [] : current }, set: { choose($0) })
+    }
+
+    func choose(_ proposed: Set<ChangesPick>) {
+        let changes = window.changes
+        let order = groups.picks
+        let next = Set(FilePicks.ordered(proposed, in: order))
+        let now = current
+        if next.isEmpty {
+            resync = true
+            Task { @MainActor in resync = false }
+            return
         }
-        .onKeyPress(keys: [.downArrow, .upArrow]) { press in
-            move(press.key == .downArrow ? 1 : -1, extend: press.modifiers.contains(.shift))
+        guard next != now else { return }
+        if next.count == 1, let only = next.first {
+            changes.select(only, store: store, narrow: widthClass.isNarrow && Self.clicked)
+            return
         }
-        .onKeyPress(.space) {
-            window.toggleSelectionStaging()
-            return .handled
+        guard let lead = FilePicks.lead(of: next, after: now, pick: changes.pick, in: order) else { return }
+        changes.setSelection(next, lead: lead, store: store)
+    }
+
+    static var clicked: Bool {
+        guard let type = NSApp.currentEvent?.type else { return false }
+        return type == .leftMouseDown || type == .leftMouseUp
+    }
+
+    func reopen(_ pick: ChangesPick) {
+        guard NSEvent.modifierFlags.intersection([.shift, .command]).isEmpty else { return }
+        window.changes.select(pick, store: store, narrow: true)
+    }
+
+    func open(_ picks: Set<ChangesPick>) {
+        guard widthClass.isNarrow, picks.count == 1, let pick = picks.first else { return }
+        window.changes.select(pick, store: store, narrow: true)
+    }
+
+    @ViewBuilder func menu(_ picks: Set<ChangesPick>) -> some View {
+        if picks.count > 1 {
+            WorkingSelectionMenu(picks: FilePicks.ordered(picks, in: groups.picks), window: window)
+        } else if let pick = picks.first, let file = store.snapshot?.working.first(where: { $0.path == pick.path }) {
+            WorkingFileMenu(file: file, window: window)
         }
-        .onKeyPress(.rightArrow) {
-            guard let pick = changes.pick, !pick.conflict, !changes.isMultiple, changes.isLineLevel else { return .ignored }
-            changes.diffFocusRequest += 1
-            return .handled
-        }
-        .onKeyPress(.delete) { discardSelected() }
-        .onKeyPress(.deleteForward) { discardSelected() }
-        .onKeyPress(.return) {
-            guard widthClass.isNarrow, changes.pick != nil else { return .ignored }
-            changes.narrowDetail = true
-            return .handled
-        }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Changed files", bundle: .module))
-        .accessibilityIdentifier("changes-list")
     }
 
     func title(_ kind: ChangeGroups.Kind) -> String {
@@ -108,79 +140,42 @@ struct ChangesFileList: View {
         case .untracked: String(localized: "Untracked", bundle: .module)
         }
     }
+}
 
-    func click(_ pick: ChangesPick, order: [ChangesPick]) {
-        let changes = window.changes
-        let flags = NSEvent.modifierFlags
-        if flags.contains(.shift) {
-            changes.extend(to: pick, order: order, store: store)
-        } else if flags.contains(.command) {
-            changes.toggle(pick, order: order, store: store)
+struct NarrowClick: ViewModifier {
+    let active: Bool
+    let action: () -> Void
+
+    func body(content: Content) -> some View {
+        if active {
+            content.simultaneousGesture(TapGesture().onEnded(action))
         } else {
-            changes.select(pick, store: store, narrow: widthClass.isNarrow)
+            content
         }
-    }
-
-    func drag(_ value: DragGesture.Value, order: [ChangesPick]) {
-        let changes = window.changes
-        if dragging == nil {
-            frames.keep(order)
-            guard let start = frames.pick(at: value.startLocation.y) else { return }
-            focused = true
-            dragging = FileDrag(start: start, base: NSEvent.modifierFlags.contains(.command) ? (changes.isMultiple ? changes.selected : Set(changes.pick.map { [$0] } ?? [])) : [])
-        }
-        guard let drag = dragging, let target = frames.pick(at: value.location.y) else { return }
-        changes.drag(from: drag.start, to: target, order: order, keeping: drag.base, store: store)
-    }
-
-    func move(_ step: Int, extend: Bool) -> KeyPress.Result {
-        let changes = window.changes
-        let picks = groups.picks
-        guard !picks.isEmpty else { return .ignored }
-        let index = changes.pick.flatMap { picks.firstIndex(of: $0) } ?? (step > 0 ? -1 : picks.count)
-        let next = picks[max(0, min(picks.count - 1, index + step))]
-        if extend {
-            changes.extend(to: next, order: picks, store: store)
-        } else {
-            changes.select(next, store: store, narrow: false)
-        }
-        return .handled
-    }
-
-    func discardSelected() -> KeyPress.Result {
-        let paths = window.selectedPaths()
-        guard !paths.isEmpty else { return .ignored }
-        window.confirmDiscard(paths)
-        return .handled
     }
 }
 
-struct FileDrag {
-    let start: ChangesPick
-    let base: Set<ChangesPick>
+struct ChangeRow: Identifiable {
+    let file: WorkingFile
+    let pick: ChangesPick
+
+    var id: ChangesPick { pick }
+
+    static func rows(_ kind: ChangeGroups.Kind, in groups: ChangeGroups) -> [ChangeRow] {
+        groups.files(kind).map { file in
+            ChangeRow(file: file, pick: ChangesPick(path: file.path, side: ChangeGroups.side(of: kind), conflict: kind == .conflicts))
+        }
+    }
 }
 
-final class FileFrames {
-    static let space = "changes-file-rows"
-    private var frames: [ChangesPick: ClosedRange<CGFloat>] = [:]
-
-    func record(_ pick: ChangesPick, _ frame: CGRect) {
-        guard frame.height > 0 else { return }
-        frames[pick] = frame.minY...frame.maxY
-    }
-
-    func keep(_ order: [ChangesPick]) {
-        let live = Set(order)
-        frames = frames.filter { live.contains($0.key) }
-    }
-
-    func pick(at y: CGFloat) -> ChangesPick? {
-        if let hit = frames.first(where: { $0.value.contains(y) }) { return hit.key }
-        return frames.min { distance($0.value, y) < distance($1.value, y) }?.key
-    }
-
-    private func distance(_ range: ClosedRange<CGFloat>, _ y: CGFloat) -> CGFloat {
-        y < range.lowerBound ? range.lowerBound - y : y - range.upperBound
+extension FilePicks {
+    static func lead(of next: Set<ChangesPick>, after current: Set<ChangesPick>, pick: ChangesPick?, in order: [ChangesPick]) -> ChangesPick? {
+        let origin = pick.flatMap { order.firstIndex(of: $0) } ?? 0
+        let distance = { (candidate: ChangesPick) in abs((order.firstIndex(of: candidate) ?? origin) - origin) }
+        let added = ordered(next.subtracting(current), in: order)
+        if !added.isEmpty { return added.max { distance($0) < distance($1) } }
+        if let pick, next.contains(pick) { return pick }
+        return ordered(next, in: order).min { distance($0) < distance($1) }
     }
 }
 
@@ -190,14 +185,13 @@ struct ChangeFileRow: View {
     let selected: Bool
     let onToggle: () -> Void
     let onDiscard: () -> Void
-    @State private var hovering = false
-    @Environment(\.captureMode) private var capture
+    @Environment(\.backgroundProminence) private var prominence
 
     var body: some View {
         let conflict = kind == .conflicts
         let status = conflict ? FileStatus.conflicted : ChangeGroups.statusLetter(file, side: ChangeGroups.side(of: kind))
         let parts = PathParts.split(file.path)
-        let showActions = hovering && !capture && !conflict
+        let emphasized = prominence == .increased
         HStack(spacing: Vrai.Space.s8) {
             if !conflict {
                 StageCheckbox(state: file.staged, label: file.staged == .full ? String(localized: "Unstage \(parts.name)", bundle: .module) : String(localized: "Stage \(parts.name)", bundle: .module), action: onToggle)
@@ -211,57 +205,49 @@ struct ChangeFileRow: View {
                         Symbol("arrow.right", font: Font.Vrai.overline)
                     }
                     .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .fixedSize()
                 }
                 Text(parts.name)
-                    .font(Font.Vrai.body)
-                    .foregroundStyle(conflict ? Color.Vrai.statusConflicted : Color.Vrai.text)
+                    .foregroundStyle(conflict && !emphasized ? AnyShapeStyle(Color.Vrai.statusConflicted) : AnyShapeStyle(.primary))
                     .lineLimit(1)
                     .layoutPriority(1)
                 if !parts.directory.isEmpty {
                     Text(String(parts.directory.dropLast()))
                         .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .truncationMode(.head)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .help(file.oldPath.map { $0 + " \u{2192} " + file.path } ?? file.path)
-            if showActions {
-                IconButton(icon: "arrow.uturn.backward", label: String(localized: "Discard changes to \(parts.name)", bundle: .module), small: true, action: onDiscard)
-            } else if file.isBinary {
+            if file.isBinary {
                 Text("Binary", bundle: .module)
                     .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
             } else if !conflict, file.additions + file.deletions > 0 {
-                DiffStat(additions: file.additions, deletions: file.deletions)
+                if emphasized {
+                    HStack(spacing: Vrai.Space.s6) {
+                        if file.additions > 0 { Text(verbatim: "+\(file.additions)") }
+                        if file.deletions > 0 { Text(verbatim: "\u{2212}\(file.deletions)") }
+                    }
+                    .font(Font.Vrai.caption)
+                    .monospacedDigit()
+                    .fixedSize()
+                } else {
+                    DiffStat(additions: file.additions, deletions: file.deletions)
+                }
             }
         }
-        .padding(.leading, Vrai.Space.s6)
-        .padding(.trailing, Vrai.Space.s8)
-        .frame(height: Vrai.Size.row)
-        .background(background, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
-        .contentShape(Rectangle())
-        .onHover { hovering = $0 }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text(accessibilityText(status: status)))
+        .accessibilityLabel(Text(FileStatusTile(status: status).label + ", " + file.path))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityActions {
             if !conflict {
                 Button(String(localized: "Discard changes to \(parts.name)", bundle: .module), action: onDiscard)
             }
         }
-    }
-
-    var background: Color {
-        if selected { return Color.Vrai.accentSoft }
-        return hovering && !capture ? Color.Vrai.fill : Color.clear
-    }
-
-    func accessibilityText(status: FileStatus) -> String {
-        FileStatusTile(status: status).label + ", " + file.path
     }
 }

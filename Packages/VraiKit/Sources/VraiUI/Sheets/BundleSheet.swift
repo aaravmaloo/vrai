@@ -33,8 +33,7 @@ struct BundleSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Create bundle", bundle: .module),
-            description: String(localized: "Packs commits into one file you can clone or fetch from, for moving a repository without a server.", bundle: .module),
-            icon: "archivebox"
+            description: String(localized: "Packs commits into one file you can clone or fetch from, for moving a repository without a server.", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't write the bundle", bundle: .module), message: failure)

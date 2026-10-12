@@ -91,16 +91,20 @@ struct CommitRowView: View {
     let query: String
     let columns: CommitColumns
     let signature: SignatureState
+    var layout: CommitColumnLayout?
     @Environment(\.expert) private var expert
     @Environment(\.vraiNow) private var now
 
     var body: some View {
-        HStack(spacing: Vrai.Space.s12) {
-            GraphCell(row: row, lanes: lanes, height: height, dim: dim)
+        let emphasized = selected && focused
+        let metrics = layout ?? .standalone(lanes: lanes)
+        HStack(spacing: 0) {
+            CommitGraphCell(row: row, lanes: lanes, height: height, dim: dim, emphasized: emphasized)
+                .frame(width: metrics.graph, alignment: .leading)
             SubjectLayout(share: columns == [.date] ? Metrics.refsShareNarrow : Metrics.refsShare) {
                 if !refs.isEmpty {
                     PillRow {
-                        ForEach(refs) { RefPill(model: $0) }
+                        ForEach(refs) { RefPill(model: $0).modifier(SelectedRowPill(emphasized: emphasized)) }
                     }
                     .layoutValue(key: SubjectRole.self, value: 0)
                 }
@@ -111,38 +115,41 @@ struct CommitRowView: View {
                         .layoutValue(key: SubjectRole.self, value: 2)
                 }
             }
+            .padding(.horizontal, CommitColumnLayout.inset)
             .frame(maxWidth: .infinity, alignment: .leading)
             if columns.contains(.author) {
-                HStack(spacing: Vrai.Space.s6) {
-                    Avatar(name: commit.authorName, size: Vrai.Space.s16)
-                    Text(commit.authorName)
-                        .lineLimit(1)
-                }
-                .font(Font.Vrai.callout)
-                .foregroundStyle(Color.Vrai.textSecondary)
-                .frame(width: Vrai.Size.colAuthor, alignment: .leading)
+                Text(commit.authorName)
+                    .font(Font.Vrai.callout)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .padding(.horizontal, CommitColumnLayout.inset)
+                    .frame(width: metrics.author, alignment: .leading)
             }
             if columns.contains(.date) {
                 Text(RelativeDate.text(commit.authorDate, now: now))
                     .font(Font.Vrai.callout)
                     .monospacedDigit()
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
-                    .frame(width: Vrai.Size.colDate, alignment: .leading)
+                    .padding(.horizontal, CommitColumnLayout.inset)
+                    .frame(width: metrics.date, alignment: .leading)
                     .help(RelativeDate.full(commit.authorDate))
             }
             if columns.contains(.hash) {
                 Text(commit.id.display(expert: expert))
                     .font(Font.Vrai.codeSmall)
-                    .foregroundStyle(Color.Vrai.textTertiary)
-                    .frame(width: Vrai.Size.colHash, alignment: .trailing)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .padding(.horizontal, CommitColumnLayout.inset)
+                    .frame(width: metrics.hash, alignment: .leading)
             }
         }
-        .padding(.trailing, Vrai.Space.s12)
+        .padding(.horizontal, metrics.leading)
         .frame(height: height)
         .opacity(dim ? 0.4 : 1)
+        .background { StandaloneSelection(shown: layout == nil && selected, focused: focused) }
         .contentShape(Rectangle())
-        .hoverHighlight(radius: Vrai.Radius.sm, selected: selected, selectedFill: focused ? Color.Vrai.accentSoft : Color.Vrai.fillActive)
+        .environment(\.backgroundProminence, emphasized ? .increased : .standard)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityAddTraits(selected ? [.isSelected, .isButton] : .isButton)
@@ -155,14 +162,61 @@ struct CommitRowView: View {
     }
 }
 
+struct CommitGraphCell: View {
+    let row: GraphRow
+    let lanes: Int
+    let height: CGFloat
+    var isWip = false
+    var dim = false
+    let emphasized: Bool
+
+    var body: some View {
+        if emphasized {
+            Color(nsColor: .alternateSelectedControlTextColor)
+                .frame(width: GraphCell.width(lanes: lanes), height: height)
+                .mask { GraphCell(row: row, lanes: lanes, height: height, isWip: isWip, dim: dim) }
+                .accessibilityHidden(true)
+        } else {
+            GraphCell(row: row, lanes: lanes, height: height, isWip: isWip, dim: dim)
+        }
+    }
+}
+
+struct SelectedRowPill: ViewModifier {
+    let emphasized: Bool
+
+    func body(content: Content) -> some View {
+        if emphasized {
+            content
+                .background(Color(nsColor: .controlBackgroundColor), in: Capsule())
+                .environment(\.backgroundProminence, .standard)
+        } else {
+            content
+        }
+    }
+}
+
+struct StandaloneSelection: View {
+    let shown: Bool
+    let focused: Bool
+
+    var body: some View {
+        if shown {
+            RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
+                .fill(Color(nsColor: focused ? .selectedContentBackgroundColor : .unemphasizedSelectedContentBackgroundColor))
+        }
+    }
+}
+
 struct SubjectText: View {
     let subject: String
     let query: String
+    @Environment(\.backgroundProminence) private var prominence
 
     var body: some View {
         Text(attributed)
             .font(Font.Vrai.body)
-            .foregroundStyle(Color.Vrai.text)
+            .foregroundStyle(.primary)
             .lineLimit(1)
             .truncationMode(.tail)
     }
@@ -174,7 +228,7 @@ struct SubjectText: View {
         let length = subject.distance(from: range.lowerBound, to: range.upperBound)
         let start = text.index(text.startIndex, offsetByCharacters: lower)
         let end = text.index(start, offsetByCharacters: length)
-        text[start..<end].backgroundColor = Color.Vrai.warningSoft
+        text[start..<end].backgroundColor = prominence == .increased ? Color(nsColor: .alternateSelectedControlTextColor).opacity(0.25) : Color.Vrai.warningSoft
         return text
     }
 }
@@ -187,58 +241,39 @@ struct WipRowView: View {
     let selected: Bool
     let focused: Bool
     let columns: CommitColumns
+    var layout: CommitColumnLayout?
 
     var body: some View {
-        HStack(spacing: Vrai.Space.s12) {
-            GraphCell(row: row, lanes: lanes, height: height, isWip: true)
+        let emphasized = selected && focused
+        let metrics = layout ?? .standalone(lanes: lanes)
+        HStack(spacing: 0) {
+            CommitGraphCell(row: row, lanes: lanes, height: height, isWip: true, emphasized: emphasized)
+                .frame(width: metrics.graph, alignment: .leading)
             Text("Uncommitted changes", bundle: .module)
                 .font(Font.Vrai.headline)
                 .italic()
-                .foregroundStyle(Color.Vrai.textSecondary)
+                .foregroundStyle(.secondary)
                 .lineLimit(1)
+                .padding(.horizontal, CommitColumnLayout.inset)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if columns.contains(.author) { Color.clear.frame(width: Vrai.Size.colAuthor) }
-            if columns.contains(.date) { Color.clear.frame(width: Vrai.Size.colDate) }
+            if columns.contains(.author) { Color.clear.frame(width: metrics.author) }
+            if columns.contains(.date) { Color.clear.frame(width: metrics.date) }
             if columns.contains(.hash) {
                 Text(n(files, "file"))
                     .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.warning)
+                    .foregroundStyle(emphasized ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.Vrai.warning))
                     .lineLimit(1)
-                    .frame(width: Vrai.Size.colHash, alignment: .trailing)
+                    .padding(.horizontal, CommitColumnLayout.inset)
+                    .frame(width: metrics.hash, alignment: .leading)
             }
         }
-        .padding(.trailing, Vrai.Space.s12)
+        .padding(.horizontal, metrics.leading)
         .frame(height: height)
+        .background { StandaloneSelection(shown: layout == nil && selected, focused: focused) }
         .contentShape(Rectangle())
-        .hoverHighlight(radius: Vrai.Radius.sm, selected: selected, selectedFill: focused ? Color.Vrai.accentSoft : Color.Vrai.fillActive)
+        .environment(\.backgroundProminence, emphasized ? .increased : .standard)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Uncommitted changes, \(n(files, "file"))", bundle: .module))
         .accessibilityAddTraits(selected ? [.isSelected, .isButton] : .isButton)
-    }
-}
-
-struct HistoryHeader: View {
-    let graphWidth: CGFloat
-    let columns: CommitColumns
-
-    var body: some View {
-        HStack(spacing: Vrai.Space.s12) {
-            Text("Graph", bundle: .module)
-                .fixedSize()
-                .frame(minWidth: graphWidth, alignment: .leading)
-            Text("Description", bundle: .module)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            if columns.contains(.author) { Text("Author", bundle: .module).frame(width: Vrai.Size.colAuthor, alignment: .leading) }
-            if columns.contains(.date) { Text("Date", bundle: .module).frame(width: Vrai.Size.colDate, alignment: .leading) }
-            if columns.contains(.hash) { Text("Commit", bundle: .module).frame(width: Vrai.Size.colHash, alignment: .trailing) }
-        }
-        .font(Font.Vrai.captionStrong)
-        .foregroundStyle(Color.Vrai.textTertiary)
-        .lineLimit(1)
-        .padding(.leading, Vrai.Space.s4)
-        .padding(.trailing, Vrai.Space.s12)
-        .frame(height: Vrai.Space.s24)
-        .background(Color.Vrai.bg)
-        .hairline(.bottom)
     }
 }

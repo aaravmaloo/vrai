@@ -61,13 +61,13 @@ final class PerfFlowTests: XCTestCase {
             let app = PerfRun.launch(log: log)
             let recent = app.descendants(matching: .any)["recent-monorepo"]
             XCTAssertTrue(recent.waitForExistence(timeout: 10))
-            recent.click()
+            recent.doubleClick()
             XCTAssertTrue(app.descendants(matching: .any)["commits"].waitForExistence(timeout: 20))
             clicked += log.wait(for: "open", count: 1)
             app.terminate()
         }
         Sandbox.forgetRecent(PerfRun.large)
-        PerfReport.add("Open large to first history rows and status", clicked, budget: 500, unit: "ms", note: "click on the recent row to rows drawn, median of \(clicked.count); with -VraiOpen at launch \(PerfReport.format(PerfReport.median(direct))) ms")
+        PerfReport.add("Open large to first history rows and status", clicked, budget: 500, unit: "ms", note: "double click on the recent row to rows drawn, median of \(clicked.count); with -VraiOpen at launch \(PerfReport.format(PerfReport.median(direct))) ms")
         XCTAssertLessThan(PerfReport.median(clicked), 500)
     }
 

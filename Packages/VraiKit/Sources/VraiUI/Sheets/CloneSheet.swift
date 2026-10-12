@@ -132,8 +132,6 @@ struct CloneSheet: View {
         return LongTailSheet(
             title: String(localized: "Cloning \(name)", bundle: .module),
             description: String(localized: "Into \(destination)", bundle: .module),
-            icon: "square.and.arrow.down",
-            tone: .accent,
             width: Vrai.Size.sheetWide
         ) {
             VStack(alignment: .leading, spacing: Vrai.Space.s8) {
@@ -172,8 +170,6 @@ struct CloneSheet: View {
         LongTailSheet(
             title: String(localized: "Clone a repository", bundle: .module),
             description: String(localized: "Copies a repository and its whole history to this Mac.", bundle: .module),
-            icon: "square.and.arrow.down",
-            tone: .accent,
             width: Vrai.Size.sheetWide
         ) {
             if let failure = runner.failure {

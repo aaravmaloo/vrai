@@ -20,7 +20,6 @@ struct SubmoduleSheet: View {
         SyncForm.Sheet(
             title: String(localized: "Add submodule", bundle: .module),
             description: String(localized: "Pins another repository at an exact commit inside this one.", bundle: .module),
-            icon: "shippingbox",
             primary: String(localized: "Add submodule", bundle: .module),
             primaryEnabled: ok,
             busy: store.busy.contains("addSubmodule"),

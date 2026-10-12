@@ -90,17 +90,17 @@ struct ToastView: View {
                     dismiss()
                     toast.onAction?()
                 } label: {
-                    Text(action).font(Font.Vrai.headline)
+                    Text(action)
                 }
-                .buttonStyle(ToastActionStyle())
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
             Button(action: dismiss) {
-                Symbol("xmark", font: Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.textTertiary)
-                    .frame(width: Vrai.Space.s20, height: Vrai.Space.s20)
-                    .contentShape(Circle())
+                Image(systemName: "xmark")
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
+            .controlSize(.small)
+            .foregroundStyle(.secondary)
             .accessibilityLabel(Text("Dismiss", bundle: .module))
         }
         .padding(.vertical, Vrai.Space.s8)
@@ -110,17 +110,6 @@ struct ToastView: View {
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isStaticText)
-    }
-}
-
-struct ToastActionStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundStyle(Color.Vrai.accentText)
-            .padding(.horizontal, Vrai.Space.s8)
-            .frame(height: Vrai.Size.controlSm)
-            .background(configuration.isPressed ? Color.Vrai.fillActive : Color.clear, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
-            .contentShape(Rectangle())
     }
 }
 

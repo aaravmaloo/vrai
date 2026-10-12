@@ -14,9 +14,9 @@ struct HistoryView: View {
             main
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             if showInspector {
+                Divider()
                 InspectorView()
                     .frame(width: Vrai.Size.inspector)
-                    .hairline(.leading)
             }
         }
         .background(Color.Vrai.bg)
@@ -51,9 +51,9 @@ struct HistoryView: View {
                     VStack(spacing: 0) {
                         CommitList()
                             .frame(height: max(Vrai.Space.s64, geometry.size.height * 0.52))
+                        Divider()
                         DetailPane()
                             .frame(maxHeight: .infinity)
-                            .hairline(.top)
                     }
                 }
             }
@@ -83,9 +83,16 @@ struct HistoryBar: View {
     @Environment(\.widthClass) private var widthClass
 
     var body: some View {
+        VStack(spacing: 0) {
+            bar
+            Divider()
+        }
+    }
+
+    var bar: some View {
         @Bindable var window = window
         let history = store.history
-        HStack(spacing: Vrai.Space.s8) {
+        return HStack(spacing: Vrai.Space.s8) {
             SearchField(text: $window.query, placeholder: String(localized: "Filter by subject, author or hash", bundle: .module), focusRequest: $window.focusFilter)
                 .frame(maxWidth: widthClass.isNarrow ? .infinity : Vrai.Size.field)
             if !widthClass.isNarrow {
@@ -118,14 +125,13 @@ struct HistoryBar: View {
                 Text(countText)
                     .font(Font.Vrai.caption)
                     .monospacedDigit()
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .fixedSize()
             }
         }
         .padding(.horizontal, Vrai.Space.s12)
         .frame(height: Metrics.barHeight)
-        .hairline(.bottom)
     }
 
     var otherBranches: [String] {
@@ -159,23 +165,15 @@ struct SelectMenu<Content: View>: View {
 
     var body: some View {
         Menu(content: content) {
-            HStack(spacing: Vrai.Space.s6) {
-                if let icon { Symbol(icon, font: Font.Vrai.callout) }
-                Text(title).lineLimit(1)
-                Symbol("chevron.up.chevron.down", font: Font.Vrai.overline)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+            if let icon {
+                Label(title, systemImage: icon)
+                    .labelStyle(.titleAndIcon)
+            } else {
+                Text(title)
             }
-            .font(Font.Vrai.body)
-            .foregroundStyle(Color.Vrai.text)
-            .padding(.leading, Vrai.Space.s8)
-            .padding(.trailing, Vrai.Space.s4)
-            .frame(height: Vrai.Size.controlSm)
-            .background(Color.Vrai.surfaceRaised, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         }
         .menuStyle(.button)
-        .buttonStyle(.plain)
-        .menuIndicator(.hidden)
+        .lineLimit(1)
         .fixedSize()
     }
 }
@@ -204,6 +202,7 @@ struct CommitList: View {
     @Environment(Preferences.self) private var preferences
     @Environment(\.widthClass) private var widthClass
     @Environment(\.expert) private var expert
+    @Environment(\.controlActiveState) private var activeState
     @FocusState private var focused: Bool
     @State private var bisectSkipped: [OID] = []
     @State private var refPills = RefPillsCache()
@@ -219,15 +218,15 @@ struct CommitList: View {
     var body: some View {
         let history = store.history
         let refs = store.snapshot.map { refPills.pills($0, skipped: bisectSkipped) } ?? [:]
-        let columns: CommitColumns = widthClass.isNarrow ? [.date] : .all
-        let showHeader = widthClass >= .regular
         let state = CommitTableState(
             history: history,
             refs: refs,
             selection: store.selection,
             focused: focused || window.listFocused,
+            active: activeState == .key,
             filter: CommitFilter(query: window.query, author: window.author),
-            columns: columns,
+            columns: widthClass.isNarrow ? [.date] : .all,
+            header: widthClass >= .regular,
             height: rowHeight,
             expert: expert,
             files: store.snapshot?.working.count ?? 0,
@@ -235,10 +234,6 @@ struct CommitList: View {
             signatures: expert ? store.signatures : [:]
         )
         VStack(spacing: 0) {
-            if showHeader {
-                HistoryHeader(graphWidth: GraphCell.width(lanes: history.lanes), columns: columns)
-                    .padding(.horizontal, Vrai.Space.s4)
-            }
             CommitTable(state: state, content: row, onRowShown: shown)
         }
         .focusable()
@@ -291,7 +286,8 @@ struct CommitList: View {
                 dim: model.dim,
                 query: model.query,
                 columns: model.columns,
-                signature: model.signature
+                signature: model.signature,
+                layout: model.layout
             )
             .onTapGesture { choose(.commit(commit.id)) }
             .accessibilityAction { choose(.commit(commit.id)) }
@@ -299,7 +295,7 @@ struct CommitList: View {
             .contextMenu { CommitMenu(id: commit.id, window: window) }
             .modifier(RewriteCommitDrag(commit: commit))
         } else {
-            WipRowView(row: model.graph, lanes: model.lanes, height: model.height, files: model.files, selected: model.selected, focused: model.focused, columns: model.columns)
+            WipRowView(row: model.graph, lanes: model.lanes, height: model.height, files: model.files, selected: model.selected, focused: model.focused, columns: model.columns, layout: model.layout)
                 .onTapGesture { choose(.wip) }
                 .accessibilityAction { choose(.wip) }
                 .simultaneousGesture(TapGesture(count: 2).onEnded { window.show(.changes) })

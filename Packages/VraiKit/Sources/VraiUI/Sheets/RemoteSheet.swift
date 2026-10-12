@@ -58,7 +58,6 @@ struct RemoteSheet: View {
         SyncForm.Sheet(
             title: editing.map { String(localized: "Edit remote \($0.name)", bundle: .module) } ?? String(localized: "Add remote", bundle: .module),
             description: String(localized: "A remote is another copy of this repository you fetch from and push to.", bundle: .module),
-            icon: "network",
             primary: editing == nil ? String(localized: "Add remote", bundle: .module) : String(localized: "Save", bundle: .module),
             primaryEnabled: ok,
             onSubmit: go

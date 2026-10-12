@@ -37,7 +37,6 @@ struct CompareSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Compare branches", bundle: .module),
-            icon: "arrow.left.arrow.right",
             width: Vrai.Size.sheet + Vrai.Space.s64
         ) {
             HStack(alignment: .top, spacing: Vrai.Space.s12) {

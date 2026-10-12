@@ -14,7 +14,7 @@ struct PaletteHost: View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
                 if open {
-                    Color.Vrai.scrim
+                    Color.clear
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture { window.palette.dismiss() }
@@ -69,7 +69,6 @@ struct PaletteView: View {
     @Environment(\.widthClass) private var widthClass
 
     static let searchHeight = Vrai.Size.toolbar + Vrai.Space.s4
-    static let footerHeight = Vrai.Space.s32
     static let rowHeight = Vrai.Size.control + Vrai.Space.s8
     static let listMax = Vrai.Space.s64 * 5 + Vrai.Space.s40
 
@@ -82,19 +81,19 @@ struct PaletteView: View {
         let groups = PaletteSources(context: context, search: search, mode: palette.mode, query: query, narrow: narrow).groups()
         let flat = groups.flatMap(\.items)
         let typing = query.hasPrefix("git") && CommandParser.parse(query) != nil
-        let showFooter = room > Self.searchHeight + Self.footerHeight + Self.rowHeight * 3 && widthClass != .compact
-        let listRoom = max(Self.rowHeight * 2, min(Self.listMax, room - Self.searchHeight - (showFooter ? Self.footerHeight : 0)))
+        let listRoom = max(Self.rowHeight * 2, min(Self.listMax, room - Self.searchHeight))
         VStack(spacing: 0) {
             HStack(spacing: Vrai.Space.s12) {
-                Symbol(typing ? "terminal" : "magnifyingglass", font: Font.Vrai.title3.weight(.regular))
-                    .foregroundStyle(Color.Vrai.textTertiary)
-                    .frame(width: Vrai.Size.icon)
+                Image(systemName: typing ? "terminal" : "magnifyingglass")
+                    .font(.title2)
+                    .foregroundStyle(.secondary)
+                    .frame(width: Vrai.Size.iconLg)
+                    .accessibilityHidden(true)
                 TextField(text: $palette.query) {
-                    Text(placeholder(narrow: narrow)).foregroundStyle(Color.Vrai.textTertiary)
+                    Text(placeholder(narrow: narrow))
                 }
                 .textFieldStyle(.plain)
-                .font(typing ? Font.Vrai.code : Font.Vrai.lead)
-                .foregroundStyle(Color.Vrai.text)
+                .font(typing ? .system(.title2, design: .monospaced) : .title2)
                 .autocorrectionDisabled()
                 .focused($focused)
                 .onKeyPress(.downArrow) {
@@ -116,57 +115,25 @@ struct PaletteView: View {
                 .onExitCommand { window.palette.dismiss() }
                 .accessibilityLabel(Text("Search or run a command", bundle: .module))
                 .accessibilityIdentifier("palette-field")
-                if window.preferences.expert {
-                    Text("Expert", bundle: .module)
-                        .font(Font.Vrai.captionStrong)
-                        .foregroundStyle(Color.Vrai.accentText)
-                        .padding(.horizontal, Vrai.Space.s8)
-                        .frame(height: Vrai.Space.s20)
-                        .background(Color.Vrai.accentSoft, in: Capsule())
-                        .fixedSize()
-                }
             }
             .padding(.leading, Vrai.Space.s20)
             .padding(.trailing, Vrai.Space.s16)
             .frame(height: Self.searchHeight)
-            .hairline(.bottom)
+            Divider()
             if flat.isEmpty {
-                VStack(alignment: .leading, spacing: Vrai.Space.s4) {
-                    Text(query.trimmingCharacters(in: .whitespaces).isEmpty ? String(localized: "Nothing to show yet.", bundle: .module) : String(localized: "No actions match \u{201C}\(query.trimmingCharacters(in: .whitespaces))\u{201D}.", bundle: .module))
-                        .font(Font.Vrai.body)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                    Text("Start with git to run any command, for example git log --oneline -5.", bundle: .module)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.vertical, Vrai.Space.s24)
-                .padding(.horizontal, Vrai.Space.s16)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(query.trimmingCharacters(in: .whitespaces).isEmpty ? String(localized: "Nothing to show yet.", bundle: .module) : String(localized: "No actions match \u{201C}\(query.trimmingCharacters(in: .whitespaces))\u{201D}.", bundle: .module))
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, Vrai.Space.s20)
+                    .padding(.horizontal, Vrai.Space.s20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .help(String(localized: "Start with git to run any command, for example git log --oneline -5.", bundle: .module))
             } else {
                 PaletteList(groups: groups, cursor: cursor, maxHeight: listRoom) { item in
                     run(item, option: NSEvent.modifierFlags.contains(.option))
                 }
             }
-            if showFooter {
-                HStack(spacing: Vrai.Space.s16) {
-                    footerKey("\u{2191}\u{2193}", String(localized: "navigate", bundle: .module))
-                    footerKey("\u{21A9}", String(localized: "run", bundle: .module))
-                    footerKey("\u{2325}\u{21A9}", String(localized: "run with options", bundle: .module))
-                    Spacer(minLength: Vrai.Space.s8)
-                    footerKey("esc", String(localized: "close", bundle: .module))
-                }
-                .padding(.horizontal, Vrai.Space.s16)
-                .frame(height: Self.footerHeight)
-                .background(Color.Vrai.glassFill)
-                .hairline(.top)
-            }
         }
-        .background(Color.Vrai.glassFill, in: RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous))
-        .glassEffect(.regular, in: .rect(cornerRadius: Vrai.Radius.xl))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
-        .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous))
-        .shadow(color: Color.Vrai.glassEdge, radius: Vrai.Space.s24, y: Vrai.Space.s12)
+        .glassEffect(.regular, in: .rect(cornerRadius: Vrai.Space.s24))
         .onChange(of: flat.count, initial: true) { _, count in
             cursor.count = count
             if cursor.active >= count { cursor.active = max(0, count - 1) }
@@ -202,18 +169,6 @@ struct PaletteView: View {
         return window.preferences.expert ? String(localized: "Search, or type a git command", bundle: .module) : String(localized: "Search actions, branches, commits and files", bundle: .module)
     }
 
-    func footerKey(_ keys: String, _ label: String) -> some View {
-        HStack(spacing: Vrai.Space.s4) {
-            Text(verbatim: keys)
-                .font(Font.Vrai.captionStrong)
-            Text(label)
-                .font(Font.Vrai.caption)
-        }
-        .foregroundStyle(Color.Vrai.textSecondary)
-        .lineLimit(1)
-        .fixedSize()
-    }
-
     func run(_ flat: [PaletteItem], option: Bool) {
         guard flat.indices.contains(cursor.active) else { return }
         run(flat[cursor.active], option: option)
@@ -240,8 +195,8 @@ struct PaletteList: View {
                     ForEach(Array(groups.enumerated()), id: \.offset) { groupIndex, group in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(group.kind.title)
-                                .overline()
-                                .foregroundStyle(Color.Vrai.textTertiary)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
                                 .padding(.horizontal, Vrai.Space.s10)
                                 .padding(.top, Vrai.Space.s8)
@@ -287,10 +242,11 @@ struct PaletteRow: View {
         let active = cursor.active == index
         Button(action: run) {
             HStack(spacing: Vrai.Space.s10) {
-                tile(active: active)
+                icon(active: active)
+                    .frame(width: Vrai.Size.iconLg)
                 Text(item.label)
                     .font(item.command ? Font.Vrai.code : Font.Vrai.body)
-                    .foregroundStyle(item.danger ? Color.Vrai.danger : Color.Vrai.text)
+                    .foregroundStyle(active ? Color.white : (item.danger ? Color.Vrai.danger : Color.primary))
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -298,7 +254,7 @@ struct PaletteRow: View {
                 if let detail = item.detail {
                     Text(detail)
                         .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                        .foregroundStyle(active ? Color.white.opacity(0.8) : Color.secondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
                         .frame(maxWidth: Vrai.Size.palette * 0.4, alignment: .trailing)
@@ -308,8 +264,8 @@ struct PaletteRow: View {
                 }
                 if let shortcut = item.shortcut {
                     Text(verbatim: shortcut)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                        .font(Font.Vrai.body)
+                        .foregroundStyle(active ? Color.white.opacity(0.8) : Color.secondary)
                         .lineLimit(1)
                         .fixedSize()
                 }
@@ -317,7 +273,7 @@ struct PaletteRow: View {
             .padding(.leading, Vrai.Space.s6)
             .padding(.trailing, Vrai.Space.s10)
             .frame(height: PaletteView.rowHeight)
-            .background(active ? Color.Vrai.accentSoft : Color.clear, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
+            .background(active ? Color.Vrai.accent : Color.clear, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -329,24 +285,16 @@ struct PaletteRow: View {
         .accessibilityIdentifier("palette-item")
     }
 
-    @ViewBuilder func tile(active: Bool) -> some View {
-        let fill = item.command && item.id == "__run" ? Color.Vrai.accent : (active ? Color.Vrai.surfaceRaised : Color.Vrai.fill)
-        let ink = item.command && item.id == "__run" ? Color.Vrai.onAccent : (active ? Color.Vrai.accentText : Color.Vrai.textSecondary)
-        RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
-            .fill(fill)
-            .frame(width: Vrai.Size.iconLg, height: Vrai.Size.iconLg)
-            .overlay {
-                switch item.glyph {
-                case .symbol(let name):
-                    Symbol(name, font: Font.Vrai.callout)
-                        .foregroundStyle(item.danger ? Color.Vrai.danger : ink)
-                case .lane(let name, let lane):
-                    Symbol(name, font: Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.lane(lane))
-                case .file(let status):
-                    FileStatusTile(status: status)
-                }
-            }
-            .shadow(color: active ? Color.Vrai.separator : Color.clear, radius: Metrics.hairline, y: Metrics.hairline)
+    @ViewBuilder func icon(active: Bool) -> some View {
+        switch item.glyph {
+        case .symbol(let name):
+            Image(systemName: name)
+                .foregroundStyle(active ? Color.white : (item.danger ? Color.Vrai.danger : Color.secondary))
+        case .lane(let name, let lane):
+            Image(systemName: name)
+                .foregroundStyle(active ? Color.white : Color.Vrai.lane(lane))
+        case .file(let status):
+            FileStatusTile(status: status)
+        }
     }
 }

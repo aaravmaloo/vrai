@@ -47,7 +47,6 @@ struct SettingsLogicTests {
         #expect(SettingsCopy.list(["origin"]) == "origin")
         #expect(SettingsCopy.list(["origin", "mira"]) == "origin and mira")
         #expect(SettingsCopy.list(["pull.rebase", "pull.ff", "rebase.autoStash", "merge.autoStash"]) == "pull.rebase, pull.ff, rebase.autoStash and merge.autoStash")
-        #expect(SettingsCopy.stored(in: "~/.gitconfig", as: ["init.defaultBranch"]) == "Stored in ~/.gitconfig as init.defaultBranch.")
         #expect(SettingsCopy.trimmed("/a/b/") == "/a/b")
         #expect(GeneralPane.interval(60) == "Every hour")
         #expect(GeneralPane.interval(15) == "Every 15 minutes")
@@ -148,14 +147,6 @@ struct SettingsLogicTests {
         let store = CredentialSetup(helpers: CredentialHelper.effective(["store --file=~/.vrai-credentials"]))
         #expect(AccountsCopy.storage(store, environment: ["HOME": "/Users/avery"]) == "git credential-store keeps tokens unencrypted in /Users/avery/.vrai-credentials.")
         #expect(AccountsCopy.storage(nothing, environment: [:]) == "No credential helper is set, so git saves no tokens and asks every time.")
-    }
-
-    @Test func passwordFooterNamesWhereTheHelperComesFrom() {
-        let system = ConfigEntry(scope: .system, origin: "file:/Library/Developer/CommandLineTools/usr/share/git-core/gitconfig", key: "credential.helper", value: "osxkeychain")
-        let global = ConfigEntry(scope: .global, origin: "file:/Users/avery/.gitconfig", key: "credential.helper", value: "osxkeychain")
-        #expect(AccountsCopy.origin([system, global], file: "~/.gitconfig", environment: [:]) == "Stored in ~/.gitconfig as credential.helper.")
-        #expect(AccountsCopy.origin([], file: "~/.gitconfig", environment: [:]) == "Stored in ~/.gitconfig as credential.helper.")
-        #expect(AccountsCopy.origin([system], file: "~/.gitconfig", environment: [:]) == "Set in /Library/Developer/CommandLineTools/usr/share/git-core/gitconfig as credential.helper. A new choice goes in ~/.gitconfig.")
     }
 
     @Test func settingsErrorCopyCoversConfigFailures() {

@@ -46,8 +46,7 @@ struct SavePatchSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Save \(id.short) as a patch", bundle: .module),
-            description: String(localized: "Writes format-patch files you can mail or apply elsewhere with Apply patches.", bundle: .module),
-            icon: "envelope"
+            description: String(localized: "Writes format-patch files you can mail or apply elsewhere with Apply patches.", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't write the patches", bundle: .module), message: failure)

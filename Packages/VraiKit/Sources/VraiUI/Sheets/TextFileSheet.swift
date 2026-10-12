@@ -40,8 +40,7 @@ struct TextFileSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Edit \(kind.fileName)", bundle: .module),
-            description: description,
-            icon: icon
+            description: description
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: readFailed ? String(localized: "Vrai couldn't read \(kind.fileName)", bundle: .module) : String(localized: "Vrai couldn't save \(kind.fileName)", bundle: .module), message: failure)

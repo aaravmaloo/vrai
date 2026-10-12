@@ -19,9 +19,7 @@ struct CleanSheet: View {
             title: title,
             description: ignored
                 ? String(localized: "Includes build products and anything else .gitignore hides. git lists them first; nothing is removed until you confirm.", bundle: .module)
-                : String(localized: "git lists them first; nothing is removed until you confirm.", bundle: .module),
-            icon: "trash",
-            tone: .danger
+                : String(localized: "git lists them first; nothing is removed until you confirm.", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't list the files", bundle: .module), message: failure)
@@ -112,8 +110,7 @@ struct RenameFileSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Rename \(PathParts.split(path).name)", bundle: .module),
-            description: String(localized: "Moves the file and stages the rename in one step, so history follows it.", bundle: .module),
-            icon: "pencil"
+            description: String(localized: "Moves the file and stages the rename in one step, so history follows it.", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't rename it", bundle: .module), message: failure)

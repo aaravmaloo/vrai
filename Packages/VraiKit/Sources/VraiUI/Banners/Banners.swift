@@ -58,9 +58,9 @@ struct BannerView: View {
         .padding(.leading, Vrai.Space.s16)
         .padding(.trailing, Vrai.Space.s12)
         .frame(minHeight: Metrics.bannerHeight)
-        .background(model.tone.soft)
-        .background(Color.Vrai.bg)
-        .hairline(.bottom)
+        .glassEffect(.regular.tint(model.tone.soft), in: .rect(cornerRadius: Vrai.Radius.lg))
+        .padding(.horizontal, Vrai.Space.s8)
+        .padding(.vertical, Vrai.Space.s4)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(model.title)
     }

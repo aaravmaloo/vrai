@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import VraiCore
 
@@ -13,22 +14,6 @@ enum ButtonSize {
     case regular
     case large
 
-    var height: CGFloat {
-        switch self {
-        case .small: Vrai.Size.controlSm
-        case .regular: Vrai.Size.control
-        case .large: Vrai.Size.controlLg
-        }
-    }
-
-    var padding: CGFloat {
-        switch self {
-        case .small: Vrai.Space.s8
-        case .regular: Vrai.Space.s12
-        case .large: Vrai.Space.s20
-        }
-    }
-
     var gap: CGFloat {
         switch self {
         case .small: Vrai.Space.s4
@@ -37,19 +22,11 @@ enum ButtonSize {
         }
     }
 
-    var radius: CGFloat {
+    var control: ControlSize {
         switch self {
-        case .small: Vrai.Radius.sm
-        case .regular: Vrai.Radius.md
-        case .large: Vrai.Radius.full
-        }
-    }
-
-    var font: Font {
-        switch self {
-        case .small: Font.Vrai.callout
-        case .regular: Font.Vrai.body
-        case .large: Font.Vrai.headline
+        case .small: .small
+        case .regular: .regular
+        case .large: .large
         }
     }
 
@@ -62,72 +39,23 @@ enum ButtonSize {
     }
 }
 
-struct VraiButtonStyle: ButtonStyle {
+struct VraiButtonStyle: PrimitiveButtonStyle {
     var variant: ButtonVariant = .secondary
     var size: ButtonSize = .regular
     var full = false
 
-    func makeBody(configuration: Configuration) -> some View {
-        StyledButton(configuration: configuration, variant: variant, size: size, full: full)
-    }
-
-    struct StyledButton: View {
-        let configuration: Configuration
-        let variant: ButtonVariant
-        let size: ButtonSize
-        let full: Bool
-        @Environment(\.isEnabled) private var enabled
-        @State private var hovering = false
-
-        var body: some View {
+    @ViewBuilder func makeBody(configuration: Configuration) -> some View {
+        let button = Button(role: configuration.role, action: configuration.trigger) {
             configuration.label
-                .font(size.font)
                 .lineLimit(1)
-                .foregroundStyle(foreground)
-                .padding(.horizontal, size.padding)
                 .frame(maxWidth: full ? .infinity : nil)
-                .frame(height: size.height)
-                .background(background, in: RoundedRectangle(cornerRadius: size.radius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: size.radius, style: .continuous)
-                        .strokeBorder(border, lineWidth: Metrics.hairline)
-                }
-                .contentShape(RoundedRectangle(cornerRadius: size.radius, style: .continuous))
-                .onHover { hovering = $0 }
         }
-
-        var foreground: Color {
-            guard enabled else { return Color.Vrai.textDisabled }
-            switch variant {
-            case .primary: return Color.Vrai.onAccent
-            case .danger: return Color.Vrai.onDanger
-            case .secondary, .plain: return Color.Vrai.text
-            }
-        }
-
-        var background: Color {
-            let pressed = configuration.isPressed
-            switch variant {
-            case .primary:
-                guard enabled else { return Color.Vrai.fillActive }
-                return pressed ? Color.Vrai.accentActive : (hovering ? Color.Vrai.accentHover : Color.Vrai.accent)
-            case .danger:
-                guard enabled else { return Color.Vrai.fillActive }
-                return Color.Vrai.danger
-            case .secondary:
-                guard enabled else { return Color.clear }
-                return pressed ? Color.Vrai.fillActive : (hovering ? Color.Vrai.fill : Color.Vrai.surfaceRaised)
-            case .plain:
-                guard enabled else { return Color.clear }
-                return pressed ? Color.Vrai.fillActive : (hovering ? Color.Vrai.fillHover : Color.clear)
-            }
-        }
-
-        var border: Color {
-            switch variant {
-            case .secondary: enabled ? Color.Vrai.Contrast.border : Color.Vrai.Contrast.separator
-            default: Color.clear
-            }
+        .controlSize(size.control)
+        switch variant {
+        case .primary: button.buttonStyle(.borderedProminent)
+        case .danger: button.buttonStyle(.borderedProminent).tint(Color.Vrai.danger)
+        case .secondary: button.buttonStyle(.bordered)
+        case .plain: button.buttonStyle(.borderless)
         }
     }
 }
@@ -157,32 +85,20 @@ struct VraiButton: View {
     }
 }
 
-struct IconButtonStyle: ButtonStyle {
+struct IconButtonStyle: PrimitiveButtonStyle {
     var small = false
     var active = false
 
     func makeBody(configuration: Configuration) -> some View {
-        StyledBody(configuration: configuration, small: small, active: active)
-    }
-
-    struct StyledBody: View {
-        let configuration: Configuration
-        let small: Bool
-        let active: Bool
-        @Environment(\.isEnabled) private var enabled
-        @State private var hovering = false
-
-        var body: some View {
-            let size = small ? Vrai.Size.controlSm : Vrai.Size.control
-            let radius = small ? Vrai.Radius.sm : Vrai.Radius.md
+        let size = small ? Vrai.Size.controlSm : Vrai.Size.control
+        Button(role: configuration.role, action: configuration.trigger) {
             configuration.label
-                .font(small ? Font.Vrai.callout : Font.Vrai.body)
-                .foregroundStyle(!enabled ? Color.Vrai.textDisabled : active ? Color.Vrai.accentText : (hovering ? Color.Vrai.text : Color.Vrai.textSecondary))
-                .frame(width: size, height: size)
-                .background(active ? Color.Vrai.accentSoft : configuration.isPressed ? Color.Vrai.fillActive : (hovering && enabled ? Color.Vrai.fillHover : Color.clear), in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+                .frame(minWidth: size, minHeight: size)
                 .contentShape(Rectangle())
-                .onHover { hovering = $0 }
         }
+        .buttonStyle(.borderless)
+        .controlSize(small ? .small : .regular)
+        .foregroundStyle(active ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
     }
 }
 
@@ -283,44 +199,51 @@ struct AheadBehind: View {
     }
 }
 
-struct SearchField: View {
+struct SearchField: NSViewRepresentable {
     @Binding var text: String
     let placeholder: String
     var small = true
     var focusRequest: Binding<Bool>?
-    @FocusState private var focused: Bool
 
-    var body: some View {
-        HStack(spacing: Vrai.Space.s6) {
-            Symbol("magnifyingglass", font: small ? Font.Vrai.callout : Font.Vrai.body)
-                .foregroundStyle(Color.Vrai.textTertiary)
-            TextField(text: $text) {
-                Text(placeholder).foregroundStyle(Color.Vrai.textTertiary)
-            }
-            .textFieldStyle(.plain)
-            .font(Font.Vrai.body)
-            .focused($focused)
-            .onChange(of: focusRequest?.wrappedValue ?? false, initial: true) { _, value in
-                guard value else { return }
-                focused = true
-                focusRequest?.wrappedValue = false
-            }
-            if !text.isEmpty {
-                Button {
-                    text = ""
-                } label: {
-                    Symbol("xmark.circle.fill", font: Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text("Clear", bundle: .module))
+    func makeNSView(context: Context) -> NSSearchField {
+        let field = NSSearchField()
+        field.delegate = context.coordinator
+        field.placeholderString = placeholder
+        field.controlSize = small ? .small : .regular
+        field.font = .systemFont(ofSize: NSFont.systemFontSize(for: field.controlSize))
+        field.sendsSearchStringImmediately = true
+        field.setAccessibilityLabel(placeholder)
+        return field
+    }
+
+    func updateNSView(_ field: NSSearchField, context: Context) {
+        context.coordinator.text = $text
+        if field.stringValue != text { field.stringValue = text }
+        field.placeholderString = placeholder
+        if let focusRequest, focusRequest.wrappedValue {
+            DispatchQueue.main.async {
+                field.window?.makeFirstResponder(field)
+                focusRequest.wrappedValue = false
             }
         }
-        .padding(.horizontal, small ? Vrai.Space.s8 : Vrai.Space.s10)
-        .frame(height: small ? Vrai.Size.controlSm : Vrai.Size.control)
-        .background(Color.Vrai.fill, in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
-        .accessibilityLabel(placeholder)
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(text: $text)
+    }
+
+    @MainActor
+    final class Coordinator: NSObject, NSSearchFieldDelegate {
+        var text: Binding<String>
+
+        init(text: Binding<String>) {
+            self.text = text
+        }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let field = notification.object as? NSSearchField else { return }
+            text.wrappedValue = field.stringValue
+        }
     }
 }
 
@@ -341,36 +264,14 @@ struct EmptyStateView<Actions: View>: View {
     }
 
     var content: some View {
-        VStack(spacing: small ? Vrai.Space.s8 : Vrai.Space.s12) {
-            Circle()
-                .fill(Color.Vrai.fill)
-                .frame(width: small ? Metrics.emptyIconSmall : Metrics.emptyIcon, height: small ? Metrics.emptyIconSmall : Metrics.emptyIcon)
-                .overlay {
-                    Symbol(icon, font: small ? Font.Vrai.title1 : Font.Vrai.display)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                }
-                .padding(.bottom, Vrai.Space.s4)
-            Text(title)
-                .font(small ? Font.Vrai.title3 : Font.Vrai.title1)
-                .foregroundStyle(Color.Vrai.text)
-                .multilineTextAlignment(.center)
-            if let message {
-                Text(message)
-                    .font(small ? Font.Vrai.callout : Font.Vrai.body)
-                    .foregroundStyle(Color.Vrai.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: Vrai.Size.sheet * 0.7)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: Vrai.Space.s8) { actions() }
-                VStack(spacing: Vrai.Space.s8) { actions() }
-            }
-            .padding(.top, Vrai.Space.s8)
+        ContentUnavailableView {
+            Label(title, systemImage: icon)
+        } description: {
+            if let message { Text(message) }
+        } actions: {
+            actions()
         }
-        .padding(.horizontal, small ? Vrai.Space.s16 : Vrai.Space.s32)
-        .padding(.vertical, small ? Vrai.Space.s24 : Vrai.Space.s40)
-        .frame(maxWidth: .infinity)
+        .controlSize(small ? .small : .regular)
     }
 }
 

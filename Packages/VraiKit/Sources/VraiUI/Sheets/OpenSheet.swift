@@ -13,8 +13,7 @@ struct OpenSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Open a repository", bundle: .module),
-            description: String(localized: "Pick a folder with a git repository. Vrai also finds the repository from any folder inside it.", bundle: .module),
-            icon: "folder"
+            description: String(localized: "Pick a folder with a git repository. Vrai also finds the repository from any folder inside it.", bundle: .module)
         ) {
             LongTailPathField(label: String(localized: "Folder", bundle: .module), text: $path, placeholder: "~/Developer/vrai", kind: .folder, home: app.homeFolder, autofocus: true)
             switch problem {

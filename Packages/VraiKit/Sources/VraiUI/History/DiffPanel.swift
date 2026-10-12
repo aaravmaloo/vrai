@@ -65,8 +65,9 @@ struct DiffPanel<FileMenu: View, Header: View>: View {
             HStack(spacing: Vrai.Space.s8) {
                 Text(title ?? String(localized: "\(n(files.count, "file")) changed", bundle: .module))
                     .font(Font.Vrai.captionStrong)
-                    .foregroundStyle(Color.Vrai.textSecondary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
+                    .layoutPriority(1)
                 DiffStat(additions: totals.0, deletions: totals.1, bar: true)
                 Spacer(minLength: 0)
                 filesHeader()
@@ -78,7 +79,7 @@ struct DiffPanel<FileMenu: View, Header: View>: View {
             } else if files.isEmpty {
                 Text("No file changes.", bundle: .module)
                     .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
                     .padding(Vrai.Space.s12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             } else {
@@ -164,7 +165,7 @@ struct DiffPanel<FileMenu: View, Header: View>: View {
             } else {
                 Text(file.binary || store.patch?.isBinary == true ? String(localized: "Binary file, not shown.", bundle: .module) : String(localized: "No text changes.", bundle: .module))
                     .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.Vrai.bg)
             }

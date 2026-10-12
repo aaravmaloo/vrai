@@ -80,21 +80,6 @@ enum AccountsCopy {
         }
     }
 
-    static func origin(_ entries: [ConfigEntry], file: String, environment: [String: String]) -> String {
-        let helpers = entries.filter { ConfigCommands.canonical($0.key) == CredentialHelperCommands.key }
-        let outside = helpers.filter { $0.scope != .global }
-        guard !helpers.isEmpty, !helpers.contains(where: { $0.scope == .global }), !outside.isEmpty else {
-            return SettingsCopy.stored(in: file, as: [CredentialHelperCommands.key])
-        }
-        var seen: Set<String> = []
-        let origins = outside.compactMap { entry -> String? in
-            guard let origin = entry.origin else { return nil }
-            let path = origin.hasPrefix("file:") ? String(origin.dropFirst("file:".count)) : origin
-            return GlobalConfigFile.display(path, environment: environment)
-        }.filter { seen.insert($0).inserted }
-        guard !origins.isEmpty else { return SettingsCopy.stored(in: file, as: [CredentialHelperCommands.key]) }
-        return String(localized: "Set in \(SettingsCopy.list(origins)) as credential.helper. A new choice goes in \(file).", bundle: .module)
-    }
 }
 
 struct CredentialHelperSection: View {
@@ -105,12 +90,8 @@ struct CredentialHelperSection: View {
 
     var helpers: [CredentialHelper] { setup?.helpers ?? [] }
 
-    var footer: String {
-        AccountsCopy.origin(git.table, file: context.app.globalConfigDisplay, environment: context.app.environment.base)
-    }
-
     var body: some View {
-        SettingsSection(String(localized: "Passwords", bundle: .module), description: String(localized: "git asks a credential helper for HTTPS passwords and tokens.", bundle: .module), footer: footer) {
+        SettingsSection(String(localized: "Passwords", bundle: .module)) {
             SettingsRow(String(localized: "Remember passwords in", bundle: .module), description: AccountsCopy.summary(setup)) {
                 SettingsSelect(
                     label: String(localized: "Remember passwords in", bundle: .module),

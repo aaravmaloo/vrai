@@ -130,6 +130,11 @@ extension WindowModel {
 
     public func openPalette(_ mode: PaletteMode = .everything, query: String = "") {
         switcher.dismiss()
+        if mode == .branches, query.isEmpty {
+            palette.dismiss()
+            branchPicker = true
+            return
+        }
         palette.present(mode, query: query)
     }
 }

@@ -65,15 +65,11 @@ struct SettingsForm<Content: View>: View {
 
 struct SettingsSection<Content: View>: View {
     let title: String?
-    var description: String?
-    var footer: String?
     var top: AnyView?
     @ViewBuilder var content: () -> Content
 
-    init(_ title: String?, description: String? = nil, footer: String? = nil, top: AnyView? = nil, @ViewBuilder content: @escaping () -> Content) {
+    init(_ title: String?, top: AnyView? = nil, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
-        self.description = description
-        self.footer = footer
         self.top = top
         self.content = content
     }
@@ -82,7 +78,7 @@ struct SettingsSection<Content: View>: View {
         Section {
             content()
         } header: {
-            if title != nil || description != nil || top != nil {
+            if title != nil || top != nil {
                 VStack(alignment: .leading, spacing: Vrai.Space.s2) {
                     if let top {
                         top
@@ -90,26 +86,10 @@ struct SettingsSection<Content: View>: View {
                     }
                     if let title {
                         Text(title)
-                            .font(Font.Vrai.title3)
-                            .foregroundStyle(Color.Vrai.text)
                             .accessibilityAddTraits(.isHeader)
-                    }
-                    if let description {
-                        Text(description)
-                            .font(Font.Vrai.callout)
-                            .foregroundStyle(Color.Vrai.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .textCase(nil)
-            }
-        } footer: {
-            if let footer {
-                Text(footer)
-                    .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -130,22 +110,16 @@ struct SettingsLabel: View {
                     .frame(width: Vrai.Space.s20)
                     .accessibilityHidden(true)
             }
-            VStack(alignment: .leading, spacing: Vrai.Space.s2) {
-                HStack(spacing: Vrai.Space.s6) {
-                    Text(title)
-                        .font(mono ? Font.Vrai.code : Font.Vrai.body)
-                        .foregroundStyle(Color.Vrai.text)
-                        .lineLimit(2)
-                    if let badge { Badge(text: badge, tone: .accent) }
-                }
-                if let description {
-                    Text(description)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+            HStack(spacing: Vrai.Space.s6) {
+                Text(title)
+                    .font(mono ? Font.Vrai.code : Font.Vrai.body)
+                    .foregroundStyle(Color.Vrai.text)
+                    .lineLimit(2)
+                if let badge { Badge(text: badge, tone: .accent) }
             }
         }
+        .help(description ?? "")
+        .accessibilityHint(description ?? "")
     }
 }
 
@@ -422,10 +396,6 @@ struct SettingsNotice: View {
 }
 
 enum SettingsCopy {
-    static func stored(in file: String, as keys: [String]) -> String {
-        String(localized: "Stored in \(file) as \(SettingsCopy.list(keys)).", bundle: .module)
-    }
-
     static func list(_ items: [String]) -> String {
         switch items.count {
         case 0: return ""

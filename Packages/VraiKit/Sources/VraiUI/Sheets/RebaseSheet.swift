@@ -30,9 +30,7 @@ struct RebaseSheet: View {
         let upToDate = preview?.upToDate ?? false
         RewriteSheet(
             title: String(localized: "Rebase \(head)", bundle: .module),
-            description: String(localized: "Replays your commits on top of another branch, as if you had started from there. Their hashes change.", bundle: .module),
-            icon: "arrow.triangle.swap",
-            tone: .warning
+            description: String(localized: "Replays your commits on top of another branch, as if you had started from there. Their hashes change.", bundle: .module)
         ) {
             RewriteField(label: String(localized: "Onto", bundle: .module)) {
                 RewriteSelect(selection: $onto, options: options, label: String(localized: "Onto", bundle: .module))

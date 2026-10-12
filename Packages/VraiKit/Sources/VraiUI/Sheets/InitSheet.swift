@@ -51,9 +51,7 @@ struct InitSheet: View {
 
     var body: some View {
         LongTailSheet(
-            title: String(localized: "New repository", bundle: .module),
-            icon: "folder.badge.plus",
-            tone: .accent
+            title: String(localized: "New repository", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't create the repository", bundle: .module), message: failure)

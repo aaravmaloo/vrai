@@ -18,9 +18,7 @@ struct ResetSheet: View {
         let hard = mode == .hard
         RewriteSheet(
             title: String(localized: "Reset \(head) to \(target.short)", bundle: .module),
-            description: subject,
-            icon: "arrow.counterclockwise",
-            tone: hard ? .danger : .warning
+            description: subject
         ) {
             if count > 0 {
                 Text("\(head) moves back past \(n(count, "commit")):", bundle: .module)

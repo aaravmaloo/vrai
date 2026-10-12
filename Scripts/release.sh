@@ -219,6 +219,8 @@ else
   step "Skipping the appcast (ad hoc)"
 fi
 
+rm -rf "$out/DerivedData"
+
 step "Done"
 echo "App: $app"
 echo "DMG: $dmg"

@@ -12,7 +12,7 @@ struct SwitcherHost: View {
         GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
                 if open {
-                    Color.Vrai.scrim
+                    Color.clear
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture { window.switcher.dismiss() }
@@ -51,7 +51,6 @@ struct SwitcherView: View {
     static let width = Vrai.Size.inspector
     static let heightShare: CGFloat = 0.7
     static let headerHeight = Vrai.Size.control + Vrai.Space.s16
-    static let footerHeight = Vrai.Size.control
     static let rowHeight = Vrai.Size.rowComfortable
 
     var body: some View {
@@ -60,73 +59,46 @@ struct SwitcherView: View {
         let sections = RepositoryDirectory.sections(app.recents, current: window.reference.path, query: query)
         let flat = RepositoryDirectory.flatten(sections)
         let keys = sections.flatMap { section in section.entries.map { section.id + "\n" + $0.path } }
-        let showFooter = room > Self.headerHeight + Self.footerHeight + Self.rowHeight * 4
-        let listRoom = max(Self.rowHeight * 2, room - Self.headerHeight - (showFooter ? Self.footerHeight : 0))
+        let listRoom = max(Self.rowHeight * 2, room - Self.headerHeight)
         VStack(spacing: 0) {
             HStack(spacing: Vrai.Space.s8) {
-                HStack(spacing: Vrai.Space.s6) {
-                    Symbol("magnifyingglass", font: Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                    TextField(text: $switcher.query) {
-                        Text("Filter", bundle: .module).foregroundStyle(Color.Vrai.textTertiary)
-                    }
-                    .textFieldStyle(.plain)
-                    .font(Font.Vrai.body)
-                    .foregroundStyle(Color.Vrai.text)
-                    .autocorrectionDisabled()
-                    .focused($focused)
-                    .onKeyPress(.downArrow) {
-                        cursor.move(1)
-                        return .handled
-                    }
-                    .onKeyPress(.upArrow) {
-                        cursor.move(-1)
-                        return .handled
-                    }
-                    .onKeyPress(keys: [.return], phases: .down) { press in
-                        chooseActive(flat, newWindow: press.modifiers.contains(.command))
-                        return .handled
-                    }
-                    .onKeyPress(.escape) {
-                        if switcher.query.isEmpty { switcher.dismiss() } else { switcher.query = "" }
-                        return .handled
-                    }
-                    .onExitCommand { switcher.dismiss() }
-                    .accessibilityLabel(Text("Filter repositories", bundle: .module))
-                    .accessibilityIdentifier("switcher-field")
+                TextField(text: $switcher.query, prompt: Text("Filter", bundle: .module)) {
+                    Text("Filter repositories", bundle: .module)
                 }
-                .padding(.horizontal, Vrai.Space.s10)
-                .frame(height: Vrai.Size.control)
-                .background(Color.Vrai.fill, in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .focused($focused)
+                .onKeyPress(.downArrow) {
+                    cursor.move(1)
+                    return .handled
+                }
+                .onKeyPress(.upArrow) {
+                    cursor.move(-1)
+                    return .handled
+                }
+                .onKeyPress(keys: [.return], phases: .down) { press in
+                    chooseActive(flat, newWindow: press.modifiers.contains(.command))
+                    return .handled
+                }
+                .onKeyPress(.escape) {
+                    if switcher.query.isEmpty { switcher.dismiss() } else { switcher.query = "" }
+                    return .handled
+                }
+                .onExitCommand { switcher.dismiss() }
+                .accessibilityLabel(Text("Filter repositories", bundle: .module))
+                .accessibilityIdentifier("switcher-field")
                 addMenu
             }
             .padding(.horizontal, Vrai.Space.s8)
             .frame(height: Self.headerHeight)
-            .hairline(.bottom)
+            Divider()
             if flat.isEmpty {
                 empty(query)
             } else {
                 SwitcherList(sections: sections, current: window.reference.path, cursor: cursor, maxHeight: listRoom, choose: choose, remove: remove)
             }
-            if showFooter {
-                HStack(spacing: Vrai.Space.s12) {
-                    footerKey("\u{21A9}", String(localized: "switch", bundle: .module))
-                    footerKey("\u{2318}\u{21A9}", String(localized: "new window", bundle: .module))
-                    Spacer(minLength: Vrai.Space.s8)
-                    footerKey("esc", String(localized: "close", bundle: .module))
-                }
-                .padding(.horizontal, Vrai.Space.s12)
-                .frame(height: Self.footerHeight)
-                .background(Color.Vrai.glassFill)
-                .hairline(.top)
-            }
         }
-        .background(Color.Vrai.glassFill, in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
-        .glassEffect(.regular, in: .rect(cornerRadius: Vrai.Radius.lg))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
-        .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
-        .shadow(color: Color.Vrai.glassEdge, radius: Vrai.Space.s24, y: Vrai.Space.s12)
+        .glassEffect(.regular, in: .rect(cornerRadius: Vrai.Radius.xl))
         .background {
             Button {
                 chooseActive(flat, newWindow: true)
@@ -190,14 +162,9 @@ struct SwitcherView: View {
                 Label(String(localized: "Welcome window", bundle: .module), systemImage: "macwindow")
             }
         } label: {
-            HStack(spacing: Vrai.Space.s4) {
-                Text("Add", bundle: .module)
-                Symbol("chevron.down", font: Font.Vrai.overline)
-            }
+            Text("Add", bundle: .module)
         }
         .menuStyle(.button)
-        .buttonStyle(VraiButtonStyle(variant: .secondary, size: .regular))
-        .menuIndicator(.hidden)
         .fixedSize()
         .accessibilityLabel(Text("Add a repository", bundle: .module))
         .accessibilityIdentifier("switcher-add")
@@ -218,18 +185,6 @@ struct SwitcherView: View {
         .padding(.vertical, Vrai.Space.s20)
         .padding(.horizontal, Vrai.Space.s16)
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    func footerKey(_ keys: String, _ label: String) -> some View {
-        HStack(spacing: Vrai.Space.s4) {
-            Text(verbatim: keys)
-                .font(Font.Vrai.captionStrong)
-            Text(label)
-                .font(Font.Vrai.caption)
-        }
-        .foregroundStyle(Color.Vrai.textSecondary)
-        .lineLimit(1)
-        .fixedSize()
     }
 
     func add(_ kind: AppSheetKind) {
@@ -302,8 +257,8 @@ struct SwitcherList: View {
                     ForEach(Array(sections.enumerated()), id: \.element.id) { sectionIndex, section in
                         VStack(alignment: .leading, spacing: 0) {
                             Text(Self.title(section))
-                                .overline()
-                                .foregroundStyle(Color.Vrai.textTertiary)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                                 .padding(.horizontal, Vrai.Space.s8)
@@ -373,12 +328,12 @@ struct SwitcherRow: View {
             choose(entry, false)
         } label: {
             HStack(spacing: Vrai.Space.s8) {
-                Symbol("folder", font: Font.Vrai.callout)
-                    .foregroundStyle(missing ? Color.Vrai.textDisabled : (current ? Color.Vrai.accentText : Color.Vrai.textSecondary))
+                Image(systemName: "folder")
+                    .foregroundStyle(active ? Color.white : (missing ? Color.Vrai.textDisabled : (current ? Color.Vrai.accent : Color.secondary)))
                     .frame(width: Vrai.Size.iconSm)
                 Text(entry.name)
-                    .font(current ? Font.Vrai.headline : Font.Vrai.body)
-                    .foregroundStyle(missing ? Color.Vrai.textTertiary : Color.Vrai.text)
+                    .fontWeight(current ? .semibold : nil)
+                    .foregroundStyle(active ? Color.white : (missing ? Color.secondary : Color.primary))
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -386,27 +341,30 @@ struct SwitcherRow: View {
                 if missing {
                     Text("Missing", bundle: .module)
                         .font(Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                        .foregroundStyle(active ? Color.white.opacity(0.8) : Color.secondary)
                         .lineLimit(1)
                         .fixedSize()
                 } else if let status {
                     AheadBehind(ahead: status.ahead, behind: status.behind)
                         .fixedSize()
+                        .environment(\.backgroundProminence, active ? .increased : .standard)
                     if status.changes > 0 {
                         Circle()
-                            .fill(Color.Vrai.accent)
+                            .fill(active ? Color.white : Color.Vrai.accent)
                             .frame(width: Vrai.Space.s8, height: Vrai.Space.s8)
                             .help(n(status.changes, "change"))
                     }
                 }
                 if current {
-                    Symbol("checkmark", font: Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.accentText)
+                    Image(systemName: "checkmark")
+                        .font(Font.Vrai.caption)
+                        .foregroundStyle(active ? Color.white : Color.Vrai.accent)
                 }
             }
+            .foregroundStyle(active ? Color.white : Color.primary)
             .padding(.horizontal, Vrai.Space.s8)
             .frame(height: SwitcherView.rowHeight)
-            .background(active ? Color.Vrai.accentSoft : Color.clear, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
+            .background(active ? Color.Vrai.accent : Color.clear, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

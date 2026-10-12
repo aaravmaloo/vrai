@@ -21,8 +21,7 @@ struct SparseSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Sparse checkout", bundle: .module),
-            description: String(localized: "Checks out only the folders you pick. The rest stays in history, out of the way.", bundle: .module),
-            icon: "folder"
+            description: String(localized: "Checks out only the folders you pick. The rest stays in history, out of the way.", bundle: .module)
         ) {
             if state == nil {
                 HStack(spacing: Vrai.Space.s8) {
@@ -60,7 +59,7 @@ struct SparseSheet: View {
                                 }
                             }
                         }
-                        .toggleStyle(SyncForm.CheckboxStyle())
+                        .toggleStyle(.checkbox)
                         .padding(.horizontal, Vrai.Space.s4)
                         .frame(minHeight: Vrai.Size.controlSm)
                         .accessibilityIdentifier("sparse-" + folder)

@@ -20,9 +20,7 @@ struct BisectSheet: View {
         let candidates = preview?.candidates ?? 0
         RewriteSheet(
             title: String(localized: "Find the commit that broke something", bundle: .module),
-            description: String(localized: "Bisect checks out commits halfway between a good one and a bad one. You say good or bad until one is left.", bundle: .module),
-            icon: "scope",
-            tone: .accent
+            description: String(localized: "Bisect checks out commits halfway between a good one and a bad one. You say good or bad until one is left.", bundle: .module)
         ) {
             HStack(alignment: .top, spacing: Vrai.Space.s12) {
                 RewriteField(label: String(localized: "Known bad", bundle: .module)) {

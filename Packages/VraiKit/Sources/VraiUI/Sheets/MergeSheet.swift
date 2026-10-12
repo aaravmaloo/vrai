@@ -21,7 +21,7 @@ struct MergeSheet: View {
         let options = RewriteRefOptions.build(store.snapshot, includeRemotes: true, exclude: store.snapshot?.head.branchName)
         let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let command = RewriteCommands.merge(source: source.isEmpty ? "<branch>" : source, mode: mode, message: trimmed.isEmpty ? nil : trimmed, strategyOption: strategy.isEmpty ? nil : strategy)
-        RewriteSheet(title: String(localized: "Merge into \(head)", bundle: .module), icon: "arrow.triangle.merge", tone: .accent) {
+        RewriteSheet(title: String(localized: "Merge into \(head)", bundle: .module)) {
             RewriteField(label: String(localized: "Branch to merge", bundle: .module)) {
                 RewriteSelect(selection: $source, options: options, label: String(localized: "Branch to merge", bundle: .module))
             }

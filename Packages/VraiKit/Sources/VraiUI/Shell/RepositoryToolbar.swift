@@ -10,200 +10,137 @@ struct RepositoryToolbar: ToolbarContent {
             ToolbarTitle(window: window)
         }
         .sharedBackgroundVisibility(.hidden)
+        ToolbarItem {
+            Spacer(minLength: 0)
+        }
+        .sharedBackgroundVisibility(.hidden)
         if window.widthClass.isNarrow {
-            ToolbarItem {
-                Spacer(minLength: 0)
+            ToolbarItemGroup {
+                NarrowActions(window: window)
             }
-            .sharedBackgroundVisibility(.hidden)
-            ToolbarItem {
-                ToolbarCapsule(label: String(localized: "Actions", bundle: .module)) {
-                    NarrowActions(window: window)
-                }
-                .toolbarSlot(last: true)
-            }
-            .sharedBackgroundVisibility(.hidden)
         } else {
-            ToolbarItem {
-                Spacer(minLength: 0)
+            ToolbarItemGroup {
+                SyncButtons(window: window)
             }
-            .sharedBackgroundVisibility(.hidden)
-            ToolbarItem {
-                ToolbarCapsule(label: String(localized: "Sync", bundle: .module)) {
-                    SyncButtons(window: window)
-                }
-                .toolbarSlot()
-            }
-            .sharedBackgroundVisibility(.hidden)
+            ToolbarSpacer(.fixed)
             if window.widthClass >= .regular {
-                ToolbarItem {
-                    ToolbarCapsule(label: String(localized: "Branch", bundle: .module)) {
-                        BranchButtons(window: window)
-                    }
-                    .toolbarSlot()
+                ToolbarItemGroup {
+                    BranchButtons(window: window)
                 }
-                .sharedBackgroundVisibility(.hidden)
+                ToolbarSpacer(.fixed)
                 ToolbarItem {
-                    ToolbarCapsule(label: String(localized: "Stash", bundle: .module)) {
-                        ToolbarIconButton(icon: "tray.and.arrow.down", label: window.optionDown ? String(localized: "Stash including untracked files", bundle: .module) : String(localized: "Stash changes", bundle: .module), shortcut: "\u{21E7}\u{2318}S", busy: window.store.busy.contains("stash"), enabled: !(window.store.snapshot?.working.isEmpty ?? true)) { RewriteToolbar.stash(window) }
-                    }
-                    .toolbarSlot()
+                    StashButton(window: window)
                 }
-                .sharedBackgroundVisibility(.hidden)
+                ToolbarSpacer(.fixed)
             }
             ToolbarItem {
-                ToolbarField(window: window)
-                    .toolbarSlot()
+                PaletteButton(window: window)
             }
-            .sharedBackgroundVisibility(.hidden)
-            ToolbarItem {
-                ToolbarCapsule(label: String(localized: "Panels", bundle: .module)) {
-                    PanelButtons(window: window)
-                }
-                .toolbarSlot(last: true)
+            ToolbarSpacer(.fixed)
+            ToolbarItemGroup {
+                PanelToggles(window: window)
             }
-            .sharedBackgroundVisibility(.hidden)
         }
     }
 }
 
-enum ToolbarLayout {
-    static let systemGap = Vrai.Space.s8
-    static let groupGap = Vrai.Space.s12
-    static let systemEdge = Vrai.Space.s8
-    static let edge = Vrai.Space.s12
-    static let glyph = Vrai.Size.icon - Vrai.Space.s2
-}
-
-extension View {
-    func toolbarSlot(last: Bool = false) -> some View {
-        padding(.leading, ToolbarLayout.groupGap - ToolbarLayout.systemGap)
-            .padding(.trailing, last ? ToolbarLayout.edge - ToolbarLayout.systemEdge : 0)
-    }
-}
-
-struct ToolbarCapsule<Content: View>: View {
-    let label: String
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        HStack(spacing: 0) {
-            content()
-        }
-        .padding(.horizontal, Vrai.Space.s2)
-        .frame(height: Vrai.Size.toolbarItem)
-        .fixedSize()
-        .glassEffect(.regular, in: Capsule())
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(label)
-    }
-}
-
-struct ToolbarGlyph: View {
+struct ToolbarAction: View {
+    let title: String
     let icon: String
-
-    var body: some View {
-        Symbol(icon, font: Font.Vrai.title3)
-            .frame(width: ToolbarLayout.glyph, height: ToolbarLayout.glyph)
-    }
-}
-
-struct ToolbarButtonStyle: ButtonStyle {
-    var active = false
-    var counted = false
-
-    func makeBody(configuration: Configuration) -> some View {
-        StyledBody(configuration: configuration, active: active, counted: counted)
-    }
-
-    struct StyledBody: View {
-        let configuration: Configuration
-        let active: Bool
-        let counted: Bool
-        @Environment(\.isEnabled) private var enabled
-        @State private var hovering = false
-
-        var body: some View {
-            configuration.label
-                .foregroundStyle(!enabled ? Color.Vrai.textDisabled : active ? Color.Vrai.accentText : Color.Vrai.text)
-                .padding(.leading, Vrai.Space.s8)
-                .padding(.trailing, counted ? Vrai.Space.s10 : Vrai.Space.s8)
-                .frame(minWidth: Metrics.toolbarButtonMin)
-                .frame(height: Metrics.toolbarButton)
-                .fixedSize()
-                .background(active ? Color.Vrai.accentSoft : configuration.isPressed ? Color.Vrai.fillActive : (hovering && enabled ? Color.Vrai.fillHover : Color.clear), in: Capsule())
-                .contentShape(Capsule())
-                .onHover { hovering = $0 }
-        }
-    }
-}
-
-struct ToolbarIconButton: View {
-    let icon: String
-    let label: String
+    let identifier: String
     var shortcut: String?
-    var badge: Int?
-    var active = false
+    var count = 0
     var busy = false
     var enabled = true
-    var action: () -> Void = {}
+    let action: () -> Void
 
     var body: some View {
-        let counted = badge.map { $0 != 0 } ?? false
         Button(action: action) {
-            HStack(spacing: Vrai.Space.s4) {
+            Label {
+                Text(title)
+            } icon: {
                 if busy {
                     Spinner()
-                        .frame(width: ToolbarLayout.glyph, height: ToolbarLayout.glyph)
                 } else {
-                    ToolbarGlyph(icon: icon)
-                }
-                if let badge, counted {
-                    Text(String(badge))
-                        .font(Font.Vrai.captionStrong)
-                        .monospacedDigit()
-                        .foregroundStyle(enabled ? Color.Vrai.accentText : Color.Vrai.textDisabled)
+                    Image(systemName: icon)
                 }
             }
         }
-        .buttonStyle(ToolbarButtonStyle(active: active, counted: counted))
+        .badge(count)
         .disabled(!enabled)
-        .help(shortcut.map { label + "  " + $0 } ?? label)
-        .accessibilityLabel(label)
+        .help(shortcut.map { title + "  " + $0 } ?? title)
+        .accessibilityLabel(title)
+        .accessibilityIdentifier(identifier)
+    }
+}
+
+struct ToolbarToggle: View {
+    let title: String
+    let icon: String
+    let identifier: String
+    let shortcut: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            Label(title, systemImage: icon)
+        }
+        .toggleStyle(.button)
+        .help(title + "  " + shortcut)
+        .accessibilityLabel(title)
+        .accessibilityIdentifier(identifier)
     }
 }
 
 struct ToolbarTitle: View {
     let window: WindowModel
+    @Environment(AppModel.self) private var app
+    @Environment(\.openWindow) private var openWindow
+
+    var context: PaletteContext {
+        let openWindow = openWindow
+        return PaletteContext(
+            window: window,
+            app: app,
+            openWindowID: { openWindow(id: $0) },
+            openRepository: { openWindow(value: $0) }
+        )
+    }
 
     var body: some View {
         let snapshot = window.store.snapshot
-        HStack(spacing: Vrai.Space.s6) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(window.repositoryName)
-                    .font(Font.Vrai.headline)
-                    .foregroundStyle(Color.Vrai.text)
-                    .lineLimit(1)
-                HStack(spacing: Vrai.Space.s4) {
-                    Symbol(isDetached(snapshot) ? "mappin.and.ellipse" : "arrow.triangle.branch", font: Font.Vrai.caption)
-                        .foregroundStyle(laneColor(snapshot))
-                    Text(subtitle(snapshot))
-                        .font(Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.textSecondary)
+        Button {
+            window.openPalette(.branches)
+        } label: {
+            HStack(spacing: Vrai.Space.s6) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(window.repositoryName)
+                        .font(.headline)
                         .lineLimit(1)
+                    HStack(spacing: Vrai.Space.s4) {
+                        Image(systemName: isDetached(snapshot) ? "mappin.and.ellipse" : "arrow.triangle.branch")
+                            .foregroundStyle(laneColor(snapshot))
+                            .accessibilityHidden(true)
+                        Text(subtitle(snapshot))
+                            .lineLimit(1)
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 }
+                .frame(maxWidth: window.widthClass == .compact ? Metrics.compactTitle : nil, alignment: .leading)
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
             }
-            .frame(maxWidth: window.widthClass == .compact ? Metrics.compactTitle : nil, alignment: .leading)
-            Symbol("chevron.down", font: Font.Vrai.overline)
-                .foregroundStyle(Color.Vrai.textTertiary)
+            .padding(.horizontal, Vrai.Space.s6)
+            .contentShape(Rectangle())
         }
-        .padding(.horizontal, Vrai.Space.s6)
-        .frame(height: Vrai.Size.toolbarItem)
-        .contentShape(Rectangle())
-        .onTapGesture { window.openPalette(.branches) }
+        .buttonStyle(.plain)
         .help(String(localized: "Switch branch", bundle: .module))
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction { window.openPalette(.branches) }
+        .popover(isPresented: Binding(get: { window.branchPicker }, set: { window.branchPicker = $0 }), arrowEdge: .bottom) {
+            BranchPicker(context: context)
+        }
     }
 
     func isDetached(_ snapshot: RepositorySnapshot?) -> Bool {
@@ -212,8 +149,8 @@ struct ToolbarTitle: View {
     }
 
     func laneColor(_ snapshot: RepositorySnapshot?) -> Color {
-        guard let snapshot else { return Color.Vrai.textTertiary }
-        return window.store.headColor(snapshot).map { Color.Vrai.lane($0) } ?? Color.Vrai.textTertiary
+        guard let snapshot else { return .secondary }
+        return window.store.headColor(snapshot).map { Color.Vrai.lane($0) } ?? .secondary
     }
 
     func subtitle(_ snapshot: RepositorySnapshot?) -> String {
@@ -270,9 +207,9 @@ struct SyncButtons: View {
         let labels = SyncLabels(window: window)
         let alt = window.optionDown
         let sync = window.sync
-        ToolbarIconButton(icon: "arrow.triangle.2.circlepath", label: sync.busyLabel(.fetch) ?? labels.fetch, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}F" : "\u{21E7}\u{2318}F", busy: sync.isBusy(.fetch)) { alt ? sync.fetch(all: true) : sync.fetch() }
-        ToolbarIconButton(icon: "arrow.down.to.line", label: sync.busyLabel(.pull) ?? labels.pull, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}L" : "\u{21E7}\u{2318}L", badge: alt ? nil : labels.behind, busy: sync.isBusy(.pull), enabled: labels.onBranch) { alt ? sync.pull(mode: .rebase) : sync.pull() }
-        ToolbarIconButton(icon: "arrow.up.to.line", label: sync.busyLabel(.push) ?? labels.push, shortcut: alt ? "\u{2325}\u{21E7}\u{2318}P" : "\u{21E7}\u{2318}P", badge: alt ? nil : labels.ahead, busy: sync.isBusy(.push), enabled: labels.onBranch) { alt ? sync.push(force: .withLease) : sync.push() }
+        ToolbarAction(title: sync.busyLabel(.fetch) ?? labels.fetch, icon: "arrow.triangle.2.circlepath", identifier: "toolbar-fetch", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}F" : "\u{21E7}\u{2318}F", busy: sync.isBusy(.fetch)) { alt ? sync.fetch(all: true) : sync.fetch() }
+        ToolbarAction(title: sync.busyLabel(.pull) ?? labels.pull, icon: "arrow.down.to.line", identifier: "toolbar-pull", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}L" : "\u{21E7}\u{2318}L", count: alt ? 0 : labels.behind, busy: sync.isBusy(.pull), enabled: labels.onBranch) { alt ? sync.pull(mode: .rebase) : sync.pull() }
+        ToolbarAction(title: sync.busyLabel(.push) ?? labels.push, icon: "arrow.up.to.line", identifier: "toolbar-push", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}P" : "\u{21E7}\u{2318}P", count: alt ? 0 : labels.ahead, busy: sync.isBusy(.push), enabled: labels.onBranch) { alt ? sync.push(force: .withLease) : sync.push() }
     }
 }
 
@@ -281,60 +218,57 @@ struct BranchButtons: View {
 
     var body: some View {
         let alt = window.optionDown
-        ToolbarIconButton(icon: "arrow.triangle.branch", label: String(localized: "New branch", bundle: .module), shortcut: "\u{21E7}\u{2318}B") { window.sync.newBranch() }
-        ToolbarIconButton(icon: "arrow.triangle.merge", label: alt ? String(localized: "Merge with a merge commit", bundle: .module) : String(localized: "Merge", bundle: .module), shortcut: "\u{21E7}\u{2318}M", busy: window.store.busy.contains("merge"), enabled: window.store.snapshot != nil) { RewriteToolbar.merge(window) }
-        ToolbarIconButton(icon: "arrow.triangle.swap", label: alt ? String(localized: "Interactive rebase", bundle: .module) : String(localized: "Rebase", bundle: .module), shortcut: alt ? "\u{2325}\u{21E7}\u{2318}R" : "\u{21E7}\u{2318}R", busy: window.store.busy.contains("rebase") || window.store.busy.contains("interactiveRebase"), enabled: window.store.snapshot?.currentBranch != nil) { RewriteToolbar.rebase(window) }
+        let busy = window.store.busy
+        ToolbarAction(title: String(localized: "New branch", bundle: .module), icon: "arrow.triangle.branch", identifier: "toolbar-new-branch", shortcut: "\u{21E7}\u{2318}B") { window.sync.newBranch() }
+        ToolbarAction(title: alt ? String(localized: "Merge with a merge commit", bundle: .module) : String(localized: "Merge", bundle: .module), icon: "arrow.triangle.merge", identifier: "toolbar-merge", shortcut: "\u{21E7}\u{2318}M", busy: busy.contains("merge"), enabled: window.store.snapshot != nil) { RewriteToolbar.merge(window) }
+        ToolbarAction(title: alt ? String(localized: "Interactive rebase", bundle: .module) : String(localized: "Rebase", bundle: .module), icon: "arrow.triangle.swap", identifier: "toolbar-rebase", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}R" : "\u{21E7}\u{2318}R", busy: busy.contains("rebase") || busy.contains("interactiveRebase"), enabled: window.store.snapshot?.currentBranch != nil) { RewriteToolbar.rebase(window) }
     }
 }
 
-struct PanelButtons: View {
+struct StashButton: View {
     let window: WindowModel
 
     var body: some View {
-        ToolbarIconButton(icon: "terminal", label: window.console.open ? String(localized: "Hide console", bundle: .module) : String(localized: "Show console", bundle: .module), shortcut: "\u{2318}J", active: window.console.open) { window.console.toggle() }
-        ToolbarIconButton(icon: "sidebar.right", label: window.preferences.inspector ? String(localized: "Hide inspector", bundle: .module) : String(localized: "Show inspector", bundle: .module), shortcut: "\u{2325}\u{2318}0", active: window.preferences.inspector) {
-            window.preferences.inspector.toggle()
-        }
+        ToolbarAction(title: window.optionDown ? String(localized: "Stash including untracked files", bundle: .module) : String(localized: "Stash changes", bundle: .module), icon: "tray.and.arrow.down", identifier: "toolbar-stash", shortcut: "\u{21E7}\u{2318}S", busy: window.store.busy.contains("stash"), enabled: !(window.store.snapshot?.working.isEmpty ?? true)) { RewriteToolbar.stash(window) }
     }
 }
 
-struct ToolbarField: View {
+struct PaletteButton: View {
     let window: WindowModel
 
     var body: some View {
-        HStack(spacing: 0) {
-            field
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    @ViewBuilder var field: some View {
-        let showText = window.widthClass == .wide
         let prompt = window.preferences.expert ? String(localized: "Search or run a git command", bundle: .module) : String(localized: "Search actions, branches, commits", bundle: .module)
-        HStack(spacing: Vrai.Space.s8) {
-            Symbol("magnifyingglass", font: Font.Vrai.body)
-            if showText {
-                Text(prompt)
-                    .font(Font.Vrai.body)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            Text(verbatim: "\u{2318}K")
-                .font(Font.Vrai.callout)
+        Button {
+            window.openPalette()
+        } label: {
+            Label(String(localized: "Search", bundle: .module), systemImage: "magnifyingglass")
         }
-        .foregroundStyle(Color.Vrai.textTertiary)
-        .padding(.horizontal, Vrai.Space.s12)
-        .frame(width: showText ? Vrai.Size.field : nil, height: Vrai.Size.toolbarItem)
-        .fixedSize()
-        .glassEffect(.regular, in: Capsule())
-        .contentShape(Capsule())
-        .onTapGesture { window.openPalette() }
-        .help(String(localized: "Command palette", bundle: .module))
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(showText ? prompt : String(localized: "Command palette", bundle: .module))
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction { window.openPalette() }
+        .help(prompt + "  \u{2318}K")
+        .accessibilityLabel(String(localized: "Command palette", bundle: .module))
         .accessibilityIdentifier("toolbar-palette-field")
+    }
+}
+
+struct PanelToggles: View {
+    let window: WindowModel
+
+    var body: some View {
+        let console = window.console
+        let preferences = window.preferences
+        ToolbarToggle(
+            title: console.open ? String(localized: "Hide console", bundle: .module) : String(localized: "Show console", bundle: .module),
+            icon: "terminal",
+            identifier: "toolbar-console",
+            shortcut: "\u{2318}J",
+            isOn: Binding(get: { console.open }, set: { if $0 != console.open { console.toggle() } })
+        )
+        ToolbarToggle(
+            title: preferences.inspector ? String(localized: "Hide inspector", bundle: .module) : String(localized: "Show inspector", bundle: .module),
+            icon: "sidebar.right",
+            identifier: "toolbar-inspector",
+            shortcut: "\u{2325}\u{2318}0",
+            isOn: Binding(get: { preferences.inspector }, set: { preferences.inspector = $0 })
+        )
     }
 }
 
@@ -347,23 +281,13 @@ struct NarrowActions: View {
         Menu {
             SyncMenuItems(window: window, labels: labels)
         } label: {
-            HStack(spacing: Vrai.Space.s4) {
-                ToolbarGlyph(icon: "arrow.up.arrow.down")
-                if labels.ahead + labels.behind > 0 {
-                    Text(String(labels.ahead + labels.behind))
-                        .font(Font.Vrai.captionStrong)
-                        .monospacedDigit()
-                        .foregroundStyle(Color.Vrai.accentText)
-                }
-            }
+            Label(String(localized: "Sync", bundle: .module), systemImage: "arrow.up.arrow.down")
         }
-        .menuStyle(.button)
-        .buttonStyle(ToolbarButtonStyle(counted: labels.ahead + labels.behind > 0))
         .menuIndicator(.hidden)
-        .fixedSize()
+        .badge(labels.ahead + labels.behind)
         .help(String(localized: "Sync", bundle: .module))
-        .accessibilityLabel(Text("Sync", bundle: .module))
-        ToolbarIconButton(icon: "magnifyingglass", label: String(localized: "Search", bundle: .module), shortcut: "\u{2318}K") { window.openPalette() }
+        .accessibilityIdentifier("toolbar-sync")
+        PaletteButton(window: window)
         Menu {
             Button(String(localized: "New branch\u{2026}", bundle: .module), systemImage: "arrow.triangle.branch") { window.sync.newBranch() }
             Button(String(localized: "Merge\u{2026}", bundle: .module), systemImage: "arrow.triangle.merge") { RewriteActions.openMerge(window) }
@@ -383,13 +307,10 @@ struct NarrowActions: View {
             }
             Button(String(localized: "Settings\u{2026}", bundle: .module), systemImage: "gearshape") { openSettings() }
         } label: {
-            ToolbarGlyph(icon: "ellipsis")
+            Label(String(localized: "More", bundle: .module), systemImage: "ellipsis")
         }
-        .menuStyle(.button)
-        .buttonStyle(ToolbarButtonStyle())
         .menuIndicator(.hidden)
-        .fixedSize()
         .help(String(localized: "More", bundle: .module))
-        .accessibilityLabel(Text("More", bundle: .module))
+        .accessibilityIdentifier("toolbar-more")
     }
 }

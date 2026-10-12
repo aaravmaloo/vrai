@@ -37,8 +37,6 @@ struct InteractiveRebaseSheet: View {
         RewriteSheet(
             title: String(localized: "Interactive rebase", bundle: .module),
             description: String(localized: "Reorder, edit, squash or drop \(n(steps.count, "commit")) on \(head). Oldest first, like git's todo list.", bundle: .module),
-            icon: "list.number",
-            tone: .warning,
             width: Vrai.Size.sheetWide
         ) {
             HStack(alignment: .bottom, spacing: Vrai.Space.s8) {

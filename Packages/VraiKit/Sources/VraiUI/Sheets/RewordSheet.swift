@@ -21,9 +21,7 @@ struct RewordSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Reword \(id.short)", bundle: .module),
-            description: description,
-            icon: "pencil",
-            tone: .warning
+            description: description
         ) {
             if loaded {
                 SyncForm.Input(label: String(localized: "Summary", bundle: .module), text: $subject, autofocus: true) { run() }

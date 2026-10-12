@@ -1583,12 +1583,6 @@
     "Commits anyone pushed since your last fetch are lost too." : {
 
     },
-    "Commits here use their own identity, not your global one." : {
-
-    },
-    "Commits here use your global identity." : {
-
-    },
     "Commits you make here won't belong to any branch. Create a branch to keep them." : {
 
     },
@@ -2120,9 +2114,6 @@
     "Edit, Undo history lists older changes you can restore." : {
 
     },
-    "Edits show up in Changes, ready to commit." : {
-
-    },
     "Edit…" : {
 
     },
@@ -2174,9 +2165,6 @@
     "Every commit picked as is" : {
 
     },
-    "Every commit you make records this name and email." : {
-
-    },
     "Every conflict in %@ has a resolution. Mark it resolved to stage it." : {
 
     },
@@ -2214,15 +2202,6 @@
 
     },
     "Every remote branch still exists on %@." : {
-
-    },
-    "Every value git reads in %@. Local beats global, and global beats system." : {
-
-    },
-    "Every value git reads outside a repository. Global beats system." : {
-
-    },
-    "Everything Expert mode adds is also in the menus and the palette." : {
 
     },
     "Everything on it is already in %@." : {
@@ -2375,6 +2354,9 @@
 
     },
     "Filter" : {
+
+    },
+    "Filter branches" : {
 
     },
     "Filter by subject, author or hash" : {
@@ -2552,9 +2534,6 @@
     "Git LFS isn't installed" : {
 
     },
-    "Git LFS stores big binaries on the server and downloads them on checkout." : {
-
-    },
     "Git binary" : {
 
     },
@@ -2659,9 +2638,6 @@
 
     },
     "History, submodules" : {
-
-    },
-    "Hold ⌥ in a menu or over the toolbar to see the alternates." : {
 
     },
     "Hooks" : {
@@ -2870,9 +2846,6 @@
     "Keep the summary under 50 characters. git log --oneline cuts at 72." : {
 
     },
-    "Keeps ahead and behind counts current. Fetching never changes your branches or files." : {
-
-    },
     "Keeps both histories; adds a merge commit when they diverged." : {
 
     },
@@ -2907,9 +2880,6 @@
 
     },
     "Keyboard shortcuts" : {
-
-    },
-    "Keys live in %@. ssh-agent loads them from your keychain." : {
 
     },
     "Kind" : {
@@ -3447,9 +3417,6 @@
     "Not signed in" : {
 
     },
-    "Not staged" : {
-
-    },
     "Note" : {
 
     },
@@ -3732,9 +3699,6 @@
     "Packs loose objects and refreshes the commit graph." : {
 
     },
-    "Panels" : {
-
-    },
     "Parent" : {
 
     },
@@ -3751,9 +3715,6 @@
 
     },
     "Partial clone, --filter=blob:none. Fast for big repositories." : {
-
-    },
-    "Partly staged" : {
 
     },
     "Passphrase" : {
@@ -4141,9 +4102,6 @@
     "Refs" : {
 
     },
-    "Registered in maintenance.repo in %@. The schedule from git maintenance start runs it in the background." : {
-
-    },
     "Regular" : {
 
     },
@@ -4388,9 +4346,6 @@
 
     },
     "Reset to here" : {
-
-    },
-    "Resolutions live in .git/rr-cache." : {
 
     },
     "Resolve %@" : {
@@ -4667,9 +4622,6 @@
     "Scope" : {
 
     },
-    "Scripts in %@, run exactly as git runs them. In Expert mode, Skip hooks in the commit composer bypasses them for one commit." : {
-
-    },
     "Search" : {
 
     },
@@ -4711,16 +4663,6 @@
     },
     "Sent to the server with -o. Separate several with commas." : {
 
-    },
-    "Set in %@ as credential.helper. A new choice goes in %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Set in %1$@ as credential.helper. A new choice goes in %2$@."
-          }
-        }
-      }
     },
     "Set my changes aside and bring them back after" : {
 
@@ -5109,9 +5051,6 @@
     "Starts a branch at %@, where the stash was made, then applies and drops it. Useful when the stash no longer applies cleanly." : {
 
     },
-    "Stash" : {
-
-    },
     "Stash %@" : {
 
     },
@@ -5225,16 +5164,6 @@
     },
     "Stops instead of making a merge commit." : {
 
-    },
-    "Stored in %@ as %@." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Stored in %1$@ as %2$@."
-          }
-        }
-      }
     },
     "Stored in refs/notes/commits." : {
 
@@ -6137,9 +6066,6 @@
     "Vrai couldn't save %@" : {
 
     },
-    "Vrai keeps its own settings in %@." : {
-
-    },
     "Vrai kept the first 1 MB of this output." : {
 
     },
@@ -6158,9 +6084,6 @@
     "Vrai opens it when it's done." : {
 
     },
-    "Vrai passes both to diff and log. Changing the algorithm also writes diff.algorithm to %@, so git diff in Terminal matches." : {
-
-    },
     "Vrai runs one task at a time." : {
 
     },
@@ -6173,9 +6096,6 @@
     "Vrai runs the git you already have. Install the command line tools, then open the repository again." : {
 
     },
-    "Vrai settings. git diff in Terminal is unaffected." : {
-
-    },
     "Vrai stops fetching from %@ and forgets its %@." : {
       "localizations" : {
         "en" : {
@@ -6185,9 +6105,6 @@
           }
         }
       }
-    },
-    "Vrai works with git %@ or newer and runs every command through it." : {
-
     },
     "Vrai's console doesn't open an editor. Pass a message with -m, or use the composer in Changes." : {
 
@@ -6400,9 +6317,6 @@
     "branch %@, checked out" : {
 
     },
-    "close" : {
-
-    },
     "command" : {
 
     },
@@ -6449,9 +6363,6 @@
 
     },
     "git asks %@, in that order." : {
-
-    },
-    "git asks a credential helper for HTTPS passwords and tokens." : {
 
     },
     "git asks again the next time a remote needs one." : {
@@ -6733,12 +6644,6 @@
     "lightweight" : {
 
     },
-    "local is .git/config, global is %@, system is the gitconfig that ships with git." : {
-
-    },
-    "macOS reserves these; they work in every window." : {
-
-    },
     "memory" : {
 
     },
@@ -6757,12 +6662,6 @@
           }
         }
       }
-    },
-    "navigate" : {
-
-    },
-    "new window" : {
-
     },
     "no commits yet" : {
 
@@ -6818,12 +6717,6 @@
     "replacement" : {
 
     },
-    "run" : {
-
-    },
-    "run with options" : {
-
-    },
     "running" : {
 
     },
@@ -6846,9 +6739,6 @@
 
     },
     "succeeded" : {
-
-    },
-    "switch" : {
 
     },
     "symbolic" : {

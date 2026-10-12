@@ -5,115 +5,91 @@ import VraiGit
 struct InspectorView: View {
     @Environment(RepositoryStore.self) private var store
     @Environment(WindowModel.self) private var window
-    @Environment(Preferences.self) private var preferences
     @Environment(\.expert) private var expert
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("Commit", bundle: .module)
-                    .font(Font.Vrai.captionStrong)
-                    .foregroundStyle(Color.Vrai.textSecondary)
-                Spacer()
-                IconButton(icon: "xmark", label: String(localized: "Hide inspector", bundle: .module), small: true) {
-                    preferences.inspector = false
-                }
-            }
-            .padding(.leading, Vrai.Space.s16)
-            .padding(.trailing, Vrai.Space.s8)
-            .frame(height: Metrics.paneBarHeight)
-            .hairline(.bottom)
+        Group {
             if let commit = window.selectedCommit {
-                ScrollView {
-                    content(commit)
-                        .padding(.top, Vrai.Space.s12)
-                        .padding(.horizontal, Vrai.Space.s16)
-                        .padding(.bottom, Vrai.Space.s20)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                content(commit)
             } else {
-                EmptyStateView(icon: "info.circle", title: String(localized: "No commit selected", bundle: .module), message: String(localized: "Select a commit to see its author, dates, parents, branches and signature.", bundle: .module), small: true)
+                EmptyStateView(icon: "info.circle", title: String(localized: "No commit selected", bundle: .module), small: true)
+                    .help(String(localized: "Select a commit to see its author, dates, parents, branches and signature.", bundle: .module))
             }
         }
-        .frame(maxHeight: .infinity)
-        .background(Color.Vrai.bgSubtle, ignoresSafeAreaEdges: [])
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Inspector", bundle: .module))
     }
 
-    @ViewBuilder func content(_ commit: Commit) -> some View {
+    func content(_ commit: Commit) -> some View {
         let info = store.inspectorInfo?.id == commit.id ? store.inspectorInfo : nil
         let detail = store.detail?.commit.id == commit.id ? store.detail : nil
         let tags = store.snapshot?.tags.filter { $0.target == commit.id } ?? []
         let branches = info?.branches ?? []
-        VStack(alignment: .leading, spacing: Vrai.Space.s16) {
-            KeyValueGrid {
-                KeyValueRow(key: String(localized: "Hash", bundle: .module)) {
+        let rewrite = RewriteMenuState(window: window, id: commit.id)
+        return Form {
+            Section {
+                LabeledContent(String(localized: "Hash", bundle: .module)) {
                     HashButton(id: commit.id, length: 10, full: expert)
                 }
-                KeyValueRow(key: String(localized: "Describe", bundle: .module)) {
+                LabeledContent(String(localized: "Describe", bundle: .module)) {
                     Text(info?.describe ?? commit.id.short)
                         .font(Font.Vrai.codeSmall)
                         .textSelection(.enabled)
                 }
-                KeyValueRow(key: commit.parents.count > 1 ? String(localized: "Parents", bundle: .module) : String(localized: "Parent", bundle: .module)) {
+                LabeledContent(commit.parents.count > 1 ? String(localized: "Parents", bundle: .module) : String(localized: "Parent", bundle: .module)) {
                     if commit.parents.isEmpty {
-                        Text("Root commit", bundle: .module).foregroundStyle(Color.Vrai.textTertiary)
+                        Text("Root commit", bundle: .module)
                     } else {
-                        HStack(spacing: Vrai.Space.s4) {
+                        HStack(spacing: Vrai.Space.s8) {
                             ForEach(commit.parents, id: \.self) { parent in
-                                Button {
+                                Button(parent.short) {
                                     store.selectCommit(parent, scroll: true)
-                                } label: {
-                                    Text(parent.short)
-                                        .font(Font.Vrai.codeSmall)
-                                        .padding(.horizontal, Vrai.Space.s4)
-                                        .frame(height: Vrai.Space.s20)
                                 }
-                                .buttonStyle(HashButtonStyle())
+                                .buttonStyle(.link)
+                                .font(Font.Vrai.codeSmall)
                             }
                         }
                     }
                 }
             }
-            InspectorSection(title: String(localized: "People", bundle: .module)) {
-                KeyValueGrid {
-                    KeyValueRow(key: String(localized: "Author", bundle: .module)) {
-                        HStack(spacing: Vrai.Space.s4) {
-                            Avatar(name: commit.authorName, size: Vrai.Space.s16)
-                            Text(commit.authorName).foregroundStyle(Color.Vrai.text)
-                        }
+            Section(String(localized: "People", bundle: .module)) {
+                LabeledContent(String(localized: "Author", bundle: .module)) {
+                    Text(commit.authorName)
+                }
+                LabeledContent(String(localized: "Email", bundle: .module)) {
+                    Text(commit.authorEmail)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                }
+                LabeledContent(String(localized: "Authored", bundle: .module)) {
+                    Text(Self.fullDate(commit.authorDate))
+                        .help(RelativeDate.full(commit.authorDate))
+                }
+                LabeledContent(String(localized: "Committer", bundle: .module)) {
+                    Text(commit.committerName.isEmpty ? commit.authorName : commit.committerName)
+                }
+                if expert, commit.committerDate != commit.authorDate, !commit.committerName.isEmpty {
+                    LabeledContent(String(localized: "Committed", bundle: .module)) {
+                        Text(Self.fullDate(commit.committerDate))
                     }
-                    KeyValueRow(key: "") {
-                        Text(commit.authorEmail).foregroundStyle(Color.Vrai.textTertiary).textSelection(.enabled)
-                    }
-                    KeyValueRow(key: String(localized: "Authored", bundle: .module)) {
-                        Text(Self.fullDate(commit.authorDate)).help(RelativeDate.full(commit.authorDate))
-                    }
-                    KeyValueRow(key: String(localized: "Committer", bundle: .module)) {
-                        Text(commit.committerName.isEmpty ? commit.authorName : commit.committerName)
-                    }
-                    if expert, commit.committerDate != commit.authorDate, !commit.committerName.isEmpty {
-                        KeyValueRow(key: String(localized: "Committed", bundle: .module)) {
-                            Text(Self.fullDate(commit.committerDate))
-                        }
-                    }
-                    KeyValueRow(key: String(localized: "Signature", bundle: .module)) {
-                        if let detail {
-                            SignatureCheck(target: .commit(commit.id), state: detail.commit.signature, signer: detail.signer ?? commit.authorName)
-                        } else {
-                            Spinner()
-                        }
+                }
+                LabeledContent(String(localized: "Signature", bundle: .module)) {
+                    if let detail {
+                        SignatureCheck(target: .commit(commit.id), state: detail.commit.signature, signer: detail.signer ?? commit.authorName)
+                    } else {
+                        Spinner()
                     }
                 }
             }
-            InspectorSection(title: String(localized: "On branches", bundle: .module)) {
+            Section(String(localized: "On branches", bundle: .module)) {
                 if info == nil {
                     Spinner()
                 } else if branches.isEmpty {
-                    Text("Only reachable from remote branches or tags.", bundle: .module)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                    Text("None", bundle: .module)
+                        .foregroundStyle(.secondary)
+                        .help(String(localized: "Only reachable from remote branches or tags.", bundle: .module))
                 } else {
                     FlowLayout(spacing: Vrai.Space.s4, lineSpacing: Vrai.Space.s4) {
                         ForEach(branches, id: \.self) { name in
@@ -133,12 +109,11 @@ struct InspectorView: View {
                 }
             }
             if expert {
-                InspectorSection(title: String(localized: "Note", bundle: .module)) {
+                Section(String(localized: "Note", bundle: .module)) {
                     CommitNoteEditor(id: commit.id)
                 }
             }
-            InspectorSection(title: String(localized: "Actions", bundle: .module)) {
-                let rewrite = RewriteMenuState(window: window, id: commit.id)
+            Section(String(localized: "Actions", bundle: .module)) {
                 FlowLayout(spacing: Vrai.Space.s6, lineSpacing: Vrai.Space.s6) {
                     VraiButton(title: String(localized: "Branch", bundle: .module), icon: "arrow.triangle.branch", size: .small) {
                         window.sync.newBranch(from: commit.id.rawValue)
@@ -165,8 +140,8 @@ struct InspectorView: View {
                 }
             }
         }
-        .font(Font.Vrai.callout)
-        .foregroundStyle(Color.Vrai.text)
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
     }
 
     static func fullDate(_ date: Date) -> String {
@@ -174,20 +149,6 @@ struct InspectorView: View {
         formatter.locale = Locale(identifier: "en_US")
         formatter.dateFormat = "EEE, MMM d, y, h:mm a"
         return formatter.string(from: date)
-    }
-}
-
-struct InspectorSection<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: () -> Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Vrai.Space.s8) {
-            Text(title)
-                .overline()
-                .foregroundStyle(Color.Vrai.textTertiary)
-            content()
-        }
     }
 }
 

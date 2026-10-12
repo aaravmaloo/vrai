@@ -12,8 +12,7 @@ struct RepositoryInfoSheet: View {
     var body: some View {
         LongTailSheet(
             title: info?.name ?? window.repositoryName,
-            description: info.map { app.displayPath(URL(filePath: $0.path)) } ?? store.snapshot?.root.map { app.displayPath($0) },
-            icon: "info.circle"
+            description: info.map { app.displayPath(URL(filePath: $0.path)) } ?? store.snapshot?.root.map { app.displayPath($0) }
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "Vrai couldn't read the repository", bundle: .module), message: failure)

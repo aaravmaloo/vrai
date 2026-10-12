@@ -89,8 +89,6 @@ struct SignInSheet: View {
         SyncForm.Sheet(
             title: title,
             description: description,
-            icon: kind == .passphrase ? "lock" : "key",
-            tone: .accent,
             primary: kind == .passphrase ? String(localized: "Unlock", bundle: .module) : (asksForAccount ? String(localized: "Sign in", bundle: .module) : String(localized: "Send", bundle: .module)),
             primaryEnabled: ok,
             busy: busy,

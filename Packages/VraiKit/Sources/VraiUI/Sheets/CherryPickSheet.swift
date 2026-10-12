@@ -17,9 +17,7 @@ struct CherryPickSheet: View {
         let command = RewriteCommands.cherryPick(ids: ids, recordOrigin: recordOrigin, noCommit: noCommit, mainline: hasMerge ? mainline : nil)
         RewriteSheet(
             title: String(localized: "Cherry-pick onto \(head)", bundle: .module),
-            description: String(localized: "Copies the changes of a commit onto the current branch as a new commit.", bundle: .module),
-            icon: "arrow.turn.down.right",
-            tone: .accent
+            description: String(localized: "Copies the changes of a commit onto the current branch as a new commit.", bundle: .module)
         ) {
             RewriteCommitList(commits: commits)
             RewriteCheckbox(String(localized: "Note where it came from in the message", bundle: .module), isOn: $recordOrigin, description: String(localized: "Adds (cherry picked from commit \u{2026}), -x", bundle: .module))

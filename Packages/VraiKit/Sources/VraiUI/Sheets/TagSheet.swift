@@ -50,8 +50,6 @@ struct TagSheet: View {
         SyncForm.Sheet(
             title: String(localized: "New tag", bundle: .module),
             description: description,
-            icon: "tag",
-            tone: .accent,
             primary: String(localized: "Create tag", bundle: .module),
             primaryEnabled: ok,
             onSubmit: go

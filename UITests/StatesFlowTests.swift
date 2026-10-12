@@ -221,7 +221,7 @@ final class StatesFlowTests: XCTestCase {
             XCTAssertTrue(row.waitForExistence(timeout: 15))
             Thread.sleep(forTimeInterval: 1.5)
             StateLab.attach(self, app, "states-welcome-missing-recent-\(appearance)")
-            row.click()
+            row.doubleClick()
             let locate = app.buttons["Locate\u{2026}"]
             XCTAssertTrue(locate.waitForExistence(timeout: 10))
             StateLab.attach(self, app, "states-welcome-missing-alert-\(appearance)")

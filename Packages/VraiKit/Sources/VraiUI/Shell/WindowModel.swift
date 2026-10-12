@@ -34,6 +34,7 @@ public final class WindowModel {
     public var optionDown = false
     public var focusFilter = false
     public var switchRequest: RepositoryReference?
+    public var branchPicker = false
 
     public init(reference: RepositoryReference, store: RepositoryStore, preferences: Preferences, now: Date?) {
         self.reference = reference

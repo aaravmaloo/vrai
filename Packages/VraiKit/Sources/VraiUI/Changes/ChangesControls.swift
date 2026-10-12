@@ -5,11 +5,8 @@ import VraiGit
 enum ChangesMetrics {
     static let sideWide = Vrai.Size.inspector + Vrai.Space.s20
     static let sideMedium = Vrai.Size.filelist + Vrai.Space.s8
-    static let groupHeight = Vrai.Space.s24
-    static let summaryHeight = Vrai.Size.control + Vrai.Space.s8
     static let bodyHeight = Vrai.Space.s64 + Vrai.Space.s8
     static let hookOutputHeight = Vrai.Space.s64 * 2
-    static let checkMark = Vrai.Space.s12
     static let selectionBar = Vrai.Size.line
     static let summaryLimit = 50
     static let summaryHardLimit = 72
@@ -20,38 +17,36 @@ struct StageCheckbox: View {
     let state: StageState
     let label: String
     let action: () -> Void
-    @State private var hovering = false
-    @Environment(\.captureMode) private var capture
 
     var body: some View {
-        let on = state != .none
-        Button(action: action) {
-            ZStack {
-                RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
-                    .fill(on ? Color.Vrai.accent : (hovering && !capture ? Color.Vrai.fillHover : Color.Vrai.bg))
-                if !on {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
-                        .strokeBorder(Color.Vrai.borderControl, lineWidth: Metrics.hairline)
-                }
-                if state == .partial {
-                    Image(systemName: "minus")
-                        .font(Font.Vrai.captionStrong)
-                        .foregroundStyle(Color.Vrai.onAccent)
-                } else if state == .full {
-                    Image(systemName: "checkmark")
-                        .font(Font.Vrai.captionStrong)
-                        .foregroundStyle(Color.Vrai.onAccent)
-                }
-            }
-            .frame(width: Vrai.Space.s16, height: Vrai.Space.s16)
-            .shadow(color: Color.Vrai.separator, radius: Metrics.hairline / 2, y: Metrics.hairline / 2)
-            .contentShape(Rectangle())
+        let once = StageOnce(action)
+        Toggle(sources: [
+            Binding(get: { state != .none }, set: { _ in once.run() }),
+            Binding(get: { state == .full }, set: { _ in once.run() })
+        ], isOn: \.self) {
+            Text(label)
         }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
+        .toggleStyle(.checkbox)
+        .labelsHidden()
+        .help(label)
         .accessibilityLabel(label)
-        .accessibilityValue(state == .full ? Text("Staged", bundle: .module) : state == .partial ? Text("Partly staged", bundle: .module) : Text("Not staged", bundle: .module))
-        .accessibilityAddTraits(.isToggle)
+    }
+}
+
+@MainActor
+final class StageOnce {
+    private let action: () -> Void
+    private var running = false
+
+    init(_ action: @escaping () -> Void) {
+        self.action = action
+    }
+
+    func run() {
+        guard !running else { return }
+        running = true
+        action()
+        Task { @MainActor [weak self] in self?.running = false }
     }
 }
 
@@ -62,17 +57,10 @@ struct ChangesGroupHeader: View {
     var body: some View {
         HStack(spacing: Vrai.Space.s8) {
             Text(title)
-                .overline()
             Spacer(minLength: 0)
-            Text(String(count))
-                .overline()
+            Text(count, format: .number)
                 .monospacedDigit()
         }
-        .foregroundStyle(Color.Vrai.textTertiary)
-        .padding(.leading, Vrai.Space.s10)
-        .padding(.trailing, Vrai.Space.s8)
-        .frame(height: ChangesMetrics.groupHeight)
-        .padding(.top, Vrai.Space.s6)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("\(title), \(n(count, "file"))", bundle: .module))
         .accessibilityAddTraits(.isHeader)
@@ -108,21 +96,15 @@ struct ChangesCallout: View {
         HStack(alignment: .top, spacing: Vrai.Space.s10) {
             Symbol(tone.symbol, font: Font.Vrai.title3)
                 .foregroundStyle(tone.color)
-            VStack(alignment: .leading, spacing: Vrai.Space.s2) {
-                Text(title)
-                    .font(Font.Vrai.headline)
-                    .foregroundStyle(Color.Vrai.text)
-                if let message {
-                    Text(message)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                }
-            }
-            .fixedSize(horizontal: false, vertical: true)
+            Text(title)
+                .font(Font.Vrai.headline)
+                .foregroundStyle(Color.Vrai.text)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
         .padding(Vrai.Space.s12)
         .background(tone.soft, in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
+        .help(message ?? "")
         .accessibilityElement(children: .combine)
     }
 }

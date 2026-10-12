@@ -132,10 +132,6 @@ struct AccountsForm: View {
         AccountList.hosts(accounts: preferences.accounts, remotes: hub.activeWindow?.store.snapshot?.remotes ?? [], managed: setup?.managerActive == true)
     }
 
-    var sshFolder: String {
-        GlobalConfigFile.display(SettingsCopy.trimmed(context.app.sshFolder.path(percentEncoded: false)), environment: context.app.environment.base)
-    }
-
     var body: some View {
         let hosts = hosts
         let list = AccountList.items(hosts: hosts, lookups: lookups, failing: AccountList.failing(hub.openWindows))
@@ -152,7 +148,7 @@ struct AccountsForm: View {
                     .listRowBackground(Color.clear)
                 }
             }
-            SettingsSection(String(localized: "Accounts", bundle: .module), footer: storageFooter) {
+            SettingsSection(String(localized: "Accounts", bundle: .module)) {
                 if list.isEmpty {
                     SettingsRow(String(localized: "No accounts yet", bundle: .module), description: String(localized: "Open a repository with an HTTPS remote to sign in to its host, or sign in when git asks.", bundle: .module), icon: "globe")
                 } else {
@@ -170,7 +166,7 @@ struct AccountsForm: View {
                 }
             }
             CredentialHelperSection(context: context, git: git, setup: setup)
-            SettingsSection(String(localized: "SSH keys", bundle: .module), footer: String(localized: "Keys live in \(sshFolder). ssh-agent loads them from your keychain.", bundle: .module)) {
+            SettingsSection(String(localized: "SSH keys", bundle: .module)) {
                 if context.sshKeys.isEmpty {
                     SettingsRow(String(localized: "No SSH keys yet", bundle: .module), description: String(localized: "Create one in Terminal with ssh-keygen -t ed25519.", bundle: .module), icon: "key")
                 } else {
@@ -185,7 +181,7 @@ struct AccountsForm: View {
                     }
                 }
             }
-            SettingsSection(String(localized: "Signing", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.commitSign, ConfigKeys.tagSign, ConfigKeys.signFormat, ConfigKeys.signingKey])) {
+            SettingsSection(String(localized: "Signing", bundle: .module)) {
                 SettingsRow(String(localized: "Sign commits and tags", bundle: .module), description: String(localized: "Lets others check that your commits really come from you.", bundle: .module)) {
                     SettingsSwitch(label: String(localized: "Sign commits and tags", bundle: .module), isOn: signing.commits, id: "settings.signing") { on in context.run { try await git.setSigning(on) } }
                 }
@@ -202,7 +198,7 @@ struct AccountsForm: View {
                     SignatureBadge(state: signing.commits ? .verified : .unsigned, signer: git.identity.name, keyType: signing.format.keyType)
                 }
             }
-            SettingsSection(String(localized: "Identity", bundle: .module), description: String(localized: "Every commit you make records this name and email.", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.userName, ConfigKeys.userEmail])) {
+            SettingsSection(String(localized: "Identity", bundle: .module)) {
                 SettingsRow(String(localized: "Name", bundle: .module)) {
                     CommitField(value: git.identity.name ?? "", label: String(localized: "Name", bundle: .module), placeholder: "Avery Chen", id: "settings.userName", validate: { $0.isEmpty ? String(localized: "Enter a name.", bundle: .module) : nil }) { name in
                         context.run { try await git.setName(name) }
@@ -222,11 +218,6 @@ struct AccountsForm: View {
             await probe(hosts)
         }
         .onDisappear { login?.cancel() }
-    }
-
-    var storageFooter: String {
-        guard let setup else { return String(localized: "Reading credential.helper\u{2026}", bundle: .module) }
-        return AccountsCopy.storage(setup, environment: context.app.environment.base)
     }
 
     func probe(_ hosts: [AccountHost]) async {

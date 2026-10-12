@@ -65,10 +65,10 @@ final class PaletteFlowTests: XCTestCase {
         let app = fixture.launch()
         ConsoleUI.waitForHistory(app)
         PaletteUI.switchTo(app)
-        let palette = PaletteUI.palette(app)
+        let palette = PaletteUI.picker(app)
         XCTAssertTrue(ConsoleUI.text(palette, "Branches").waitForExistence(timeout: 5))
         XCTAssertTrue(PaletteUI.item(app, "main").exists)
-        PaletteUI.query(app, "line-staging")
+        PaletteUI.query(app, "line-staging", field: PaletteUI.pickerField(app))
         XCTAssertTrue(PaletteUI.item(app, "feature/line-staging").waitForExistence(timeout: 5))
         ChangesFixtureCopy.attach(self, app, name: "palette-switch-light")
         app.typeKey(.return, modifierFlags: [])
@@ -77,7 +77,7 @@ final class PaletteFlowTests: XCTestCase {
 
         PaletteUI.switchTo(app)
         XCTAssertTrue(palette.waitForExistence(timeout: 5))
-        PaletteUI.query(app, "feature/palette-test")
+        PaletteUI.query(app, "feature/palette-test", field: PaletteUI.pickerField(app))
         XCTAssertTrue(PaletteUI.item(app, "Create branch \u{201C}feature/palette-test\u{201D}\u{2026}").waitForExistence(timeout: 5))
         app.typeKey(.escape, modifierFlags: [])
         app.typeKey(.escape, modifierFlags: [])
@@ -183,19 +183,29 @@ enum PaletteUI {
 
     @MainActor
     static func switchTo(_ app: XCUIApplication) {
-        let palette = app.descendants(matching: .any)["command-palette"]
-        for attempt in 0..<3 where !palette.exists {
+        let picker = picker(app)
+        for attempt in 0..<3 where !picker.exists {
             if attempt > 0 { ConsoleUI.focusWindow(app) }
             app.activate()
             app.typeKey("b", modifierFlags: .command)
-            if palette.waitForExistence(timeout: 3) { break }
+            if picker.waitForExistence(timeout: 3) { break }
         }
-        XCTAssertTrue(palette.exists, "Command-B didn't open Switch to")
+        XCTAssertTrue(picker.exists, "Command-B didn't open the branch picker")
     }
 
     @MainActor
-    static func query(_ app: XCUIApplication, _ text: String) {
-        let field = field(app)
+    static func picker(_ app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)["branch-picker"]
+    }
+
+    @MainActor
+    static func pickerField(_ app: XCUIApplication) -> XCUIElement {
+        app.textFields["branch-picker-filter"]
+    }
+
+    @MainActor
+    static func query(_ app: XCUIApplication, _ text: String, field: XCUIElement? = nil) {
+        let field = field ?? self.field(app)
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         let focused = XCTNSPredicateExpectation(predicate: NSPredicate(format: "hasKeyboardFocus == true"), object: field)
         XCTAssertEqual(XCTWaiter().wait(for: [focused], timeout: 3), .completed, "The palette field doesn't take keyboard focus when the palette opens")

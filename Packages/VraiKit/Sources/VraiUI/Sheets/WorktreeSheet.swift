@@ -31,7 +31,6 @@ struct WorktreeSheet: View {
         SyncForm.Sheet(
             title: String(localized: "Add worktree", bundle: .module),
             description: String(localized: "A second working folder for this repository, on another branch. Both share one history.", bundle: .module),
-            icon: "rectangle.on.rectangle",
             primary: String(localized: "Add worktree", bundle: .module),
             primaryEnabled: ok,
             busy: store.busy.contains("addWorktree"),

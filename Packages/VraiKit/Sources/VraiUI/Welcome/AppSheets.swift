@@ -38,7 +38,7 @@ public final class WelcomeModel {
 
     public var sheet: AppSheetKind?
     public var statuses: [String: RecentStatus] = [:]
-    public var selected = 0
+    public var selected: String?
     public var missing: RecentRepository?
     public var closeAfterSheet = false
 

@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 import VraiCore
 import VraiGit
 
@@ -64,7 +65,6 @@ public struct WelcomeView: View {
 struct WelcomeContent: View {
     let context: AppSheetContext
     @Environment(AppModel.self) private var app
-    @Environment(\.openWindow) private var openWindow
     @Environment(\.dismissWindow) private var dismissWindow
     @State private var model = WelcomeModel.shared
     @FocusState private var listFocused: Bool
@@ -76,98 +76,74 @@ struct WelcomeContent: View {
         @Bindable var model = model
         let list = recents
         HStack(spacing: 0) {
-            VStack(spacing: Vrai.Space.s8) {
+            VStack(spacing: 0) {
                 Spacer(minLength: 0)
                 MarkImage(size: Metrics.welcomeMark)
-                    .padding(.bottom, Vrai.Space.s8)
+                    .padding(.bottom, Vrai.Space.s12)
                 Text(verbatim: "Vrai")
                     .font(Font.Vrai.display)
-                    .foregroundStyle(Color.Vrai.text)
                 Text(AppInfo.version)
-                    .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textSecondary)
-                    .padding(.bottom, Vrai.Space.s16)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, Vrai.Space.s2)
                 VStack(spacing: Vrai.Space.s8) {
                     WelcomeAction(title: String(localized: "Open a repository\u{2026}", bundle: .module), icon: "folder", shortcut: "\u{2318}O", identifier: "welcome-open") { model.sheet = .open }
                     WelcomeAction(title: String(localized: "Clone a repository\u{2026}", bundle: .module), icon: "square.and.arrow.down", shortcut: "\u{21E7}\u{2318}O", identifier: "welcome-clone") { model.sheet = .clone(url: nil) }
                     WelcomeAction(title: String(localized: "New repository\u{2026}", bundle: .module), icon: "folder.badge.plus", shortcut: "\u{2325}\u{2318}N", identifier: "welcome-new") { model.sheet = .newRepository(folder: nil) }
                 }
                 .frame(maxWidth: LongTailMetrics.welcomeActions)
+                .padding(.top, Vrai.Space.s32)
                 Spacer(minLength: 0)
+                Toggle(String(localized: "Show this window when no repository is open", bundle: .module), isOn: $preferences.welcomeOnLaunch)
+                    .toggleStyle(.checkbox)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Vrai.Space.s32)
+            .padding(.top, LongTailMetrics.welcomeTitlebar)
+            .padding(.bottom, Vrai.Space.s20)
             .padding(.horizontal, Vrai.Space.s24)
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Recent", bundle: .module)
-                    .font(Font.Vrai.captionStrong)
-                    .foregroundStyle(Color.Vrai.textSecondary)
-                    .padding(.horizontal, Vrai.Space.s12)
-                    .padding(.top, Vrai.Space.s16)
-                    .padding(.bottom, Vrai.Space.s8)
-                if list.isEmpty {
-                    EmptyStateView(icon: "clock", title: String(localized: "No recent repositories", bundle: .module), message: String(localized: "Repositories you open, clone or create show up here.", bundle: .module), small: true)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            VStack(spacing: Vrai.Space.s2) {
-                                ForEach(Array(list.enumerated()), id: \.element.id) { offset, recent in
-                                    RepoRowView(recent: recent, status: model.statuses[recent.path], selected: offset == min(model.selected, list.count - 1), now: app.now)
-                                        .id(recent.id)
-                                        .onTapGesture {
-                                            model.selected = offset
-                                            open(recent)
-                                        }
-                                        .accessibilityAction {
-                                            model.selected = offset
-                                            open(recent)
-                                        }
-                                        .contextMenu { rowMenu(recent) }
-                                }
-                            }
-                            .padding(.horizontal, Vrai.Space.s6)
-                            .padding(.bottom, Vrai.Space.s8)
-                        }
-                        .focusable()
-                        .focused($listFocused)
-                        .focusEffectDisabled()
-                        .onKeyPress(.downArrow) { move(1, in: list, proxy: proxy) }
-                        .onKeyPress(.upArrow) { move(-1, in: list, proxy: proxy) }
-                        .onKeyPress(.home) { move(-list.count, in: list, proxy: proxy) }
-                        .onKeyPress(.end) { move(list.count, in: list, proxy: proxy) }
-                        .onKeyPress(.return) {
-                            guard list.indices.contains(model.selected) else { return .ignored }
-                            open(list[model.selected])
-                            return .handled
-                        }
-                        .onKeyPress(keys: [.delete], phases: .down) { press in
-                            guard press.modifiers.contains(.command), list.indices.contains(model.selected) else { return .ignored }
-                            remove(list[model.selected])
-                            return .handled
-                        }
-                        .accessibilityElement(children: .contain)
-                        .accessibilityLabel(Text("Recent repositories", bundle: .module))
-                        .accessibilityIdentifier("welcome-recents")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Divider()
+            List(selection: $model.selected) {
+                Section(String(localized: "Recent", bundle: .module)) {
+                    ForEach(list) { recent in
+                        RepoRowView(recent: recent, status: model.statuses[recent.path], now: app.now)
+                            .accessibilityAction { open(recent) }
                     }
                 }
-                Toggle(String(localized: "Show this window when no repository is open", bundle: .module), isOn: $preferences.welcomeOnLaunch)
-                    .toggleStyle(SyncForm.CheckboxStyle())
-                    .font(Font.Vrai.callout)
-                    .padding(.vertical, Vrai.Space.s10)
-                    .padding(.horizontal, Vrai.Space.s16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .hairline(.top)
             }
+            .listStyle(.sidebar)
+            .contentMargins(.top, Vrai.Space.s12, for: .scrollContent)
+            .overlay {
+                if list.isEmpty {
+                    ContentUnavailableView(String(localized: "No recent repositories", bundle: .module), systemImage: "clock")
+                        .help(String(localized: "Repositories you open, clone or create show up here.", bundle: .module))
+                }
+            }
+            .contextMenu(forSelectionType: String.self) { ids in
+                if let recent = chosen(ids, in: list) { rowMenu(recent) }
+            } primaryAction: { ids in
+                if let recent = chosen(ids, in: list) { open(recent) }
+            }
+            .focused($listFocused)
+            .onKeyPress(.return) {
+                guard let recent = chosen(model.selected.map { [$0] } ?? [], in: list) else { return .ignored }
+                open(recent)
+                return .handled
+            }
+            .onKeyPress(keys: [.delete], phases: .down) { press in
+                guard press.modifiers.contains(.command), let recent = chosen(model.selected.map { [$0] } ?? [], in: list) else { return .ignored }
+                remove(recent)
+                return .handled
+            }
+            .accessibilityLabel(Text("Recent repositories", bundle: .module))
+            .accessibilityIdentifier("welcome-recents")
             .frame(width: LongTailMetrics.welcomeRight)
-            .frame(maxHeight: .infinity)
-            .background(Color.Vrai.bgSubtle)
-            .hairline(.leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.Vrai.bg)
         .ignoresSafeArea()
         .frame(width: LongTailMetrics.welcomeWidth, height: LongTailMetrics.welcomeContentHeight)
+        .defaultFocus($listFocused, true)
+        .onAppear { keepSelection() }
+        .onChange(of: app.recents) { keepSelection() }
         .sheet(item: $model.sheet, onDismiss: {
             guard model.closeAfterSheet else { return }
             model.closeAfterSheet = false
@@ -205,11 +181,15 @@ struct WelcomeContent: View {
         Button(String(localized: "Remove from list", bundle: .module)) { remove(recent) }
     }
 
-    func move(_ delta: Int, in list: [RecentRepository], proxy: ScrollViewProxy) -> KeyPress.Result {
-        guard !list.isEmpty else { return .ignored }
-        model.selected = max(0, min(list.count - 1, model.selected + delta))
-        proxy.scrollTo(list[model.selected].id)
-        return .handled
+    func chosen(_ ids: Set<String>, in list: [RecentRepository]) -> RecentRepository? {
+        guard ids.count == 1 else { return nil }
+        return list.first { ids.contains($0.id) }
+    }
+
+    func keepSelection() {
+        let list = recents
+        guard !list.contains(where: { $0.id == model.selected }) else { return }
+        model.selected = list.first?.id
     }
 
     func open(_ recent: RecentRepository) {
@@ -222,8 +202,11 @@ struct WelcomeContent: View {
     }
 
     func remove(_ recent: RecentRepository) {
+        let index = recents.firstIndex { $0.id == recent.id } ?? 0
         app.removeRecent(recent)
-        model.selected = max(0, min(model.selected, recents.count - 1))
+        guard model.selected == recent.id else { return }
+        let remaining = recents
+        model.selected = remaining.isEmpty ? nil : remaining[min(index, remaining.count - 1)].id
     }
 }
 
@@ -236,17 +219,18 @@ struct WelcomeAction: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: ButtonSize.large.gap) {
-                Symbol(icon, font: ButtonSize.large.iconFont)
+            Label {
                 Text(title)
                     .lineLimit(1)
-                Spacer(minLength: Vrai.Space.s8)
-                Text(shortcut)
-                    .opacity(0.72)
-                    .accessibilityHidden(true)
+            } icon: {
+                Image(systemName: icon)
+                    .frame(width: Vrai.Size.icon)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .buttonStyle(VraiButtonStyle(variant: .secondary, size: .large, full: true))
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .help(title + "  " + shortcut)
         .accessibilityLabel(title)
         .accessibilityIdentifier(identifier)
     }
@@ -255,31 +239,26 @@ struct WelcomeAction: View {
 struct RepoRowView: View {
     let recent: RecentRepository
     let status: RecentStatus?
-    let selected: Bool
     let now: Date
-    @State private var hovering = false
     @Environment(AppModel.self) private var app
 
     var body: some View {
-        let lane = RepoRowView.lane(for: recent.name)
-        HStack(spacing: Vrai.Space.s12) {
-            RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                .fill(Color.Vrai.lane(lane))
+        let missing = status?.missing == true
+        HStack(spacing: Vrai.Space.s10) {
+            Image(nsImage: RepoRowView.icon(recent.path, missing: missing))
+                .resizable()
+                .interpolation(.high)
                 .frame(width: Vrai.Space.s32, height: Vrai.Space.s32)
-                .overlay {
-                    Text(String(recent.name.prefix(1)).uppercased())
-                        .font(Font.Vrai.title3)
-                        .foregroundStyle(Color.Vrai.onLane)
-                }
+                .opacity(missing ? 0.5 : 1)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: Vrai.Space.s2) {
                 Text(recent.name)
-                    .font(Font.Vrai.headline)
-                    .foregroundStyle(Color.Vrai.text)
+                    .font(.headline)
+                    .foregroundStyle(missing ? HierarchicalShapeStyle.secondary : .primary)
                     .lineLimit(1)
                 Text(app.displayPath(URL(filePath: recent.path)))
-                    .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
@@ -287,30 +266,24 @@ struct RepoRowView: View {
             meta
                 .layoutPriority(1)
             Text(RelativeDate.ago(recent.lastOpened, now: now))
-                .font(Font.Vrai.caption)
-                .foregroundStyle(Color.Vrai.textTertiary)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
                 .monospacedDigit()
                 .lineLimit(1)
                 .frame(width: LongTailMetrics.repoTime, alignment: .trailing)
         }
-        .padding(.vertical, Vrai.Space.s8)
-        .padding(.horizontal, Vrai.Space.s12)
-        .frame(minHeight: Vrai.Size.controlLg + Vrai.Space.s16)
-        .background(selected ? Color.Vrai.accentSoft : (hovering ? Color.Vrai.fill : Color.clear), in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .contentShape(Rectangle())
-        .onHover { hovering = $0 }
+        .padding(.vertical, Vrai.Space.s4)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
-        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
         .accessibilityIdentifier("recent-" + recent.name)
     }
 
     @ViewBuilder var meta: some View {
         if let status {
             if status.missing {
-                Text("Missing", bundle: .module)
-                    .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.warning)
+                Label(String(localized: "Missing", bundle: .module), systemImage: "exclamationmark.triangle")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
             } else {
                 ViewThatFits(in: .horizontal) {
@@ -318,8 +291,8 @@ struct RepoRowView: View {
                         pill(status)
                         if status.changes > 0 {
                             Text(n(status.changes, "change"))
-                                .font(Font.Vrai.caption)
-                                .foregroundStyle(Color.Vrai.warning)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
                                 .fixedSize()
                         }
@@ -351,9 +324,15 @@ struct RepoRowView: View {
             if status.missing { parts.append(String(localized: "missing", bundle: .module)) }
             if let branch = status.branch { parts.append(String(localized: "on \(branch)", bundle: .module)) }
             if status.changes > 0 { parts.append(n(status.changes, "change")) }
+            let sync = AheadBehind.help(ahead: status.ahead, behind: status.behind)
+            if !sync.isEmpty { parts.append(sync) }
         }
         parts.append(String(localized: "opened \(RelativeDate.ago(recent.lastOpened, now: now))", bundle: .module))
         return parts.joined(separator: ", ")
+    }
+
+    static func icon(_ path: String, missing: Bool) -> NSImage {
+        missing ? NSWorkspace.shared.icon(for: .folder) : NSWorkspace.shared.icon(forFile: path)
     }
 
     static func branchLane(_ branch: String) -> Int {
@@ -381,11 +360,10 @@ struct OnboardingView: View {
                 .padding(.bottom, Vrai.Space.s8)
             Text(title)
                 .font(Font.Vrai.title1)
-                .foregroundStyle(Color.Vrai.text)
                 .multilineTextAlignment(.center)
             Text(message)
                 .font(Font.Vrai.body)
-                .foregroundStyle(Color.Vrai.textSecondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: LongTailMetrics.onboardingWidth)
@@ -412,7 +390,6 @@ struct OnboardingView: View {
         }
         .padding(Vrai.Space.s32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.Vrai.bg)
         .ignoresSafeArea()
         .frame(width: LongTailMetrics.welcomeWidth, height: LongTailMetrics.welcomeContentHeight)
     }

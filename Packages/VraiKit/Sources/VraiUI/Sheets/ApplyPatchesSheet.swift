@@ -26,8 +26,7 @@ struct ApplyPatchesSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Apply patches", bundle: .module),
-            description: String(localized: "Applies patches from mail or format-patch files as commits, keeping authors and messages.", bundle: .module),
-            icon: "doc.on.doc"
+            description: String(localized: "Applies patches from mail or format-patch files as commits, keeping authors and messages.", bundle: .module)
         ) {
             if files.isEmpty {
                 SyncForm.Callout(tone: .info, title: String(localized: "Pick .patch or .mbox files", bundle: .module), message: String(localized: "git format-patch writes them; mail clients export mbox.", bundle: .module))

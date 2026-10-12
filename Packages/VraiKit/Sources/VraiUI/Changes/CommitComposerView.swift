@@ -54,16 +54,8 @@ struct CommitComposerView: View {
             .disabled(!ready || changes.committing)
             .help(reason ?? "")
             .accessibilityIdentifier("commit-button")
-            if let reason {
-                Text(reason)
-                    .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.textTertiary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, -Vrai.Space.s4)
-            }
         }
         .padding(Vrai.Space.s12)
-        .background(Color.Vrai.bgSubtle)
         .hairline(.top)
         .onChange(of: changes.focusRequest, initial: true) { _, _ in claimFocus() }
     }
@@ -87,28 +79,18 @@ struct CommitComposerView: View {
     @ViewBuilder func fields(_ changes: ChangesModel) -> some View {
         @Bindable var changes = changes
         let count = changes.subject.count
-        let tone: Color = count > ChangesMetrics.summaryHardLimit ? Color.Vrai.danger : (count > ChangesMetrics.summaryLimit ? Color.Vrai.warning : Color.Vrai.textTertiary)
-        let focused = focus != nil
-        VStack(spacing: 0) {
+        let tone: AnyShapeStyle = count > ChangesMetrics.summaryHardLimit ? AnyShapeStyle(Color.Vrai.danger) : (count > ChangesMetrics.summaryLimit ? AnyShapeStyle(Color.Vrai.warning) : AnyShapeStyle(.secondary))
+        let editing = focus == .description
+        VStack(spacing: Vrai.Space.s8) {
             HStack(spacing: Vrai.Space.s8) {
-                ZStack(alignment: .leading) {
-                    if changes.subject.isEmpty {
-                        Text(changes.amend ? String(localized: "Summary of the amended commit", bundle: .module) : String(localized: "Summary (required)", bundle: .module))
-                            .font(Font.Vrai.body)
-                            .foregroundStyle(Color.Vrai.textTertiary)
-                            .lineLimit(1)
-                            .allowsHitTesting(false)
-                            .accessibilityHidden(true)
-                    }
-                    TextField(String(), text: $changes.subject)
-                    .accessibilityLabel(Text("Commit summary", bundle: .module))
-                    .textFieldStyle(.plain)
-                    .font(Font.Vrai.headline)
-                    .foregroundStyle(Color.Vrai.text)
-                    .focused($focus, equals: .summary)
-                    .onSubmit { focus = .description }
-                    .accessibilityIdentifier("commit-summary")
+                TextField(text: $changes.subject, prompt: Text(changes.amend ? String(localized: "Summary of the amended commit", bundle: .module) : String(localized: "Summary (required)", bundle: .module))) {
+                    Text("Commit summary", bundle: .module)
                 }
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .focused($focus, equals: .summary)
+                .onSubmit { focus = .description }
+                .accessibilityIdentifier("commit-summary")
                 Text(verbatim: "\(count)/\(ChangesMetrics.summaryLimit)")
                     .font(Font.Vrai.caption)
                     .monospacedDigit()
@@ -116,42 +98,37 @@ struct CommitComposerView: View {
                     .help(String(localized: "Keep the summary under 50 characters. git log --oneline cuts at 72.", bundle: .module))
                     .accessibilityLabel(Text("\(count) of \(ChangesMetrics.summaryLimit) characters", bundle: .module))
             }
-            .padding(.horizontal, Vrai.Space.s12)
-            .frame(height: ChangesMetrics.summaryHeight)
-            .hairline(.bottom)
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $changes.body)
                     .font(Font.Vrai.body)
-                    .foregroundStyle(Color.Vrai.text)
                     .scrollContentBackground(.hidden)
-                    .scrollIndicators(.never)
                     .focused($focus, equals: .description)
                     .accessibilityLabel(Text("Commit description", bundle: .module))
                     .accessibilityIdentifier("commit-description")
                 if changes.body.isEmpty {
                     Text("Description", bundle: .module)
                         .font(Font.Vrai.body)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                        .foregroundStyle(Color(nsColor: .placeholderTextColor))
                         .padding(.leading, Vrai.Space.s4 + Metrics.hairline)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                 }
             }
-            .padding(.horizontal, Vrai.Space.s8)
-            .padding(.vertical, Vrai.Space.s8)
+            .padding(.vertical, Vrai.Space.s4)
+            .padding(.horizontal, Vrai.Space.s2)
             .frame(height: ChangesMetrics.bodyHeight)
-        }
-        .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
-        }
-        .overlay {
-            if focused {
-                RoundedRectangle(cornerRadius: Vrai.Radius.lg + Vrai.Size.focusHalo, style: .continuous)
-                    .strokeBorder(Color.Vrai.accentSoftStrong, lineWidth: Vrai.Size.focusHalo)
-                    .padding(-Vrai.Size.focusHalo)
-                    .allowsHitTesting(false)
+            .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
+                    .strokeBorder(Color(nsColor: .separatorColor), lineWidth: Metrics.hairline)
+            }
+            .overlay {
+                if editing {
+                    RoundedRectangle(cornerRadius: Vrai.Radius.sm + Vrai.Size.focusHalo, style: .continuous)
+                        .strokeBorder(Color(nsColor: .keyboardFocusIndicatorColor), lineWidth: Vrai.Size.focusHalo)
+                        .padding(-Vrai.Size.focusHalo)
+                        .allowsHitTesting(false)
+                }
             }
         }
     }
@@ -182,15 +159,11 @@ struct HookFailureView: View {
             HStack(alignment: .top, spacing: Vrai.Space.s10) {
                 Symbol(Tone.danger.symbol, font: Font.Vrai.title3)
                     .foregroundStyle(Color.Vrai.danger)
-                VStack(alignment: .leading, spacing: Vrai.Space.s2) {
-                    Text("The \(failure.name) hook stopped the commit", bundle: .module)
-                        .font(Font.Vrai.headline)
-                        .foregroundStyle(Color.Vrai.text)
-                    Text("Your message is kept. Fix what the hook reports, then commit again.", bundle: .module)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                }
-                .fixedSize(horizontal: false, vertical: true)
+                Text("The \(failure.name) hook stopped the commit", bundle: .module)
+                    .font(Font.Vrai.headline)
+                    .foregroundStyle(Color.Vrai.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .help(String(localized: "Your message is kept. Fix what the hook reports, then commit again.", bundle: .module))
                 Spacer(minLength: 0)
                 IconButton(icon: "xmark", label: String(localized: "Dismiss", bundle: .module), small: true, action: dismiss)
             }

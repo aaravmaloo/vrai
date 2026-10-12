@@ -56,8 +56,7 @@ struct ArchiveSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Export \(shown)", bundle: .module),
-            description: String(localized: "Saves the files at that commit, without the .git folder.", bundle: .module),
-            icon: "archivebox"
+            description: String(localized: "Saves the files at that commit, without the .git folder.", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't write the archive", bundle: .module), message: failure)

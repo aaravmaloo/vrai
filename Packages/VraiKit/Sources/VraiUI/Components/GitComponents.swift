@@ -333,11 +333,13 @@ struct DiffStat: View {
     let additions: Int
     let deletions: Int
     var bar = false
+    @Environment(\.backgroundProminence) private var prominence
 
     var body: some View {
+        let plain = prominence == .increased
         HStack(spacing: Vrai.Space.s6) {
-            if additions > 0 { Text("+\(additions)").foregroundStyle(Color.Vrai.success) }
-            if deletions > 0 { Text("\u{2212}\(deletions)").foregroundStyle(Color.Vrai.danger) }
+            if additions > 0 { Text("+\(additions)").foregroundStyle(plain ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.Vrai.success)) }
+            if deletions > 0 { Text("\u{2212}\(deletions)").foregroundStyle(plain ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.Vrai.danger)) }
             if bar, additions + deletions > 0 {
                 let filled = Int((Double(additions) / Double(additions + deletions) * 5).rounded())
                 HStack(spacing: Metrics.hairline) {
@@ -368,28 +370,30 @@ struct FileRowView: View {
 
     var body: some View {
         let parts = PathParts.split(path)
+        let emphasized = selected && focused
         HStack(spacing: Vrai.Space.s8) {
             FileStatusTile(status: status)
             HStack(alignment: .firstTextBaseline, spacing: Vrai.Space.s6) {
                 if let oldPath {
                     HStack(spacing: Vrai.Space.s2) {
                         Text(PathParts.split(oldPath).name)
-                        Symbol("arrow.right", font: Font.Vrai.overline)
+                        Image(systemName: "arrow.right")
+                            .font(Font.Vrai.overline)
                     }
                     .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .fixedSize()
                 }
                 Text(parts.name)
                     .font(Font.Vrai.body)
-                    .foregroundStyle(status == .conflicted ? Color.Vrai.statusConflicted : Color.Vrai.text)
+                    .foregroundStyle(status == .conflicted && !emphasized ? AnyShapeStyle(Color.Vrai.statusConflicted) : AnyShapeStyle(.primary))
                     .lineLimit(1)
                     .layoutPriority(1)
                 if !parts.directory.isEmpty {
                     Text(String(parts.directory.dropLast()))
                         .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textTertiary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .truncationMode(.head)
                 }
@@ -399,16 +403,23 @@ struct FileRowView: View {
             if binary {
                 Text("Binary", bundle: .module)
                     .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.textTertiary)
+                    .foregroundStyle(.secondary)
             } else if additions != nil || deletions != nil {
                 DiffStat(additions: additions ?? 0, deletions: deletions ?? 0)
             }
         }
+        .foregroundStyle(emphasized ? Color.white : Color.primary)
+        .environment(\.backgroundProminence, emphasized ? .increased : .standard)
         .padding(.leading, Vrai.Space.s6)
         .padding(.trailing, Vrai.Space.s8)
         .frame(height: Vrai.Size.row)
+        .background {
+            if selected {
+                RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
+                    .fill(focused ? Color(nsColor: .selectedContentBackgroundColor) : Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
+            }
+        }
         .contentShape(Rectangle())
-        .hoverHighlight(radius: Vrai.Radius.sm, selected: selected, selectedFill: focused ? Color.Vrai.accentSoft : Color.Vrai.fillActive)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }

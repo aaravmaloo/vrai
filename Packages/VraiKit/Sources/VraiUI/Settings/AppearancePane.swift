@@ -43,7 +43,7 @@ struct AppearancePane: View {
                     ) { preferences.density = $0 }
                 }
             }
-            SettingsSection(String(localized: "Diffs and code", bundle: .module), footer: String(localized: "Vrai settings. git diff in Terminal is unaffected.", bundle: .module)) {
+            SettingsSection(String(localized: "Diffs and code", bundle: .module)) {
                 SettingsRow(String(localized: "Layout", bundle: .module), stacked: narrow) {
                     SettingsSegments(
                         label: String(localized: "Diff layout", bundle: .module),

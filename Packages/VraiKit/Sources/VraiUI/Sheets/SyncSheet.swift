@@ -102,7 +102,7 @@ struct SyncSheet: View {
     }
 
     var body: some View {
-        SyncForm.Sheet(title: title, description: description, icon: icon, tone: .accent, primary: primary, primaryEnabled: enabled, danger: tab == .push && force != .none, onSubmit: go) {
+        SyncForm.Sheet(title: title, description: description, primary: primary, primaryEnabled: enabled, danger: tab == .push && force != .none, onSubmit: go) {
             if !publish {
                 SyncForm.Tabs(selection: $tab, items: [
                     SyncForm.Option(value: SyncTab.fetch, label: String(localized: "Fetch", bundle: .module)),

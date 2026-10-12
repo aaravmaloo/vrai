@@ -18,6 +18,84 @@ struct CommitTableRow: Equatable {
     var signature: SignatureState
     var files: Int
     var expert: Bool
+    var layout: CommitColumnLayout
+}
+
+struct CommitColumnLayout: Equatable {
+    static let inset = Vrai.Space.s2
+
+    var leading: CGFloat
+    var graph: CGFloat
+    var author: CGFloat
+    var date: CGFloat
+    var hash: CGFloat
+
+    @MainActor static func standalone(lanes: Int) -> CommitColumnLayout {
+        CommitColumnLayout(leading: Vrai.Space.s4, graph: GraphCell.width(lanes: lanes), author: Vrai.Size.colAuthor, date: Vrai.Size.colDate, hash: Vrai.Size.colHash)
+    }
+}
+
+enum CommitTableColumn: String, CaseIterable {
+    case graph
+    case subject
+    case author
+    case date
+    case hash
+
+    var identifier: NSUserInterfaceItemIdentifier { NSUserInterfaceItemIdentifier(rawValue) }
+
+    var title: String {
+        switch self {
+        case .graph: String(localized: "Graph", bundle: .module)
+        case .subject: String(localized: "Description", bundle: .module)
+        case .author: String(localized: "Author", bundle: .module)
+        case .date: String(localized: "Date", bundle: .module)
+        case .hash: String(localized: "Commit", bundle: .module)
+        }
+    }
+
+    @MainActor var width: CGFloat {
+        switch self {
+        case .graph: GraphCell.width(lanes: 1)
+        case .subject: Vrai.Size.sheet
+        case .author: Vrai.Size.colAuthor
+        case .date: Vrai.Size.colDate
+        case .hash: Vrai.Size.colHash
+        }
+    }
+
+    @MainActor var minWidth: CGFloat {
+        switch self {
+        case .graph: GraphCell.width(lanes: 1)
+        case .subject: Vrai.Size.colAuthor
+        case .author, .date, .hash: Vrai.Space.s48
+        }
+    }
+
+    var maxWidth: CGFloat {
+        switch self {
+        case .graph, .subject: .greatestFiniteMagnitude
+        case .author: Vrai.Size.colAuthor * 2
+        case .date, .hash: Vrai.Size.colAuthor + Vrai.Space.s40
+        }
+    }
+
+    var resizing: NSTableColumn.ResizingOptions {
+        switch self {
+        case .graph: []
+        case .subject: .autoresizingMask
+        case .author, .date, .hash: .userResizingMask
+        }
+    }
+
+    func shown(_ columns: CommitColumns) -> Bool {
+        switch self {
+        case .graph, .subject: true
+        case .author: columns.contains(.author)
+        case .date: columns.contains(.date)
+        case .hash: columns.contains(.hash)
+        }
+    }
 }
 
 struct CommitTableState {
@@ -25,8 +103,10 @@ struct CommitTableState {
     var refs: [OID: [RefPillModel]]
     var selection: CommitSelection?
     var focused: Bool
+    var active: Bool
     var filter: CommitFilter
     var columns: CommitColumns
+    var header: Bool
     var height: CGFloat
     var expert: Bool
     var files: Int
@@ -35,6 +115,7 @@ struct CommitTableState {
 
     var offset: Int { history.wipRow == nil ? 0 : 1 }
     var count: Int { history.commits.count + offset }
+    var emphasized: Bool { focused && active }
 
     func target(at index: Int) -> CommitSelection? {
         if history.wipRow != nil, index == 0 { return .wip }
@@ -50,13 +131,15 @@ struct CommitTableState {
         }
     }
 
-    func row(at index: Int) -> CommitTableRow? {
+    func row(at index: Int, layout: CommitColumnLayout) -> CommitTableRow? {
         if let wip = history.wipRow, index == 0 {
-            return CommitTableRow(target: .wip, commit: nil, graph: wip, lanes: history.lanes, height: height, refs: [], selected: selection == .wip, focused: focused, dim: false, query: "", columns: columns, signature: .unchecked, files: files, expert: expert)
+            let selected = selection == .wip
+            return CommitTableRow(target: .wip, commit: nil, graph: wip, lanes: history.lanes, height: height, refs: [], selected: selected, focused: selected && emphasized, dim: false, query: "", columns: columns, signature: .unchecked, files: files, expert: expert, layout: layout)
         }
         let position = index - offset
         guard history.commits.indices.contains(position), history.rows.indices.contains(position) else { return nil }
         let commit = history.commits[position]
+        let selected = selection == .commit(commit.id)
         return CommitTableRow(
             target: .commit(commit.id),
             commit: commit,
@@ -64,14 +147,15 @@ struct CommitTableState {
             lanes: history.lanes,
             height: height,
             refs: refs[commit.id] ?? [],
-            selected: selection == .commit(commit.id),
-            focused: focused,
+            selected: selected,
+            focused: selected && emphasized,
             dim: filter.isActive && !filter.matches(commit),
             query: filter.query,
             columns: columns,
             signature: signatures[commit.id] ?? commit.signature,
             files: 0,
-            expert: expert
+            expert: expert,
+            layout: layout
         )
     }
 }
@@ -94,12 +178,16 @@ struct CommitTable<Row: View>: NSViewRepresentable {
         scroll.automaticallyAdjustsContentInsets = false
         scroll.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: Vrai.Space.s8, right: 0)
         let table = CommitTableView()
-        table.headerView = nil
+        let header = NSTableHeaderView()
+        table.headerView = state.header ? header : nil
         table.backgroundColor = .clear
-        table.style = .plain
-        table.selectionHighlightStyle = .none
+        table.style = .inset
+        table.selectionHighlightStyle = .regular
         table.allowsEmptySelection = true
+        table.allowsMultipleSelection = false
         table.allowsColumnSelection = false
+        table.allowsColumnReordering = false
+        table.allowsColumnResizing = true
         table.allowsTypeSelect = false
         table.intercellSpacing = .zero
         table.gridStyleMask = []
@@ -107,14 +195,22 @@ struct CommitTable<Row: View>: NSViewRepresentable {
         table.usesAutomaticRowHeights = false
         table.rowHeight = state.height
         table.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
-        let column = NSTableColumn(identifier: CommitTableView.column)
-        column.resizingMask = .autoresizingMask
-        table.addTableColumn(column)
+        for kind in CommitTableColumn.allCases {
+            let column = NSTableColumn(identifier: kind.identifier)
+            column.title = kind.title
+            column.minWidth = kind.minWidth
+            column.maxWidth = kind.maxWidth
+            column.width = kind.width
+            column.resizingMask = kind.resizing
+            column.isHidden = !kind.shown(state.columns)
+            table.addTableColumn(column)
+        }
         table.dataSource = context.coordinator
         table.delegate = context.coordinator
         table.setAccessibilityLabel(String(localized: "Commits", bundle: .module))
         scroll.documentView = table
         context.coordinator.table = table
+        context.coordinator.header = header
         if PerfLog.isEnabled {
             let monitor = FrameMonitorView(name: "scroll")
             monitor.scrollView = scroll
@@ -134,6 +230,7 @@ struct CommitTable<Row: View>: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         weak var table: CommitTableView?
+        var header: NSTableHeaderView?
         private var state: CommitTableState?
         private var environment = EnvironmentValues()
         private var content: ((CommitTableRow) -> AnyView)?
@@ -144,6 +241,14 @@ struct CommitTable<Row: View>: NSViewRepresentable {
         private var handledScroll: Int?
         private var lastSelection: CommitSelection?
         private var appearance: AppearanceKey?
+        private var layout = CommitColumnLayout.standalone(lanes: 1)
+        private var measured = false
+        private var graphKey: GraphKey?
+
+        struct GraphKey: Equatable {
+            var lanes: Int
+            var header: Bool
+        }
 
         struct AppearanceKey: Equatable {
             var scheme: ColorScheme
@@ -165,18 +270,22 @@ struct CommitTable<Row: View>: NSViewRepresentable {
             if table.rowHeight != state.height {
                 table.rowHeight = state.height
             }
+            arrange(state)
             let first = state.count > 0 ? state.target(at: 0) : nil
             let anchorKept = rowCount > 0 && first == firstID && state.count >= rowCount && state.target(at: rowCount - 1) == lastID
             if previous == nil || !anchorKept {
                 rowCount = state.count
                 table.reloadData()
-            } else if state.count != rowCount {
-                rowCount = state.count
-                table.noteNumberOfRowsChanged()
-                refreshVisible(force: restyle)
+                if measure() { refreshVisible(force: false) }
             } else {
+                if state.count != rowCount {
+                    rowCount = state.count
+                    table.noteNumberOfRowsChanged()
+                }
+                measure()
                 refreshVisible(force: restyle)
             }
+            syncSelection()
             firstID = first
             lastID = state.count > 0 ? state.target(at: state.count - 1) : nil
             if let request = state.scrollRequest, request.sequence != handledScroll {
@@ -188,6 +297,66 @@ struct CommitTable<Row: View>: NSViewRepresentable {
             lastSelection = state.selection
         }
 
+        private func arrange(_ state: CommitTableState) {
+            guard let table else { return }
+            var changed = false
+            var top: CGFloat?
+            if (table.headerView != nil) != state.header, let clip = table.enclosingScrollView?.contentView {
+                top = clip.bounds.minY + clip.contentInsets.top
+                table.headerView = state.header ? header : nil
+                changed = true
+            }
+            for kind in CommitTableColumn.allCases {
+                guard let column = table.tableColumn(withIdentifier: kind.identifier) else { continue }
+                let hidden = !kind.shown(state.columns)
+                if column.isHidden != hidden {
+                    column.isHidden = hidden
+                    changed = true
+                }
+            }
+            let key = GraphKey(lanes: state.history.lanes, header: state.header)
+            if key != graphKey, let column = table.tableColumn(withIdentifier: CommitTableColumn.graph.identifier) {
+                graphKey = key
+                let title = state.header ? column.headerCell.cellSize.width : 0
+                let width = max(GraphCell.width(lanes: key.lanes), title).rounded(.up)
+                if column.width != width {
+                    column.width = width
+                    changed = true
+                }
+            }
+            guard changed else { return }
+            table.sizeToFit()
+            guard let scroll = table.enclosingScrollView else { return }
+            scroll.tile()
+            if let top {
+                let clip = scroll.contentView
+                clip.scroll(to: NSPoint(x: clip.bounds.minX, y: max(-clip.contentInsets.top, top - clip.contentInsets.top)))
+                scroll.reflectScrolledClipView(clip)
+            }
+        }
+
+        @discardableResult private func measure() -> Bool {
+            guard let table, table.numberOfRows > 0 else { return false }
+            func frame(_ kind: CommitTableColumn) -> NSRect {
+                let index = table.column(withIdentifier: kind.identifier)
+                return index < 0 ? .zero : table.frameOfCell(atColumn: index, row: 0)
+            }
+            let graph = frame(.graph)
+            let next = CommitColumnLayout(leading: graph.minX, graph: graph.width, author: frame(.author).width, date: frame(.date).width, hash: frame(.hash).width)
+            measured = true
+            guard next != layout else { return false }
+            layout = next
+            return true
+        }
+
+        private func syncSelection() {
+            guard let table, let state else { return }
+            let wanted = state.selection.flatMap { state.index(of: $0) }.map { IndexSet(integer: $0) } ?? IndexSet()
+            if table.selectedRowIndexes != wanted {
+                table.selectRowIndexes(wanted, byExtendingSelection: false)
+            }
+        }
+
         func scroll(to target: CommitSelection, center: Bool) {
             guard let table, let state, let index = state.index(of: target), let scroll = table.enclosingScrollView else { return }
             table.layoutSubtreeIfNeeded()
@@ -196,27 +365,34 @@ struct CommitTable<Row: View>: NSViewRepresentable {
                 return
             }
             let rect = table.rect(ofRow: index)
-            let visible = scroll.contentView.bounds.height
-            let maxY = max(0, table.bounds.height - visible + scroll.contentInsets.bottom)
-            let y = min(max(0, rect.midY - visible / 2), maxY)
-            scroll.contentView.scroll(to: NSPoint(x: 0, y: y))
+            let clip = scroll.contentView
+            let insets = clip.contentInsets
+            let visible = clip.bounds.height - insets.top - insets.bottom
+            let minY = -insets.top
+            let maxY = max(minY, table.bounds.height - clip.bounds.height + insets.bottom)
+            let y = min(max(minY, rect.midY - visible / 2 - insets.top), maxY)
+            clip.scroll(to: NSPoint(x: 0, y: y))
             scroll.reflectScrolledClipView(scroll.contentView)
         }
 
         private func refreshVisible(force: Bool) {
             guard let table else { return }
+            let emphasized = state?.emphasized ?? false
             table.enumerateAvailableRowViews { rowView, row in
-                guard let cell = rowView.view(atColumn: 0) as? CommitCellView else { return }
-                self.configure(cell, row: row, force: force)
+                guard let rowView = rowView as? CommitTableRowView else { return }
+                rowView.emphasis = emphasized
+                self.configure(rowView, row: row, force: force)
             }
         }
 
-        private func configure(_ cell: CommitCellView, row: Int, force: Bool) {
-            guard let state, let content, let model = state.row(at: row) else { return }
-            if !force, cell.model == model { return }
-            cell.model = model
-            cell.host.rootView = AnyView(content(model).ignoresSafeArea().environment(\.self, environment))
-            cell.host.setAccessibilityLabel(model.commit.map { $0.subject + ", " + $0.authorName } ?? String(localized: "Uncommitted changes", bundle: .module))
+        private func configure(_ rowView: CommitTableRowView, row: Int, force: Bool) {
+            guard let state, let content else { return }
+            if !measured { measure() }
+            guard let model = state.row(at: row, layout: layout) else { return }
+            if !force, rowView.model == model { return }
+            rowView.model = model
+            rowView.host.rootView = AnyView(content(model).ignoresSafeArea().environment(\.self, environment))
+            rowView.host.setAccessibilityLabel(model.commit.map { $0.subject + ", " + $0.authorName } ?? String(localized: "Uncommitted changes", bundle: .module))
             shown?(row, state)
         }
 
@@ -224,10 +400,15 @@ struct CommitTable<Row: View>: NSViewRepresentable {
             rowCount
         }
 
+        func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+            let rowView = tableView.makeView(withIdentifier: CommitTableRowView.identifier, owner: nil) as? CommitTableRowView ?? CommitTableRowView()
+            rowView.emphasis = state?.emphasized ?? false
+            configure(rowView, row: row, force: false)
+            return rowView
+        }
+
         func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-            let cell = tableView.makeView(withIdentifier: CommitCellView.identifier, owner: nil) as? CommitCellView ?? CommitCellView()
-            configure(cell, row: row, force: false)
-            return cell
+            nil
         }
 
         func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
@@ -237,12 +418,14 @@ struct CommitTable<Row: View>: NSViewRepresentable {
         func selectionShouldChange(in tableView: NSTableView) -> Bool {
             false
         }
+
+        func tableViewColumnDidResize(_ notification: Notification) {
+            if measure() { refreshVisible(force: false) }
+        }
     }
 }
 
 final class CommitTableView: NSTableView {
-    static let column = NSUserInterfaceItemIdentifier("commit")
-
     override var acceptsFirstResponder: Bool { false }
 
     override func validateProposedFirstResponder(_ responder: NSResponder, for event: NSEvent?) -> Bool {
@@ -250,11 +433,21 @@ final class CommitTableView: NSTableView {
     }
 }
 
-final class CommitCellView: NSTableCellView {
-    static let identifier = NSUserInterfaceItemIdentifier("commit-cell")
+final class CommitTableRowView: NSTableRowView {
+    static let identifier = NSUserInterfaceItemIdentifier("commit-row")
 
     let host = NSHostingView(rootView: AnyView(EmptyView()))
     var model: CommitTableRow?
+    var emphasis = false {
+        didSet {
+            if super.isEmphasized != emphasis { super.isEmphasized = emphasis }
+        }
+    }
+
+    override var isEmphasized: Bool {
+        get { super.isEmphasized }
+        set { if super.isEmphasized != emphasis { super.isEmphasized = emphasis } }
+    }
 
     init() {
         super.init(frame: .zero)
@@ -280,7 +473,6 @@ final class CommitCellView: NSTableCellView {
     }
 
     private func placeHost() {
-        let frame = NSRect(x: Vrai.Space.s4, y: 0, width: max(0, bounds.width - Vrai.Space.s4 * 2), height: bounds.height)
-        if host.frame != frame { host.frame = frame }
+        if host.frame != bounds { host.frame = bounds }
     }
 }

@@ -52,15 +52,11 @@ enum Metrics {
     static let refsShare = 0.6
     static let refsShareNarrow = 0.42
     static let bodyMaxHeight = Vrai.Space.s64 + Vrai.Space.s24
-    static let emptyIcon = Vrai.Space.s64 + Vrai.Space.s8
-    static let emptyIconSmall = Vrai.Space.s48
     static let kvKey = Vrai.Space.s64 + Vrai.Space.s16
     static let kvKeyNarrow = Vrai.Space.s64
     static let barHeight = Vrai.Size.control + Vrai.Space.s16
     static let paneBarHeight = Vrai.Size.control + Vrai.Space.s8
     static let hunkHeight = Vrai.Size.control + Vrai.Space.s4
-    static let toolbarButton = Vrai.Size.toolbarItem - Vrai.Space.s4
-    static let toolbarButtonMin = Vrai.Size.toolbarItem + Vrai.Space.s4
     static let bannerHeight = Vrai.Size.control + Vrai.Space.s16
     static let bannerText = Vrai.Size.sidebar - Vrai.Space.s48
     static let narrowFiles = Vrai.Space.s64 * 2.5

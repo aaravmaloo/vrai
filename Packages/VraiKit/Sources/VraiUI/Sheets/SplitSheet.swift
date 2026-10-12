@@ -19,9 +19,7 @@ struct SplitSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Split \(id.short)", bundle: .module),
-            description: original.isEmpty ? nil : original,
-            icon: "rectangle.split.2x1",
-            tone: .warning
+            description: original.isEmpty ? nil : original
         ) {
             if !loaded {
                 Spinner()
@@ -42,7 +40,7 @@ struct SplitSheet: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
-                        .toggleStyle(SyncForm.CheckboxStyle())
+                        .toggleStyle(.checkbox)
                         .padding(.horizontal, Vrai.Space.s4)
                         .frame(minHeight: Vrai.Size.controlSm)
                         .accessibilityIdentifier("split-" + file.path)

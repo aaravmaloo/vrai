@@ -20,7 +20,7 @@ struct DetailPane: View {
                 .padding(.leading, Vrai.Space.s12)
                 .padding(.trailing, Vrai.Space.s8)
                 .frame(height: Metrics.paneBarHeight)
-                .hairline(.bottom)
+                Divider()
             }
             switch store.selection {
             case .wip:
@@ -28,7 +28,8 @@ struct DetailPane: View {
             case .commit(let id):
                 CommitDetailView(id: id)
             case nil:
-                EmptyStateView(icon: "clock.arrow.circlepath", title: String(localized: "Select a commit", bundle: .module), message: String(localized: "Its message, files and diff appear here.", bundle: .module), small: true)
+                EmptyStateView(icon: "clock.arrow.circlepath", title: String(localized: "Select a commit", bundle: .module), small: true)
+                    .help(String(localized: "Its message, files and diff appear here.", bundle: .module))
             }
         }
         .background(Color.Vrai.bg)
@@ -45,6 +46,7 @@ struct CommitDetailView: View {
         if let commit {
             VStack(spacing: 0) {
                 CommitHeaderView(commit: commit, signer: store.detail?.signer)
+                Divider()
                 if case .failed(let error) = store.detailState {
                     EmptyStateView(icon: "exclamationmark.triangle", title: String(localized: "This commit didn't load", bundle: .module), message: ErrorCopy(error).message, small: true)
                 } else {
@@ -80,11 +82,9 @@ struct ParentPicker: View {
             .pickerStyle(.inline)
         } label: {
             Text("Parent \(store.diffParent + 1)", bundle: .module)
-                .font(Font.Vrai.caption)
         }
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .foregroundStyle(Color.Vrai.accentText)
+        .menuStyle(.borderlessButton)
+        .controlSize(.small)
         .fixedSize()
         .help(String(localized: "Show the diff against another parent", bundle: .module))
     }
@@ -105,7 +105,7 @@ struct CommitHeaderView: View {
             HStack(alignment: .top, spacing: Vrai.Space.s8) {
                 Text(commit.subject)
                     .font(Font.Vrai.title2)
-                    .foregroundStyle(Color.Vrai.text)
+                    .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
@@ -117,7 +117,7 @@ struct CommitHeaderView: View {
                 ScrollView {
                     Text(body)
                         .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textSecondary)
+                        .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .textSelection(.enabled)
                 }
@@ -127,26 +127,22 @@ struct CommitHeaderView: View {
             FlowLayout(spacing: Vrai.Space.s12, lineSpacing: Vrai.Space.s6) {
                 HStack(spacing: Vrai.Space.s6) {
                     Avatar(name: commit.authorName, size: Vrai.Space.s16 + Vrai.Space.s2)
-                    Text(commit.authorName).lineLimit(1).foregroundStyle(Color.Vrai.textSecondary)
+                    Text(commit.authorName).lineLimit(1)
                 }
+                .help(commit.authorEmail)
                 Text(RelativeDate.text(commit.authorDate, now: now))
-                    .foregroundStyle(Color.Vrai.textTertiary)
                     .help(RelativeDate.full(commit.authorDate))
                 HashButton(id: commit.id, length: expert ? 10 : 7)
                 if commit.parents.count > 1 {
                     HStack(spacing: Vrai.Space.s6) {
                         Text("Merge of", bundle: .module)
-                            .foregroundStyle(Color.Vrai.textTertiary)
                         ForEach(commit.parents, id: \.self) { parent in
-                            Button {
+                            Button(parent.short) {
                                 store.selectCommit(parent, scroll: true)
-                            } label: {
-                                Text(parent.short)
-                                    .font(Font.Vrai.codeSmall)
-                                    .padding(.horizontal, Vrai.Space.s4)
-                                    .frame(height: Vrai.Space.s20)
                             }
-                            .buttonStyle(HashButtonStyle())
+                            .buttonStyle(.link)
+                            .font(Font.Vrai.codeSmall)
+                            .foregroundStyle(Color(nsColor: .linkColor))
                         }
                     }
                 }
@@ -160,14 +156,12 @@ struct CommitHeaderView: View {
                 }
             }
             .font(Font.Vrai.callout)
-            .foregroundStyle(Color.Vrai.textSecondary)
+            .foregroundStyle(.secondary)
         }
         .padding(.top, Vrai.Space.s12)
         .padding(.horizontal, Vrai.Space.s16)
         .padding(.bottom, Vrai.Space.s10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.Vrai.bgSubtle)
-        .hairline(.bottom)
     }
 }
 
@@ -183,7 +177,7 @@ struct WipDetailView: View {
                 HStack(alignment: .top, spacing: Vrai.Space.s8) {
                     Text("Uncommitted changes", bundle: .module)
                         .font(Font.Vrai.title2)
-                        .foregroundStyle(Color.Vrai.text)
+                        .foregroundStyle(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     VraiButton(title: String(localized: "Open Changes", bundle: .module), icon: "square.and.pencil", variant: .primary, size: .small, shortcut: "\u{2318}2") {
                         window.show(.changes)
@@ -191,14 +185,13 @@ struct WipDetailView: View {
                 }
                 Text("\(n(working.count, "changed file")), \(staged) staged, on \(window.headName)", bundle: .module)
                     .font(Font.Vrai.callout)
-                    .foregroundStyle(Color.Vrai.textSecondary)
+                    .foregroundStyle(.secondary)
             }
             .padding(.top, Vrai.Space.s12)
             .padding(.horizontal, Vrai.Space.s16)
             .padding(.bottom, Vrai.Space.s10)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.Vrai.bgSubtle)
-            .hairline(.bottom)
+            Divider()
             DiffPanel(files: store.wipFiles.map(FileEntry.init)) { file in
                 if let working = working.first(where: { $0.path == file.path }) {
                     WorkingFileMenu(file: working, window: window)

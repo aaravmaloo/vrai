@@ -21,18 +21,13 @@ struct GeneralPane: View {
         return String(localized: "Runs git fetch --prune for \(SettingsCopy.list(remotes)).", bundle: .module)
     }
 
-    var preferencesFile: String {
-        if context.app.launch.isSandboxed { return "$VRAI_SANDBOX/" + LaunchOptions.sandboxSuiteName + ".plist" }
-        return "~/Library/Preferences/" + (Bundle.main.bundleIdentifier ?? "com.aaravmaloo.vrai") + ".plist"
-    }
-
     static func interval(_ minutes: Int) -> String {
         minutes == 60 ? String(localized: "Every hour", bundle: .module) : String(localized: "Every \(n(minutes, "minute"))", bundle: .module)
     }
 
     var body: some View {
         SettingsForm {
-            SettingsSection(String(localized: "Opening", bundle: .module), footer: String(localized: "Vrai keeps its own settings in \(preferencesFile).", bundle: .module)) {
+            SettingsSection(String(localized: "Opening", bundle: .module)) {
                 SettingsRow(String(localized: "When Vrai opens", bundle: .module)) {
                     SettingsSelect(
                         label: String(localized: "When Vrai opens", bundle: .module),
@@ -48,7 +43,7 @@ struct GeneralPane: View {
                     SettingsSwitch(label: String(localized: "Show the Welcome window when no repository is open", bundle: .module), isOn: preferences.welcomeOnLaunch, id: "settings.welcomeOnLaunch") { preferences.welcomeOnLaunch = $0 }
                 }
             }
-            SettingsSection(String(localized: "Background fetch", bundle: .module), description: String(localized: "Keeps ahead and behind counts current. Fetching never changes your branches or files.", bundle: .module)) {
+            SettingsSection(String(localized: "Background fetch", bundle: .module)) {
                 SettingsRow(String(localized: "Fetch in the background", bundle: .module), description: fetchDescription) {
                     SettingsSwitch(label: String(localized: "Fetch in the background", bundle: .module), isOn: preferences.backgroundFetch, id: "settings.backgroundFetch") { preferences.backgroundFetch = $0 }
                 }

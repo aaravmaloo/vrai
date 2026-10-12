@@ -14,7 +14,7 @@ struct ExpertPane: View {
 
     var body: some View {
         SettingsForm {
-            SettingsSection(String(localized: "Expert mode", bundle: .module), footer: String(localized: "Everything Expert mode adds is also in the menus and the palette.", bundle: .module)) {
+            SettingsSection(String(localized: "Expert mode", bundle: .module)) {
                 SettingsRow(String(localized: "Expert mode", bundle: .module), description: String(localized: "Command previews in every sheet, a git prompt in the console, Reflog and Refs in the sidebar, and tools that rewrite history.", bundle: .module)) {
                     SettingsSwitch(label: String(localized: "Expert mode", bundle: .module), isOn: preferences.expert, id: "settings.expert") { preferences.expert = $0 }
                 }
@@ -32,11 +32,7 @@ struct ExpertPane: View {
                     .listRowBackground(Color.clear)
                 }
             }
-            SettingsSection(
-                String(localized: "Git configuration", bundle: .module),
-                description: repositoryName.map { String(localized: "Every value git reads in \($0). Local beats global, and global beats system.", bundle: .module) } ?? String(localized: "Every value git reads outside a repository. Global beats system.", bundle: .module),
-                footer: String(localized: "local is .git/config, global is \(context.app.globalConfigDisplay), system is the gitconfig that ships with git.", bundle: .module)
-            ) {
+            SettingsSection(String(localized: "Git configuration", bundle: .module)) {
                 ConfigTableHeader()
                 if loaded && entries.isEmpty {
                     Text("git reads no configuration here.", bundle: .module)

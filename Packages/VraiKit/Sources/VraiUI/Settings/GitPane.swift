@@ -49,7 +49,7 @@ struct GitPaneForm: View {
 
     var body: some View {
         SettingsForm {
-            SettingsSection(String(localized: "New repositories", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.defaultBranch])) {
+            SettingsSection(String(localized: "New repositories", bundle: .module)) {
                 SettingsRow(String(localized: "First branch name", bundle: .module), description: String(localized: "Used by New repository and by git init.", bundle: .module)) {
                     CommitField(
                         value: git.defaultBranch ?? "master",
@@ -60,7 +60,7 @@ struct GitPaneForm: View {
                     ) { name in context.run { try await git.setDefaultBranch(name) } }
                 }
             }
-            SettingsSection(String(localized: "Pulling", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.pullRebase, ConfigKeys.pullFastForward, ConfigKeys.rebaseAutostash, ConfigKeys.mergeAutostash])) {
+            SettingsSection(String(localized: "Pulling", bundle: .module)) {
                 SettingsRow(String(localized: "When both sides have new commits", bundle: .module), description: Self.pullHelp(git.pullMode)) {
                     SettingsSelect(
                         label: String(localized: "Pull mode", bundle: .module),
@@ -77,7 +77,7 @@ struct GitPaneForm: View {
                     SettingsSwitch(label: String(localized: "Set uncommitted changes aside while pulling", bundle: .module), isOn: git.autostash, id: "settings.autostash") { on in context.run { try await git.setAutostash(on) } }
                 }
             }
-            SettingsSection(String(localized: "Conflicts", bundle: .module), footer: SettingsCopy.stored(in: file, as: [ConfigKeys.rerere]) + " " + String(localized: "Resolutions live in .git/rr-cache.", bundle: .module)) {
+            SettingsSection(String(localized: "Conflicts", bundle: .module)) {
                 SettingsRow(String(localized: "Reuse recorded resolutions", bundle: .module), description: String(localized: "When a conflict you resolved before comes back, during a rebase for example, git resolves it the same way.", bundle: .module)) {
                     SettingsSwitch(label: String(localized: "Reuse recorded resolutions", bundle: .module), isOn: git.rerere, id: "settings.rerere") { on in context.run { try await git.setRerere(on) } }
                 }
@@ -87,7 +87,7 @@ struct GitPaneForm: View {
                     SettingsSwitch(label: String(localized: "Confirm before force pushing", bundle: .module), isOn: preferences.confirmForcePush, id: "settings.confirmForcePush") { preferences.confirmForcePush = $0 }
                 }
             }
-            SettingsSection(String(localized: "Diffs", bundle: .module), footer: String(localized: "Vrai passes both to diff and log. Changing the algorithm also writes diff.algorithm to \(file), so git diff in Terminal matches.", bundle: .module)) {
+            SettingsSection(String(localized: "Diffs", bundle: .module)) {
                 SettingsRow(String(localized: "Diff algorithm", bundle: .module), description: Self.algorithmHelp(git.diffAlgorithm)) {
                     SettingsSelect(
                         label: String(localized: "Diff algorithm", bundle: .module),
@@ -100,7 +100,7 @@ struct GitPaneForm: View {
                     SettingsSlider(label: String(localized: "Detect renames", bundle: .module), value: preferences.renameThreshold, range: 10...100, step: 5, format: { "\($0)%" }, id: "settings.renameThreshold") { preferences.renameThreshold = $0 }
                 }
             }
-            SettingsSection(String(localized: "Git", bundle: .module), footer: String(localized: "Vrai works with git \(GitVersion.minimum.description) or newer and runs every command through it.", bundle: .module)) {
+            SettingsSection(String(localized: "Git", bundle: .module)) {
                 GitBinaryRow(context: context)
             }
         }

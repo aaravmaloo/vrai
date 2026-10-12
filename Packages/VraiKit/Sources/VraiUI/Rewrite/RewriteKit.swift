@@ -5,8 +5,6 @@ import VraiGit
 struct RewriteSheet<Content: View, FooterStart: View, Actions: View>: View {
     let title: String
     var description: String?
-    let icon: String
-    var tone: Tone = .neutral
     var width: CGFloat = Vrai.Size.sheet
     @ViewBuilder let content: () -> Content
     @ViewBuilder let footerStart: () -> FooterStart
@@ -27,29 +25,12 @@ struct RewriteSheet<Content: View, FooterStart: View, Actions: View>: View {
         let limit = room
         let scrolls = limit.map { contentHeight > $0 } ?? false
         VStack(alignment: .leading, spacing: Vrai.Space.s16) {
-            HStack(alignment: .top, spacing: Vrai.Space.s12) {
-                RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .fill(tone == .neutral ? Color.Vrai.fill : tone.soft)
-                    .frame(width: Vrai.Space.s40, height: Vrai.Space.s40)
-                    .overlay {
-                        Symbol(icon, font: Font.Vrai.title1)
-                            .foregroundStyle(tone == .neutral ? Color.Vrai.textSecondary : tone.color)
-                    }
-                VStack(alignment: .leading, spacing: Vrai.Space.s4) {
-                    Text(title)
-                        .font(Font.Vrai.title2)
-                        .foregroundStyle(Color.Vrai.text)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if let description {
-                        Text(description)
-                            .font(Font.Vrai.callout)
-                            .foregroundStyle(Color.Vrai.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .padding(.top, Vrai.Space.s2)
+            Text(title)
+                .font(.headline)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            }
+                .help(description ?? "")
+                .accessibilityAddTraits(.isHeader)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { headerHeight = $0 }
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: Vrai.Space.s16) {
@@ -77,15 +58,14 @@ struct RewriteSheet<Content: View, FooterStart: View, Actions: View>: View {
         }
         .padding(Vrai.Space.s20)
         .frame(width: window.sheetWidth(width), alignment: .leading)
-        .background(Color.Vrai.surface)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(title)
     }
 }
 
 extension RewriteSheet where FooterStart == EmptyView {
-    init(title: String, description: String? = nil, icon: String, tone: Tone = .neutral, width: CGFloat = Vrai.Size.sheet, @ViewBuilder content: @escaping () -> Content, @ViewBuilder actions: @escaping () -> Actions) {
-        self.init(title: title, description: description, icon: icon, tone: tone, width: width, content: content, footerStart: { EmptyView() }, actions: actions)
+    init(title: String, description: String? = nil, width: CGFloat = Vrai.Size.sheet, @ViewBuilder content: @escaping () -> Content, @ViewBuilder actions: @escaping () -> Actions) {
+        self.init(title: title, description: description, width: width, content: content, footerStart: { EmptyView() }, actions: actions)
     }
 }
 
@@ -103,7 +83,6 @@ struct RewriteFoot: View {
         Button(action: cancel) {
             Text("Cancel", bundle: .module)
         }
-        .buttonStyle(VraiButtonStyle(variant: .secondary))
         .keyboardShortcut(.cancelAction)
         Button {
             if draft?.submit() == true { return }
@@ -140,14 +119,10 @@ struct RewriteField<Content: View>: View {
                 }
                 .font(Font.Vrai.caption)
                 .foregroundStyle(Color.Vrai.danger)
-            } else if let hint {
-                Text(hint)
-                    .font(Font.Vrai.caption)
-                    .foregroundStyle(Color.Vrai.textTertiary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .help(hint ?? "")
     }
 }
 
@@ -164,26 +139,11 @@ struct RewriteTextField: View {
 
     var body: some View {
         RewriteField(label: label, hint: hint, error: error) {
-            TextField(text: $text) {
-                Text(placeholder).foregroundStyle(Color.Vrai.textTertiary)
-            }
-            .textFieldStyle(.plain)
-            .font(mono ? Font.Vrai.code : Font.Vrai.body)
-            .focused($focused)
-            .padding(.horizontal, Vrai.Space.s8)
-            .frame(height: Vrai.Size.control)
-            .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .strokeBorder(error != nil ? Color.Vrai.danger : (focused ? Color.Vrai.focus : Color.Vrai.Contrast.border), lineWidth: Metrics.hairline)
-            }
-            .background {
-                if focused || error != nil {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.md + Vrai.Size.focusHalo, style: .continuous)
-                        .fill(error != nil ? Color.Vrai.dangerSoft : Color.Vrai.accentSoftStrong)
-                        .padding(-Vrai.Size.focusHalo)
-                }
-            }
+            TextField(label, text: $text, prompt: placeholder.isEmpty ? nil : Text(placeholder))
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .font(mono ? Font.Vrai.code : Font.Vrai.body)
+                .focused($focused)
             .accessibilityLabel(label)
             .accessibilityIdentifier(identifier ?? label)
             .onAppear { if autofocus { focused = true } }
@@ -205,47 +165,18 @@ struct RewriteSelect<Value: Hashable>: View {
     let label: String
 
     var body: some View {
-        let current = options.first { $0.value == selection }
-        Menu {
-            Picker(selection: $selection) {
-                ForEach(options) { option in
-                    if let icon = option.icon {
-                        Label(option.label, systemImage: icon).tag(option.value)
-                    } else {
-                        Text(option.label).tag(option.value)
-                    }
+        Picker(label, selection: $selection) {
+            ForEach(options) { option in
+                if let icon = option.icon {
+                    Label(option.label, systemImage: icon).tag(option.value)
+                } else {
+                    Text(option.label).tag(option.value)
                 }
-            } label: {
-                EmptyView()
             }
-            .pickerStyle(.inline)
-        } label: {
-            HStack(spacing: Vrai.Space.s6) {
-                if let icon = current?.icon {
-                    Symbol(icon, font: Font.Vrai.body)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                }
-                Text(current?.label ?? "")
-                    .font(Font.Vrai.body)
-                    .foregroundStyle(Color.Vrai.text)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Spacer(minLength: 0)
-                Symbol("chevron.up.chevron.down", font: Font.Vrai.overline)
-                    .foregroundStyle(Color.Vrai.textTertiary)
-            }
-            .padding(.leading, Vrai.Space.s10)
-            .padding(.trailing, Vrai.Space.s6)
-            .frame(height: Vrai.Size.control)
-            .background(Color.Vrai.surfaceRaised, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
-            .contentShape(Rectangle())
         }
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .menuIndicator(.hidden)
-        .accessibilityLabel(label)
-        .accessibilityValue(current?.label ?? "")
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityIdentifier(label)
     }
 }
@@ -281,65 +212,6 @@ struct RewriteCallout: View {
     }
 }
 
-struct RewriteCheckboxStyle: ToggleStyle {
-    var description: String?
-
-    func makeBody(configuration: Configuration) -> some View {
-        CheckboxBody(configuration: configuration, description: description)
-    }
-
-    struct CheckboxBody: View {
-        let configuration: Configuration
-        let description: String?
-        @Environment(\.isEnabled) private var enabled
-        @State private var hovering = false
-
-        var body: some View {
-            Button {
-                configuration.isOn.toggle()
-            } label: {
-                HStack(alignment: .top, spacing: Vrai.Space.s8) {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
-                        .fill(configuration.isOn ? Color.Vrai.accent : (hovering ? Color.Vrai.fillHover : Color.Vrai.bg))
-                        .overlay {
-                            if !configuration.isOn {
-                                RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
-                                    .strokeBorder(Color.Vrai.borderControl, lineWidth: Metrics.hairline)
-                            }
-                        }
-                        .overlay {
-                            if configuration.isOn {
-                                Symbol("checkmark", font: Font.Vrai.overline)
-                                    .foregroundStyle(Color.Vrai.onAccent)
-                            }
-                        }
-                        .frame(width: Vrai.Space.s16, height: Vrai.Space.s16)
-                        .padding(.top, Metrics.hairline)
-                    VStack(alignment: .leading, spacing: Vrai.Space.s2) {
-                        configuration.label
-                            .font(Font.Vrai.body)
-                            .foregroundStyle(Color.Vrai.text)
-                        if let description {
-                            Text(description)
-                                .font(Font.Vrai.caption)
-                                .foregroundStyle(Color.Vrai.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .opacity(enabled ? 1 : 0.5)
-            .onHover { hovering = $0 }
-            .accessibilityRepresentation {
-                Toggle(isOn: configuration.$isOn) { configuration.label }
-            }
-        }
-    }
-}
-
 struct RewriteCheckbox<Label: View>: View {
     @Binding var isOn: Bool
     var description: String?
@@ -347,7 +219,8 @@ struct RewriteCheckbox<Label: View>: View {
 
     var body: some View {
         Toggle(isOn: $isOn, label: label)
-            .toggleStyle(RewriteCheckboxStyle(description: description))
+            .toggleStyle(.checkbox)
+            .help(description ?? "")
     }
 }
 
@@ -372,65 +245,18 @@ struct RewriteRadioCards<Value: Hashable>: View {
     let label: String
 
     var body: some View {
-        VStack(spacing: Vrai.Space.s8) {
+        Picker(label, selection: $selection) {
             ForEach(options) { option in
-                RadioCard(option: option, on: option.value == selection) { selection = option.value }
+                Text(option.label)
+                    .foregroundStyle(option.danger ? Color.Vrai.danger : Color.primary)
+                    .help(option.description ?? "")
+                    .accessibilityIdentifier(option.label)
+                    .tag(option.value)
             }
         }
-        .accessibilityElement(children: .contain)
+        .labelsHidden()
+        .pickerStyle(.radioGroup)
         .accessibilityLabel(label)
-    }
-
-    struct RadioCard: View {
-        let option: RewriteRadioOption<Value>
-        let on: Bool
-        let select: () -> Void
-        @State private var hovering = false
-
-        var body: some View {
-            let tint = option.danger ? Color.Vrai.danger : Color.Vrai.accent
-            Button(action: select) {
-                HStack(alignment: .top, spacing: Vrai.Space.s8) {
-                    Circle()
-                        .fill(on ? tint : Color.Vrai.bg)
-                        .overlay {
-                            if !on { Circle().strokeBorder(Color.Vrai.borderControl, lineWidth: Metrics.hairline) }
-                        }
-                        .overlay {
-                            if on {
-                                Circle().fill(Color.Vrai.onAccent).frame(width: Vrai.Space.s6, height: Vrai.Space.s6)
-                            }
-                        }
-                        .frame(width: Vrai.Space.s16, height: Vrai.Space.s16)
-                        .padding(.top, Metrics.hairline)
-                    VStack(alignment: .leading, spacing: Vrai.Space.s2) {
-                        Text(option.label)
-                            .font(Font.Vrai.headline)
-                            .foregroundStyle(Color.Vrai.text)
-                        if let description = option.description {
-                            Text(description)
-                                .font(Font.Vrai.caption)
-                                .foregroundStyle(Color.Vrai.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .padding(Vrai.Space.s12)
-                .background(on ? (option.danger ? Color.Vrai.dangerSoft : Color.Vrai.accentSoft) : (hovering ? Color.Vrai.bgSubtle : Color.Vrai.bg), in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                        .strokeBorder(on ? tint : Color.Vrai.Contrast.border, lineWidth: on ? Metrics.thinStroke : Metrics.hairline)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .onHover { hovering = $0 }
-            .accessibilityLabel(option.label)
-            .accessibilityHint(option.description ?? "")
-            .accessibilityAddTraits(on ? [.isButton, .isSelected] : .isButton)
-            .accessibilityIdentifier(option.label)
-        }
     }
 }
 
@@ -439,8 +265,6 @@ struct RewriteDisclosure<Content: View>: View {
     var detail: String?
     @State var open: Bool
     @ViewBuilder let content: () -> Content
-    @State private var hovering = false
-    @Environment(\.vraiReduceMotion) private var reduceMotion
 
     init(title: String, detail: String? = nil, open: Bool = false, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
@@ -450,42 +274,27 @@ struct RewriteDisclosure<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Button {
-                withAnimation(reduceMotion ? nil : Animation.Vrai.standardFast) { open.toggle() }
-            } label: {
-                HStack(spacing: Vrai.Space.s6) {
-                    Symbol("chevron.right", font: Font.Vrai.caption)
-                        .foregroundStyle(Color.Vrai.textTertiary)
-                        .rotationEffect(.degrees(open ? 90 : 0))
-                    Text(title)
-                        .font(Font.Vrai.headline)
-                        .foregroundStyle(Color.Vrai.text)
-                    Spacer(minLength: Vrai.Space.s8)
-                    if let detail {
-                        Text(detail)
-                            .font(Font.Vrai.caption)
-                            .foregroundStyle(Color.Vrai.textTertiary)
-                    }
-                }
-                .padding(.horizontal, Vrai.Space.s4)
-                .frame(height: Vrai.Size.control)
-                .background(hovering ? Color.Vrai.fillHover : Color.clear, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
-                .contentShape(Rectangle())
+        DisclosureGroup(isExpanded: $open) {
+            VStack(alignment: .leading, spacing: Vrai.Space.s8) {
+                content()
             }
-            .buttonStyle(.plain)
-            .onHover { hovering = $0 }
-            .accessibilityLabel(title)
-            .accessibilityValue(open ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module))
-            if open {
-                VStack(alignment: .leading, spacing: Vrai.Space.s10) {
-                    content()
+            .padding(.top, Vrai.Space.s6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            HStack(spacing: Vrai.Space.s8) {
+                Text(title)
+                    .font(.headline)
+                Spacer(minLength: Vrai.Space.s8)
+                if let detail, !open {
+                    Text(detail)
+                        .font(Font.Vrai.caption)
+                        .foregroundStyle(.secondary)
                 }
-                .padding(.top, Vrai.Space.s8)
-                .padding(.bottom, Vrai.Space.s4)
-                .padding(.leading, Vrai.Space.s20)
             }
+            .contentShape(Rectangle())
+            .onTapGesture { withAnimation { open.toggle() } }
         }
+        .accessibilityLabel(title)
     }
 }
 

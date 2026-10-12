@@ -32,9 +32,7 @@ struct StashSheet: View {
         let command = RewriteCommands.stash(message: trimmed.isEmpty ? nil : trimmed, includeUntracked: untracked, keepIndex: keepIndex, onlyStaged: onlyStaged, paths: partial ? selection.map(\.path) : [])
         RewriteSheet(
             title: String(localized: "Stash changes", bundle: .module),
-            description: String(localized: "Sets changes aside in a stash so the working tree is clean. Apply or pop it later, on any branch.", bundle: .module),
-            icon: "tray.and.arrow.down",
-            tone: .accent
+            description: String(localized: "Sets changes aside in a stash so the working tree is clean. Apply or pop it later, on any branch.", bundle: .module)
         ) {
             RewriteTextField(label: String(localized: "Message", bundle: .module), text: $message, placeholder: String(localized: "WIP on \(head)", bundle: .module), autofocus: true, identifier: "stash-message")
             ScrollView {

@@ -32,5 +32,6 @@ for (const test of manifest) for (const a of test.attachments || []) {
 }
 fs.rmSync(path.join(dir, "manifest.json"));
 ' "$out"
+ls -1d "$root"/build/results/flows-*.xcresult 2>/dev/null | sort -r | tail -n +4 | while read -r old; do rm -rf "$old"; done
 echo "results: $results"
 exit "$status"

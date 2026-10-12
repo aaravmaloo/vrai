@@ -13,7 +13,6 @@ struct GitReferenceSheet: View {
         LongTailSheet(
             title: "git " + command,
             description: String(localized: "The manual page that comes with git \(app.gitVersion?.description ?? "").", bundle: .module),
-            icon: "doc.text",
             width: Vrai.Size.sheetWide
         ) {
             if let failure {

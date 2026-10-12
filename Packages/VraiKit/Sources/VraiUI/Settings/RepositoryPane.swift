@@ -57,8 +57,6 @@ struct RepositoryPaneForm: View {
         let badge = hasLocal ? String(localized: "This repository", bundle: .module) : nil
         SettingsSection(
             String(localized: "Identity", bundle: .module),
-            description: hasLocal ? String(localized: "Commits here use their own identity, not your global one.", bundle: .module) : String(localized: "Commits here use your global identity.", bundle: .module),
-            footer: SettingsCopy.stored(in: hasLocal ? ".git/config" : global, as: [ConfigKeys.userName, ConfigKeys.userEmail]),
             top: AnyView(RepositoryHeader(name: name, path: path, terminal: preferences.terminal, reveal: reveal, openInTerminal: openInTerminal))
         ) {
             SettingsRow(String(localized: "Name", bundle: .module), badge: badge) {
@@ -90,18 +88,9 @@ struct RepositoryPaneForm: View {
         }
     }
 
-    var hooksFolder: String {
-        guard let first = snapshot?.hooks.first else { return ".git/hooks" }
-        let folder = SettingsCopy.trimmed(URL(filePath: first.path).deletingLastPathComponent().path(percentEncoded: false))
-        if let root = snapshot?.root.map({ SettingsCopy.trimmed($0.path(percentEncoded: false)) }), folder.hasPrefix(root + "/") {
-            return String(folder.dropFirst(root.count + 1))
-        }
-        return GlobalConfigFile.display(folder, environment: context.app.environment.base)
-    }
-
     @ViewBuilder var hooks: some View {
         let list = snapshot?.hooks ?? []
-        SettingsSection(String(localized: "Hooks", bundle: .module), footer: list.isEmpty ? nil : String(localized: "Scripts in \(hooksFolder), run exactly as git runs them. In Expert mode, Skip hooks in the commit composer bypasses them for one commit.", bundle: .module)) {
+        SettingsSection(String(localized: "Hooks", bundle: .module)) {
             if list.isEmpty {
                 SettingsRow(String(localized: "No hooks yet", bundle: .module), description: String(localized: "Add executable scripts to .git/hooks, or share a folder of them with core.hooksPath.", bundle: .module))
             } else {
@@ -145,7 +134,7 @@ struct RepositoryPaneForm: View {
     }
 
     var files: some View {
-        SettingsSection(String(localized: "Files", bundle: .module), footer: String(localized: "Edits show up in Changes, ready to commit.", bundle: .module)) {
+        SettingsSection(String(localized: "Files", bundle: .module)) {
             ForEach(RepositoryFiles.all, id: \.name) { file in
                 SettingsRow(file.name, description: file.description, icon: file.icon, mono: true) {
                     VraiButton(title: String(localized: "Edit\u{2026}", bundle: .module), size: .small) {
@@ -157,7 +146,7 @@ struct RepositoryPaneForm: View {
     }
 
     @ViewBuilder var largeFiles: some View {
-        SettingsSection(String(localized: "Large files", bundle: .module), footer: String(localized: "Git LFS stores big binaries on the server and downloads them on checkout.", bundle: .module)) {
+        SettingsSection(String(localized: "Large files", bundle: .module)) {
             switch lfs {
             case nil:
                 SettingsRow(String(localized: "Checking Git LFS", bundle: .module), description: String(localized: "Running git lfs env.", bundle: .module), icon: "externaldrive")
@@ -174,7 +163,7 @@ struct RepositoryPaneForm: View {
     }
 
     @ViewBuilder var maintenance: some View {
-        SettingsSection(String(localized: "Maintenance", bundle: .module), footer: String(localized: "Registered in maintenance.repo in \(global). The schedule from git maintenance start runs it in the background.", bundle: .module)) {
+        SettingsSection(String(localized: "Maintenance", bundle: .module)) {
             SettingsRow(String(localized: "Background maintenance", bundle: .module), description: String(localized: "Hourly prefetch and commit graph, daily loose objects, weekly pack cleanup.", bundle: .module)) {
                 SettingsSwitch(label: String(localized: "Background maintenance", bundle: .module), isOn: registered ?? false, id: "settings.maintenance", disabled: registered == nil) { on in
                     registered = on

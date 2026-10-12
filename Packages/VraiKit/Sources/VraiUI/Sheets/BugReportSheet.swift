@@ -25,8 +25,7 @@ struct BugReportSheet: View {
     var body: some View {
         LongTailSheet(
             title: String(localized: "Report a git problem", bundle: .module),
-            description: String(localized: "Collects git's own bug report and, if you like, a diagnostics archive, into a folder you can attach.", bundle: .module),
-            icon: "stethoscope"
+            description: String(localized: "Collects git's own bug report and, if you like, a diagnostics archive, into a folder you can attach.", bundle: .module)
         ) {
             if let failure {
                 SyncForm.Callout(tone: .danger, title: String(localized: "git couldn't write the report", bundle: .module), message: failure)

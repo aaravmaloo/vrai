@@ -24,7 +24,7 @@ enum ShortcutCatalog {
 
     static var groups: [ShortcutGroup] {
         [
-            ShortcutGroup(title: String(localized: "Repository", bundle: .module), footer: String(localized: "Hold \u{2325} in a menu or over the toolbar to see the alternates.", bundle: .module), items: [
+            ShortcutGroup(title: String(localized: "Repository", bundle: .module), items: [
                 item(String(localized: "Command palette", bundle: .module), "\u{2318}K"),
                 item(String(localized: "Fetch", bundle: .module), "\u{21E7}\u{2318}F"),
                 item(String(localized: "Fetch all remotes and prune", bundle: .module), "\u{2325}\u{21E7}\u{2318}F"),
@@ -89,7 +89,7 @@ enum ShortcutCatalog {
                 item(String(localized: "Move the step up", bundle: .module), "\u{2325}\u{2191}"),
                 item(String(localized: "Move the step down", bundle: .module), "\u{2325}\u{2193}")
             ]),
-            ShortcutGroup(title: String(localized: "Window", bundle: .module), footer: String(localized: "macOS reserves these; they work in every window.", bundle: .module), items: [
+            ShortcutGroup(title: String(localized: "Window", bundle: .module), items: [
                 item(String(localized: "Close window", bundle: .module), "\u{2318}W"),
                 item(String(localized: "Minimize", bundle: .module), "\u{2318}M"),
                 item(String(localized: "Hide Vrai", bundle: .module), "\u{2318}H"),
@@ -180,7 +180,7 @@ struct ShortcutsPane: View {
             } else {
                 SettingsForm {
                     ForEach(groups) { group in
-                        SettingsSection(group.title, footer: group.footer) {
+                        SettingsSection(group.title) {
                             VStack(spacing: 0) {
                                 ForEach(group.items) { item in
                                     ShortcutRow(item: item)
