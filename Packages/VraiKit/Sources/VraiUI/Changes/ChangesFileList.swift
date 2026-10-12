@@ -40,6 +40,8 @@ struct ChangesFileList: View {
                         }
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Changed files", bundle: .module))
                 .padding(.horizontal, Vrai.Space.s4)
                 .padding(.top, Vrai.Space.s4)
                 .padding(.bottom, Vrai.Space.s8)
@@ -53,10 +55,19 @@ struct ChangesFileList: View {
         .focusEffectDisabled()
         .focused($focused)
         .onChange(of: changes.listFocusRequest) { _, _ in focused = true }
+        .onAppear {
+            guard window.changes.focusRequest == window.changes.focusHandled else { return }
+            Task { @MainActor in focused = true }
+        }
         .onKeyPress(.downArrow) { move(1) }
         .onKeyPress(.upArrow) { move(-1) }
         .onKeyPress(.space) {
             window.toggleSelectionStaging()
+            return .handled
+        }
+        .onKeyPress(.rightArrow) {
+            guard let pick = changes.pick, !pick.conflict, changes.isLineLevel else { return .ignored }
+            changes.diffFocusRequest += 1
             return .handled
         }
         .onKeyPress(.delete) { discardSelected() }
@@ -162,6 +173,11 @@ struct ChangeFileRow: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(accessibilityText(status: status)))
         .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityActions {
+            if !conflict {
+                Button(String(localized: "Discard changes to \(parts.name)", bundle: .module), action: onDiscard)
+            }
+        }
     }
 
     var background: Color {

@@ -101,9 +101,9 @@ struct CompareSheet: View {
                 if let error = error as? GitError, error.code == .cancelled { return }
                 result = nil
                 if let error = error as? GitError {
-                    failure = error.result?.errorOutput.trimmingCharacters(in: .whitespacesAndNewlines) ?? ErrorCopy(error).message
+                    failure = ErrorCopy(error).message
                 } else {
-                    failure = error.localizedDescription
+                    failure = String(localized: "Try again. If it keeps failing, check both branches in Terminal.", bundle: .module)
                 }
             }
             loading = false

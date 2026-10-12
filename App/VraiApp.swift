@@ -12,6 +12,7 @@ struct VraiApp: App {
         WindowGroup(String(localized: "Vrai"), id: "repository", for: RepositoryReference.self) { $reference in
             RepositoryWindowRoot(reference: $reference)
                 .environment(app)
+                .vraiAccessibility()
         }
         .defaultSize(AppDelegate.windowSize)
         .defaultLaunchBehavior(app.launch.open == nil ? .suppressed : .presented)
@@ -22,6 +23,7 @@ struct VraiApp: App {
         Window(String(localized: "Welcome to Vrai"), id: "welcome") {
             WelcomeView()
                 .environment(app)
+                .vraiAccessibility()
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
@@ -31,6 +33,7 @@ struct VraiApp: App {
         Window(String(localized: "About Vrai"), id: "about") {
             AboutView()
                 .environment(app)
+                .vraiAccessibility()
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
@@ -39,6 +42,7 @@ struct VraiApp: App {
         Settings {
             SettingsView()
                 .environment(app)
+                .vraiAccessibility()
         }
         .windowResizability(.contentSize)
     }

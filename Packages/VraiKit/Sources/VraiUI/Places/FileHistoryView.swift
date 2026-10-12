@@ -152,7 +152,7 @@ struct FileHistoryDetail: View {
                 HStack(spacing: Vrai.Space.s12) {
                     HStack(spacing: Vrai.Space.s6) {
                         Avatar(name: entry.commit.authorName, size: Vrai.Space.s16 + Vrai.Space.s2)
-                        Text(entry.commit.authorName).lineLimit(1)
+                        Text(entry.commit.authorName).lineLimit(1).foregroundStyle(Color.Vrai.textSecondary)
                     }
                     HashButton(id: entry.commit.id, length: expert ? 10 : 7)
                     Text(RelativeDate.text(entry.commit.authorDate, now: now))

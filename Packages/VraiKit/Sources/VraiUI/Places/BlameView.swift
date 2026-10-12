@@ -121,7 +121,11 @@ struct BlameView: View {
             case .loading:
                 Spinner().frame(maxWidth: .infinity, maxHeight: .infinity)
             case .failed(let error):
-                PlacesLoadFailed(title: String(localized: "No blame for \(PathParts.split(focus.path).name)", bundle: .module), error: error) { attempt += 1 }
+                if focus.revision == nil, let file = store.snapshot?.working.first(where: { $0.path == focus.path }), file.status == .added || file.status == .untracked {
+                    PlacesEmpty(icon: "person.text.rectangle", title: String(localized: "\(PathParts.split(focus.path).name) isn't committed yet", bundle: .module), message: String(localized: "Blame shows who last changed each committed line. Commit the file, then blame it again.", bundle: .module), small: true)
+                } else {
+                    PlacesLoadFailed(title: String(localized: "No blame for \(PathParts.split(focus.path).name)", bundle: .module), error: error) { attempt += 1 }
+                }
             case .loaded(let items):
                 if items.isEmpty {
                     PlacesEmpty(icon: "person.text.rectangle", title: String(localized: "\(PathParts.split(focus.path).name) is empty", bundle: .module), message: String(localized: "There are no lines to blame at this commit.", bundle: .module), small: true)
@@ -162,6 +166,8 @@ struct BlameLines: View {
                         .accessibilityAction { selected = line.commit }
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(Text("Blame", bundle: .module))
             .padding(.top, Vrai.Space.s4)
             .padding(.bottom, Vrai.Space.s16)
         }
@@ -231,14 +237,14 @@ struct BlameRowView: View {
         }
         .background(selected || (hovering && !capture) ? Color.Vrai.accentSoft : Color.clear)
         .overlay(alignment: .top) {
-            if first { Rectangle().fill(Color.Vrai.separator).frame(height: Metrics.hairline) }
+            if first { Rectangle().fill(Color.Vrai.Contrast.separator).frame(height: Metrics.hairline) }
         }
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .help(line.summary)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "Line \(line.number), \(line.text). \(line.authorName), \(RelativeDate.text(line.authorDate, now: now)), \(line.summary)", bundle: .module))
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

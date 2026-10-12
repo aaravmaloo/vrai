@@ -144,8 +144,10 @@ public final class ChangesModel {
     var lines: LineSelection?
     var counts: SideCounts?
     var focusRequest = 0
+    @ObservationIgnored var focusHandled = 0
     var narrowDetail = false
     var listFocusRequest = 0
+    var diffFocusRequest = 0
     var fileBytes: Int?
 
     @ObservationIgnored private var loadTask: Task<Void, Never>?

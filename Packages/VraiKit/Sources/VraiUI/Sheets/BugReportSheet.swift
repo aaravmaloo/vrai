@@ -64,7 +64,7 @@ struct BugReportSheet: View {
             } catch let error as GitError {
                 failure = error.result?.errorOutput.trimmingCharacters(in: .whitespacesAndNewlines) ?? ErrorCopy(error).message
             } catch {
-                failure = error.localizedDescription
+                failure = ErrorCopy.writing(error)
             }
         }
     }

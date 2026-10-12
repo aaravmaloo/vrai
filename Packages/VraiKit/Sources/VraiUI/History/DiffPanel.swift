@@ -40,6 +40,7 @@ struct DiffPanel<FileMenu: View, Header: View>: View {
     @Environment(RepositoryStore.self) private var store
     @Environment(Preferences.self) private var preferences
     @Environment(\.widthClass) private var widthClass
+    @FocusState private var filesFocused: Bool
 
     var body: some View {
         let stacked = widthClass.isNarrow
@@ -84,18 +85,37 @@ struct DiffPanel<FileMenu: View, Header: View>: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(files) { file in
-                            FileRowView(path: file.path, oldPath: file.oldPath, status: file.status, additions: file.additions, deletions: file.deletions, binary: file.binary, selected: file.path == store.selectedPath)
-                                .onTapGesture { store.selectFile(file.path) }
+                            FileRowView(path: file.path, oldPath: file.oldPath, status: file.status, additions: file.additions, deletions: file.deletions, binary: file.binary, selected: file.path == store.selectedPath, focused: filesFocused)
+                                .onTapGesture {
+                                    filesFocused = true
+                                    store.selectFile(file.path)
+                                }
                                 .contextMenu { fileMenu(file) }
                                 .accessibilityAction { store.selectFile(file.path) }
                         }
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel(Text("Files", bundle: .module))
                     .padding(.horizontal, Vrai.Space.s4)
                     .padding(.bottom, Vrai.Space.s8)
+                }
+                .focusable()
+                .focusEffectDisabled()
+                .focused($filesFocused)
+                .onKeyPress(keys: [.downArrow, .upArrow], phases: [.down, .repeat]) { press in
+                    moveFile(press.key == .downArrow ? 1 : -1)
                 }
                 .accessibilityLabel(Text("Files", bundle: .module))
             }
         }
+    }
+
+    func moveFile(_ delta: Int) -> KeyPress.Result {
+        guard !files.isEmpty else { return .ignored }
+        let current = files.firstIndex { $0.path == store.selectedPath }
+        let next = current.map { max(0, min(files.count - 1, $0 + delta)) } ?? (delta > 0 ? 0 : files.count - 1)
+        if next != current { store.selectFile(files[next].path) }
+        return .handled
     }
 
     @ViewBuilder var diffPane: some View {

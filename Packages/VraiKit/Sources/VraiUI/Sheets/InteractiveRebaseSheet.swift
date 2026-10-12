@@ -104,6 +104,7 @@ struct InteractiveRebaseSheet: View {
                             step: $steps[index],
                             index: index,
                             selected: selected == index,
+                            compact: window.sheetWidth(Vrai.Size.sheetWide) < Vrai.Size.sheetWide,
                             onEditing: { now in
                                 if now { editing = index } else if editing == index { editing = nil }
                             }
@@ -223,6 +224,7 @@ struct RebaseStepRow: View {
     @Binding var step: EditableStep
     let index: Int
     let selected: Bool
+    var compact = false
     let onEditing: (Bool) -> Void
     let select: () -> Void
     @State private var hovering = false
@@ -246,7 +248,7 @@ struct RebaseStepRow: View {
                 .fixedSize()
             subjectView
                 .frame(maxWidth: .infinity, alignment: .leading)
-            if let author = step.author {
+            if !compact, let author = step.author {
                 Text(author)
                     .font(Font.Vrai.callout)
                     .foregroundStyle(Color.Vrai.textTertiary)
@@ -260,7 +262,7 @@ struct RebaseStepRow: View {
         .background(selected ? Color.Vrai.accentSoft : Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                .strokeBorder(selected ? Color.Vrai.accent : (hovering ? Color.Vrai.borderStrong : Color.Vrai.separator), lineWidth: selected ? Metrics.thinStroke : Metrics.hairline)
+                .strokeBorder(selected ? Color.Vrai.accent : (hovering ? Color.Vrai.Contrast.borderStrong : Color.Vrai.Contrast.separator), lineWidth: selected ? Metrics.thinStroke : Metrics.hairline)
         }
         .overlay(alignment: .topLeading) {
             if folds {
@@ -408,7 +410,7 @@ struct StepField: View {
         .padding(.horizontal, Vrai.Space.s6)
         .frame(height: Vrai.Size.controlSm)
         .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.border, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         .accessibilityLabel(label)
         .accessibilityIdentifier(identifier)
     }

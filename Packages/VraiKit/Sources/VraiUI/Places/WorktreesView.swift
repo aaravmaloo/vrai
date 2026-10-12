@@ -111,7 +111,9 @@ struct WorktreeDetail: View {
                 KeyValueRow(key: String(localized: "Checked out", bundle: .module)) {
                     if let branch = worktree.branch {
                         HStack { WorktreePill(worktree: worktree) }
+                            .accessibilityElement(children: .ignore)
                             .accessibilityLabel(branch)
+                            .accessibilityAddTraits(.isStaticText)
                     } else if let head = worktree.detachedAt ?? worktree.head {
                         Text("\(head.short(expert: expert)) (detached)", bundle: .module)
                             .font(Font.Vrai.codeSmall)

@@ -125,7 +125,7 @@ struct VraiButtonStyle: ButtonStyle {
 
         var border: Color {
             switch variant {
-            case .secondary: enabled ? Color.Vrai.border : Color.Vrai.separator
+            case .secondary: enabled ? Color.Vrai.Contrast.border : Color.Vrai.Contrast.separator
             default: Color.clear
             }
         }
@@ -240,7 +240,7 @@ struct Badge: View {
             .frame(height: Vrai.Space.s16)
             .background(outline ? Color.clear : (tone == .neutral ? Color.Vrai.fillActive : tone.soft), in: Capsule())
             .overlay {
-                if outline { Capsule().strokeBorder(Color.Vrai.borderStrong, lineWidth: Metrics.hairline) }
+                if outline { Capsule().strokeBorder(Color.Vrai.Contrast.borderStrong, lineWidth: Metrics.hairline) }
             }
     }
 }
@@ -271,6 +271,7 @@ struct AheadBehind: View {
         .help(Self.help(ahead: ahead, behind: behind))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Self.help(ahead: ahead, behind: behind))
+        .accessibilityAddTraits(.isStaticText)
     }
 
     static func help(ahead: Int, behind: Int) -> String {
@@ -317,7 +318,7 @@ struct SearchField: View {
         .padding(.horizontal, small ? Vrai.Space.s8 : Vrai.Space.s10)
         .frame(height: small ? Vrai.Size.controlSm : Vrai.Size.control)
         .background(Color.Vrai.fill, in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+        .overlay(Capsule().strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         .accessibilityLabel(placeholder)
     }
 }
@@ -330,6 +331,15 @@ struct EmptyStateView<Actions: View>: View {
     @ViewBuilder var actions: () -> Actions
 
     var body: some View {
+        ViewThatFits(in: .vertical) {
+            content
+            ScrollView(.vertical) { content }
+                .scrollBounceBehavior(.basedOnSize)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    var content: some View {
         VStack(spacing: small ? Vrai.Space.s8 : Vrai.Space.s12) {
             Circle()
                 .fill(Color.Vrai.fill)
@@ -351,12 +361,15 @@ struct EmptyStateView<Actions: View>: View {
                     .frame(maxWidth: Vrai.Size.sheet * 0.7)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            HStack(spacing: Vrai.Space.s8) { actions() }
-                .padding(.top, Vrai.Space.s8)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Vrai.Space.s8) { actions() }
+                VStack(spacing: Vrai.Space.s8) { actions() }
+            }
+            .padding(.top, Vrai.Space.s8)
         }
         .padding(.horizontal, small ? Vrai.Space.s16 : Vrai.Space.s32)
         .padding(.vertical, small ? Vrai.Space.s24 : Vrai.Space.s40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -451,7 +464,7 @@ struct SegmentedControl<Value: Hashable>: View {
                         if on {
                             RoundedRectangle(cornerRadius: small ? Vrai.Radius.xs : Vrai.Radius.sm, style: .continuous)
                                 .fill(Color.Vrai.surfaceRaised)
-                                .overlay(RoundedRectangle(cornerRadius: small ? Vrai.Radius.xs : Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline / 2))
+                                .overlay(RoundedRectangle(cornerRadius: small ? Vrai.Radius.xs : Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline / 2))
                                 .shadow(color: Color.Vrai.separator, radius: Metrics.hairline, y: Metrics.hairline)
                         }
                     }
@@ -466,7 +479,7 @@ struct SegmentedControl<Value: Hashable>: View {
         .padding(Vrai.Space.s2)
         .frame(height: small ? Vrai.Size.controlSm : Vrai.Size.control)
         .background(Color.Vrai.fill, in: RoundedRectangle(cornerRadius: small ? Vrai.Radius.sm : Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: small ? Vrai.Radius.sm : Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: small ? Vrai.Radius.sm : Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
         .fixedSize()
     }
 }

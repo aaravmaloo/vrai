@@ -107,19 +107,20 @@ struct AppearancePreview: View {
                 .frame(height: rowHeight)
             }
             Rectangle()
-                .fill(Color.Vrai.separator)
+                .fill(Color.Vrai.Contrast.separator)
                 .frame(height: Metrics.hairline)
             DiffView(diff: sample.diff, mode: narrow ? .unified : preferences.diffMode, wrap: preferences.wrap, whitespace: preferences.whitespace, codeSize: preferences.codeSize)
                 .frame(height: metrics.lineHeight * CGFloat(narrow && preferences.wrap ? 9 : 7) + Metrics.hunkHeight)
         }
         .background(Color.Vrai.bg)
         .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
         .environment(\.expert, preferences.expert)
         .environment(\.vraiNow, now)
         .allowsHitTesting(false)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Preview of the history list and a diff with these settings", bundle: .module))
+        .accessibilityAddTraits(.isImage)
         .accessibilityIdentifier("settings.preview")
     }
 }

@@ -8,14 +8,14 @@ final class ScenarioScreenshotTests: XCTestCase {
     }
 
     @MainActor
-    private func launch(_ path: String?, variant: Variant) -> XCUIApplication {
+    private func launch(_ path: String?, variant: Variant, extra: [String] = []) -> XCUIApplication {
         let defaults = UserDefaults(suiteName: Sandbox.root + "/com.aaravmaloo.vrai.sandbox")
         defaults?.set(false, forKey: "expert")
         defaults?.synchronize()
         let app = XCUIApplication()
         var arguments = ["-VraiSandbox", Sandbox.root]
         if let path { arguments += ["-VraiOpen", path, "-VraiWindowSize", variant.size] }
-        arguments += ["-VraiAppearance", variant.appearance, "-VraiNow", Sandbox.now, "-VraiCapture", "YES", "-ApplePersistenceIgnoreState", "YES"]
+        arguments += ["-VraiAppearance", variant.appearance, "-VraiNow", Sandbox.now, "-VraiCapture", "YES", "-ApplePersistenceIgnoreState", "YES"] + extra
         app.launchArguments = arguments
         app.launch()
         XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 10))
@@ -126,7 +126,8 @@ final class ScenarioScreenshotTests: XCTestCase {
     @MainActor
     func testLoading() throws {
         for variant in Variant.allCases {
-            let app = launch(Sandbox.root + "/fixtures/large/monorepo", variant: variant)
+            let app = launch(Sandbox.root + "/fixtures/large/monorepo", variant: variant, extra: ["-VraiOpenDelay", "6000"])
+            XCTAssertTrue(app.descendants(matching: .any)["loading-view"].waitForExistence(timeout: 5))
             attach(app, "loading", variant)
             waitForHistory(app)
             app.terminate()

@@ -26,7 +26,8 @@ public struct SettingsView: View {
         .environment(\.expert, app.preferences.expert)
         .environment(\.vraiNow, app.launch.now)
         .environment(\.captureMode, app.launch.capture)
-        .background(WindowConfigurator(launch: app.launch))
+        .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
+        .accessibilityHostLabel()
         .tint(Color.Vrai.accent)
         .task { await context.reload() }
         .onChange(of: active) { _, value in
@@ -87,6 +88,7 @@ struct SettingsPaneHost: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("settings.pane." + pane.rawValue)
+        .accessibilityHostLabel(pane.title, scope: .any)
     }
 }
 

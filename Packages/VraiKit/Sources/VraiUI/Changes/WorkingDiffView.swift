@@ -14,11 +14,14 @@ struct WorkingDiffView: View {
     var codeSize = DiffMetrics.defaultSize
     @Environment(WindowModel.self) private var window
     @State private var hoveredHunk: Int?
+    @State private var scrollTarget: LineID?
+    @FocusState private var focused: Bool
 
     var body: some View {
         let metrics = DiffMetrics(codeSize: codeSize)
         let language = SyntaxHighlighter.language(for: diff.path)
         GeometryReader { geometry in
+            ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                     ForEach(Array(diff.hunks.enumerated()), id: \.offset) { index, hunk in
@@ -33,6 +36,7 @@ struct WorkingDiffView: View {
                                     let id = LineID(hunk: index, line: offset)
                                     SelectableUnifiedLine(line: line, id: id, language: language, wrap: wrap, whitespace: whitespace, metrics: metrics, selectable: selectable && (line.kind == .add || line.kind == .del), selected: selection?.contains(id) ?? false, onClick: click)
                                         .frame(minWidth: geometry.size.width, alignment: .leading)
+                                        .id(id)
                                         .onHover { if $0 { hoveredHunk = index } }
                                 }
                             }
@@ -50,14 +54,73 @@ struct WorkingDiffView: View {
                         }
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Lines", bundle: .module))
                 .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
             }
             .onHover { if !$0 { hoveredHunk = nil } }
+            .onChange(of: scrollTarget) { _, target in
+                guard let target else { return }
+                proxy.scrollTo(target)
+            }
+            }
         }
         .background(Color.Vrai.bg)
+        .focusable(selectable)
+        .focusEffectDisabled()
+        .focused($focused)
+        .overlay {
+            if focused {
+                Rectangle()
+                    .strokeBorder(Color.Vrai.focus, lineWidth: Vrai.Size.line)
+                    .allowsHitTesting(false)
+            }
+        }
+        .onChange(of: window.changes.diffFocusRequest) { _, _ in
+            guard selectable else { return }
+            focused = true
+            if selection == nil { _ = step(1, extending: false) }
+        }
+        .onKeyPress(keys: [.downArrow, .upArrow], phases: [.down, .repeat]) { press in
+            step(press.key == .downArrow ? 1 : -1, extending: press.modifiers.contains(.shift))
+        }
+        .onKeyPress(.space) {
+            window.toggleSelectionStaging()
+            return .handled
+        }
+        .onKeyPress(.leftArrow) {
+            window.changes.listFocusRequest += 1
+            return .handled
+        }
+        .onKeyPress(.escape) {
+            guard selection != nil else { return .ignored }
+            window.changes.clearLines()
+            return .handled
+        }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Diff", bundle: .module))
         .accessibilityIdentifier("changes-diff")
+    }
+
+    var changedLines: [LineID] {
+        diff.hunks.indices.flatMap { hunk in
+            diff.hunks[hunk].lines.indices.compactMap { line in
+                let kind = diff.hunks[hunk].lines[line].kind
+                return kind == .add || kind == .del ? LineID(hunk: hunk, line: line) : nil
+            }
+        }
+    }
+
+    func step(_ delta: Int, extending: Bool) -> KeyPress.Result {
+        guard selectable else { return .ignored }
+        let order = changedLines
+        guard !order.isEmpty else { return .ignored }
+        let current = selection?.anchor.flatMap { order.firstIndex(of: $0) }
+        let next = current.map { max(0, min(order.count - 1, $0 + delta)) } ?? (delta > 0 ? 0 : order.count - 1)
+        guard next != current else { return .handled }
+        window.changes.click(order[next], extending: extending, toggling: false)
+        scrollTarget = order[next]
+        return .handled
     }
 
     func click(_ id: LineID) {
@@ -86,6 +149,16 @@ struct WorkingHunkHeader: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityActions {
+                    Button(staged ? String(localized: "Unstage hunk", bundle: .module) : String(localized: "Stage hunk", bundle: .module)) {
+                        window.hunkAction(staged ? .unstage : .stage, hunk: index)
+                    }
+                    if !staged {
+                        Button(String(localized: "Discard hunk", bundle: .module)) {
+                            window.hunkAction(.discard, hunk: index)
+                        }
+                    }
+                }
             HStack(spacing: Vrai.Space.s4) {
                 if selectedHere > 0 {
                     VraiButton(title: staged ? String(localized: "Unstage \(n(selectedHere, "line"))", bundle: .module) : String(localized: "Stage \(n(selectedHere, "line"))", bundle: .module), icon: staged ? "minus" : "plus", variant: .primary, size: .small) {
@@ -122,7 +195,7 @@ struct WorkingHunkHeader: View {
         .background(Color.Vrai.diffHunkBg)
         .background(Color.Vrai.bg)
         .overlay(alignment: .top) {
-            if !first { Rectangle().fill(Color.Vrai.separator).frame(height: Metrics.hairline) }
+            if !first { Rectangle().fill(Color.Vrai.Contrast.separator).frame(height: Metrics.hairline) }
         }
         .hairline(.bottom)
         .accessibilityElement(children: .contain)
@@ -180,7 +253,7 @@ struct SelectableUnifiedLine: View {
             .onTapGesture { if selectable { onClick(id) } }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(gutterLabel)
-            .accessibilityAddTraits(selectable ? [.isButton] : [])
+            .accessibilityAddTraits(selectable ? [.isButton] : [.isStaticText])
             .accessibilityAddTraits(selected ? .isSelected : [])
             .accessibilityIdentifier("gutter-\(id.hunk)-\(id.line)")
             .accessibilityAction { if selectable { onClick(id) } }
@@ -245,6 +318,7 @@ struct SelectableUnifiedLine: View {
         switch line.kind {
         case .add: String(localized: "Added line \(line.newNumber ?? 0): \(line.text)", bundle: .module)
         case .del: String(localized: "Removed line \(line.oldNumber ?? 0): \(line.text)", bundle: .module)
+        case .context: String(localized: "Line \(line.newNumber ?? 0): \(line.text)", bundle: .module)
         default: line.text
         }
     }
@@ -301,7 +375,7 @@ struct SelectableSplitLine: View {
     var body: some View {
         HStack(spacing: 0) {
             side(row.old, old: true)
-            Rectangle().fill(Color.Vrai.separator).frame(width: Metrics.hairline)
+            Rectangle().fill(Color.Vrai.Contrast.separator).frame(width: Metrics.hairline)
             side(row.new, old: false)
         }
         .frame(minHeight: metrics.lineHeight)
@@ -318,7 +392,8 @@ struct SelectableSplitLine: View {
                     .background(selected ? Color.Vrai.accentSoftStrong : change ? (old ? Color.Vrai.diffDelGutter : Color.Vrai.diffAddGutter) : Color.clear)
                     .contentShape(Rectangle())
                     .onTapGesture { if selectable, change { onClick(id) } }
-                    .accessibilityAddTraits(selectable && change ? [.isButton] : [])
+                    .accessibilityAddTraits(selectable && change ? [.isButton] : [.isStaticText])
+                    .accessibilityAction { if selectable, change { onClick(id) } }
                     .accessibilityIdentifier("gutter-\(hunk)-\(entry.index)")
                 Text(CodeRenderer.attributed(entry.line.text, language: language, words: change ? entry.line.wordRanges : [], wordColor: old ? Color.Vrai.diffDelWord : Color.Vrai.diffAddWord, whitespace: whitespace))
                     .font(metrics.codeFont)

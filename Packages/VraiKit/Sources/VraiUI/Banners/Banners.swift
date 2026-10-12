@@ -32,57 +32,26 @@ struct BannerView: View {
     let model: BannerModel
 
     var body: some View {
-        HStack(spacing: Vrai.Space.s12) {
-            Symbol(model.icon, font: Font.Vrai.title3)
-                .foregroundStyle(model.tone.color)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(model.title)
-                    .font(Font.Vrai.headline)
-                    .foregroundStyle(Color.Vrai.text)
-                    .lineLimit(1)
-                    .frame(minHeight: Metrics.headlineLine)
-                if let detail = model.detail {
-                    Text(detail)
-                        .font(Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.textSecondary)
-                        .lineLimit(1)
-                        .frame(minHeight: Metrics.calloutLine)
-                }
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: Vrai.Space.s12) {
+                icon
+                text(lines: 2)
+                    .frame(minWidth: Metrics.bannerText, idealWidth: Metrics.bannerText, maxWidth: .infinity, alignment: .leading)
+                    .layoutPriority(-1)
+                steps
+                actions
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .layoutPriority(-1)
-            if let steps = model.steps {
-                HStack(spacing: Vrai.Space.s8) {
-                    Text("\(steps.current) of \(steps.total)", bundle: .module)
-                        .font(Font.Vrai.caption)
-                        .monospacedDigit()
-                    HStack(spacing: Vrai.Space.s4) {
-                        ForEach(0..<max(0, steps.total), id: \.self) { index in
-                            StepDot(state: index < steps.current - 1 ? .done : index == steps.current - 1 ? (steps.stopped ? .stopped : .now) : .todo, tone: model.tone)
-                        }
-                    }
+            VStack(alignment: .leading, spacing: Vrai.Space.s8) {
+                HStack(alignment: .top, spacing: Vrai.Space.s12) {
+                    icon
+                    text(lines: 3)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    steps
                 }
-                .foregroundStyle(Color.Vrai.textSecondary)
-                .fixedSize()
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text("Step \(steps.current) of \(steps.total)", bundle: .module))
-            }
-            if !model.actions.isEmpty {
-                HStack(spacing: Vrai.Space.s8) {
-                    ForEach(model.actions) { action in
-                        Button {
-                            action.perform?()
-                        } label: {
-                            HStack(spacing: Vrai.Space.s4) {
-                                if action.busy { Spinner() }
-                                Text(action.title)
-                            }
-                        }
-                        .buttonStyle(VraiButtonStyle(variant: action.primary ? .primary : .secondary, size: .small))
-                        .disabled(!action.enabled)
-                    }
+                if !model.actions.isEmpty {
+                    FlowLayout(spacing: Vrai.Space.s8, lineSpacing: Vrai.Space.s8) { buttons }
+                        .padding(.leading, Vrai.Size.icon + Vrai.Space.s12)
                 }
-                .fixedSize()
             }
         }
         .padding(.vertical, Vrai.Space.s8)
@@ -94,6 +63,74 @@ struct BannerView: View {
         .hairline(.bottom)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(model.title)
+    }
+
+    var icon: some View {
+        Symbol(model.icon, font: Font.Vrai.title3)
+            .foregroundStyle(model.tone.color)
+            .frame(width: Vrai.Size.icon)
+    }
+
+    func text(lines: Int) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(model.title)
+                .font(Font.Vrai.headline)
+                .foregroundStyle(Color.Vrai.text)
+                .lineLimit(lines == 2 ? 1 : 2)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: Metrics.headlineLine)
+            if let detail = model.detail {
+                Text(detail)
+                    .font(Font.Vrai.callout)
+                    .foregroundStyle(Color.Vrai.textSecondary)
+                    .lineLimit(lines)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(minHeight: Metrics.calloutLine)
+            }
+        }
+    }
+
+    @ViewBuilder var steps: some View {
+        if let steps = model.steps {
+            HStack(spacing: Vrai.Space.s8) {
+                Text("\(steps.current) of \(steps.total)", bundle: .module)
+                    .font(Font.Vrai.caption)
+                    .monospacedDigit()
+                HStack(spacing: Vrai.Space.s4) {
+                    ForEach(0..<max(0, steps.total), id: \.self) { index in
+                        StepDot(state: index < steps.current - 1 ? .done : index == steps.current - 1 ? (steps.stopped ? .stopped : .now) : .todo, tone: model.tone)
+                    }
+                }
+            }
+            .foregroundStyle(Color.Vrai.textSecondary)
+            .fixedSize()
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Step \(steps.current) of \(steps.total)", bundle: .module))
+            .accessibilityAddTraits(.isStaticText)
+        }
+    }
+
+    @ViewBuilder var actions: some View {
+        if !model.actions.isEmpty {
+            HStack(spacing: Vrai.Space.s8) { buttons }
+                .fixedSize()
+        }
+    }
+
+    var buttons: some View {
+        ForEach(model.actions) { action in
+            Button {
+                action.perform?()
+            } label: {
+                HStack(spacing: Vrai.Space.s4) {
+                    if action.busy { Spinner() }
+                    Text(action.title)
+                }
+            }
+            .buttonStyle(VraiButtonStyle(variant: action.primary ? .primary : .secondary, size: .small))
+            .disabled(!action.enabled)
+            .fixedSize()
+        }
     }
 }
 
@@ -217,7 +254,9 @@ enum BannerBuilder {
                 out.append(BannerModel(
                     id: "bisect", tone: .success, icon: "scope",
                     title: String(localized: "\(found.short) is the first bad commit", bundle: .module),
-                    detail: details.foundSubject.map { String(localized: "\($0).", bundle: .module) },
+                    detail: details.foundSubject.map { subject in
+                        store.history.index[found].map { String(localized: "\(subject), by \(store.history.commits[$0].authorName).", bundle: .module) } ?? String(localized: "\(subject).", bundle: .module)
+                    },
                     actions: [BannerAction(title: String(localized: "Show", bundle: .module), enabled: true, perform: { store.showRef(found.rawValue) }), BannerAction(title: String(localized: "End bisect", bundle: .module), primary: true)]
                 ))
             } else {
@@ -302,6 +341,12 @@ struct BannerStack: View {
         if !banners.isEmpty {
             VStack(spacing: 0) {
                 ForEach(banners) { BannerView(model: $0) }
+            }
+            .onChange(of: banners.map(\.id), initial: true) { old, new in
+                let fresh = old == new ? new : new.filter { !old.contains($0) }
+                for banner in banners where fresh.contains(banner.id) {
+                    AccessibilityNotification.Announcement(banner.detail.map { banner.title + ". " + $0 } ?? banner.title).post()
+                }
             }
         }
     }

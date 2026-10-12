@@ -56,7 +56,7 @@ struct RewriteCommitDrag: ViewModifier {
             .padding(.horizontal, Vrai.Space.s8)
             .frame(height: Vrai.Size.controlSm)
             .background(Color.Vrai.surfaceRaised, in: Capsule())
-            .overlay(Capsule().strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+            .overlay(Capsule().strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         }
     }
 }

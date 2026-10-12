@@ -54,7 +54,7 @@ extension ErrorCopy {
             if detail.contains("no such path") || detail.contains("no such file") || detail.contains("does not exist") {
                 return ErrorCopy(
                     title: String(localized: "git has no history for this file", bundle: .module),
-                    message: String(localized: "It isn't in that commit. It may be new, renamed or deleted.", bundle: .module)
+                    message: String(localized: "It isn't in that commit. It may be new, renamed or deleted. Open it from a commit that has it.", bundle: .module)
                 )
             }
             return nil

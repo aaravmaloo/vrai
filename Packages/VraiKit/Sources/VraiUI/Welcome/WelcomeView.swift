@@ -54,7 +54,8 @@ public struct WelcomeView: View {
             }
         }
         .environment(app.preferences)
-        .background(WindowConfigurator(launch: app.launch))
+        .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
+        .accessibilityHostLabel()
         .tint(Color.Vrai.accent)
         .onAppear { AppSheets.register(app: app, openWindow: openWindow) }
     }
@@ -177,6 +178,7 @@ struct WelcomeContent: View {
                 .environment(app.preferences)
                 .environment(\.longTailRoom, LongTailMetrics.welcomeSheetRoom)
                 .tint(Color.Vrai.accent)
+                .accessibilityHostLabel(scope: .any)
         }
         .alert(
             model.missing.map { String(localized: "\($0.name) isn't where it used to be", bundle: .module) } ?? "",
@@ -483,7 +485,7 @@ public struct AboutView: View {
         .padding(Vrai.Space.s20)
         .frame(width: Vrai.Size.alert)
         .background(Color.Vrai.surface)
-        .background(WindowConfigurator(launch: app.launch))
+        .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
         .tint(Color.Vrai.accent)
     }
 

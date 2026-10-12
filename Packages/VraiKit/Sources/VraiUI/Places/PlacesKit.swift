@@ -187,6 +187,8 @@ struct PlacesList<Content: View>: View {
             LazyVStack(spacing: Vrai.Space.s2) {
                 content()
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(label)
             .padding(Vrai.Space.s6)
         }
         .accessibilityElement(children: .contain)

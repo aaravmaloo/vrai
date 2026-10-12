@@ -78,7 +78,7 @@ struct EditableCommandLine: View {
             .background(focused ? Color.Vrai.bg : Color.Vrai.bgSunken, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .strokeBorder(focused ? Color.Vrai.focus : (level == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.separator), lineWidth: Metrics.hairline)
+                    .strokeBorder(focused ? Color.Vrai.focus : (level == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.Contrast.separator), lineWidth: Metrics.hairline)
             }
             if edited {
                 Text(draft.problem ?? String(localized: "Runs as you typed it, and the output shows in the console.", bundle: .module))
@@ -129,6 +129,6 @@ struct ReadOnlyCommandLine: View {
         .padding(.trailing, Vrai.Space.s4)
         .frame(height: Vrai.Size.control)
         .background(Color.Vrai.bgSunken, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(risk == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(risk == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
     }
 }

@@ -9,7 +9,7 @@ struct HistoryView: View {
     @Environment(\.widthClass) private var widthClass
 
     var body: some View {
-        let showInspector = preferences.inspector && store.selection?.commitID != nil && widthClass == .wide
+        let showInspector = preferences.inspector && widthClass == .wide && !store.history.commits.isEmpty && store.selection != .wip
         HStack(spacing: 0) {
             main
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -34,12 +34,14 @@ struct HistoryView: View {
         } else if isEmpty, store.wipFiles.isEmpty {
             emptyState
         } else if widthClass == .compact {
-            if window.pane == .detail {
-                DetailPane()
-            } else {
-                VStack(spacing: 0) {
-                    HistoryBar()
-                    CommitList()
+            ChangesFittedFrame {
+                if window.pane == .detail {
+                    DetailPane()
+                } else {
+                    VStack(spacing: 0) {
+                        HistoryBar()
+                        CommitList()
+                    }
                 }
             }
         } else {
@@ -169,7 +171,7 @@ struct SelectMenu<Content: View>: View {
             .padding(.trailing, Vrai.Space.s4)
             .frame(height: Vrai.Size.controlSm)
             .background(Color.Vrai.surfaceRaised, in: RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         }
         .menuStyle(.button)
         .buttonStyle(.plain)
@@ -230,6 +232,7 @@ struct CommitList: View {
                             WipRowView(row: wip, lanes: lanes, height: height, files: store.snapshot?.working.count ?? 0, selected: selection == .wip, focused: isFocused, columns: columns)
                                 .id(CommitSelection.wip)
                                 .onTapGesture { choose(.wip) }
+                                .accessibilityAction { choose(.wip) }
                                 .simultaneousGesture(TapGesture(count: 2).onEnded { window.show(.changes) })
                                 .contextMenu { WipMenu(window: window) }
                         }
@@ -250,6 +253,7 @@ struct CommitList: View {
                             )
                             .id(CommitSelection.commit(commit.id))
                             .onTapGesture { choose(.commit(commit.id)) }
+                            .accessibilityAction { choose(.commit(commit.id)) }
                             .simultaneousGesture(TapGesture(count: 2).onEnded { confirmCheckout(commit) })
                             .contextMenu { CommitMenu(id: commit.id, window: window) }
                             .modifier(RewriteCommitDrag(commit: commit))
@@ -266,6 +270,8 @@ struct CommitList: View {
                         }
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Commits", bundle: .module))
                 .padding(.horizontal, Vrai.Space.s4)
                 .padding(.bottom, Vrai.Space.s8)
             }

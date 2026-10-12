@@ -100,7 +100,7 @@ extension SyncForm {
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { footerHeight = $0 }
             }
             .padding(Vrai.Space.s20)
-            .frame(width: width)
+            .frame(width: window.sheetWidth(width))
             .background(Color.Vrai.surface)
             .accessibilityElement(children: .contain)
             .accessibilityLabel(title)
@@ -180,7 +180,7 @@ extension SyncForm {
                 .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .strokeBorder(error != nil ? Color.Vrai.danger : focused ? Color.Vrai.focus : (hovering ? Color.Vrai.borderStrong : Color.Vrai.border), lineWidth: Metrics.hairline)
+                        .strokeBorder(error != nil ? Color.Vrai.danger : focused ? Color.Vrai.focus : (hovering ? Color.Vrai.Contrast.borderStrong : Color.Vrai.Contrast.border), lineWidth: Metrics.hairline)
                 }
                 .background {
                     if focused || error != nil {
@@ -229,7 +229,7 @@ extension SyncForm {
                 .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.border, lineWidth: Metrics.hairline)
+                        .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
                 }
                 .background {
                     if focused {
@@ -386,7 +386,7 @@ extension SyncForm {
                 .overlay {
                     if cards {
                         RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                            .strokeBorder(on ? tint : Color.Vrai.border, lineWidth: on ? Metrics.thinStroke : Metrics.hairline)
+                            .strokeBorder(on ? tint : Color.Vrai.Contrast.border, lineWidth: on ? Metrics.thinStroke : Metrics.hairline)
                     }
                 }
                 .contentShape(Rectangle())
@@ -449,7 +449,7 @@ extension SyncForm {
                 .background(Color.Vrai.surfaceRaised, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                        .strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline)
+                        .strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
                 }
                 .contentShape(Rectangle())
             }
@@ -481,7 +481,7 @@ extension SyncForm {
                                 if on {
                                     RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous)
                                         .fill(Color.Vrai.surfaceRaised)
-                                        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline / 2))
+                                        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.sm, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline / 2))
                                         .shadow(color: Color.Vrai.separator, radius: Metrics.hairline, y: Metrics.hairline)
                                 }
                             }
@@ -495,7 +495,7 @@ extension SyncForm {
             .padding(Vrai.Space.s2)
             .frame(height: Vrai.Size.control)
             .background(Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
             .accessibilityElement(children: .contain)
             .accessibilityLabel(label)
         }
@@ -535,11 +535,12 @@ extension SyncForm {
         var detail: String?
         @State var open: Bool
         @ViewBuilder let content: () -> Content
+        @Environment(\.vraiReduceMotion) private var reduceMotion
 
         var body: some View {
             VStack(alignment: .leading, spacing: 0) {
                 Button {
-                    withAnimation(Animation.Vrai.standardFast) { open.toggle() }
+                    withAnimation(reduceMotion ? nil : Animation.Vrai.standardFast) { open.toggle() }
                 } label: {
                     HStack(spacing: Vrai.Space.s6) {
                         Symbol("chevron.right", font: Font.Vrai.caption)
@@ -621,7 +622,7 @@ extension SyncForm {
             .background(Color.Vrai.bgSunken, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .strokeBorder(RiskTag.level(command) == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.separator, lineWidth: Metrics.hairline)
+                    .strokeBorder(RiskTag.level(command) == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline)
             }
         }
 
@@ -716,7 +717,7 @@ extension SyncForm {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Vrai.Space.s4)
             .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
         }
     }
 

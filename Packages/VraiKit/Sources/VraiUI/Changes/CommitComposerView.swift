@@ -65,7 +65,16 @@ struct CommitComposerView: View {
         .padding(Vrai.Space.s12)
         .background(Color.Vrai.bgSubtle)
         .hairline(.top)
-        .onChange(of: changes.focusRequest, initial: false) { _, _ in focus = .summary }
+        .onChange(of: changes.focusRequest, initial: true) { _, _ in claimFocus() }
+    }
+
+    func claimFocus() {
+        let changes = window.changes
+        guard changes.focusRequest != changes.focusHandled else { return }
+        Task { @MainActor in
+            changes.focusHandled = changes.focusRequest
+            focus = .summary
+        }
     }
 
     func reason(staged: Int) -> String? {
@@ -135,7 +144,7 @@ struct CommitComposerView: View {
         .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.border, lineWidth: Metrics.hairline)
+                .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
         }
         .overlay {
             if focused {

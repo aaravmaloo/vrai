@@ -150,12 +150,12 @@ struct SettingsRow<Control: View>: View {
             }
             .padding(.vertical, Vrai.Space.s2)
         } else {
-            LabeledContent {
-                control()
-            } label: {
+            HStack(alignment: .firstTextBaseline, spacing: Vrai.Space.s12) {
                 SettingsLabel(title: title, description: description, icon: icon, badge: badge, mono: mono)
+                Spacer(minLength: Vrai.Space.s12)
+                control()
             }
-            .padding(.vertical, Vrai.Space.s2)
+            .padding(.vertical, Vrai.Space.s2 / 2)
         }
     }
 }
@@ -210,7 +210,6 @@ struct SettingsSelect<Value: Hashable>: View {
         .pickerStyle(.menu)
         .fixedSize()
         .disabled(disabled)
-        .accessibilityLabel(label)
         .accessibilityIdentifier(id ?? label)
     }
 }

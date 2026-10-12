@@ -26,7 +26,7 @@ struct SplitSheet: View {
             if !loaded {
                 Spinner()
             } else if files.count < 2 {
-                SyncForm.Callout(tone: .info, title: String(localized: "There's only one file in this commit", bundle: .module), message: String(localized: "Split works file by file, so it needs at least two.", bundle: .module))
+                SyncForm.Callout(tone: .info, title: String(localized: "There's only 1 file in this commit", bundle: .module), message: String(localized: "Split works file by file, so it needs at least 2.", bundle: .module))
             } else {
                 Text("Move these files into a second commit:", bundle: .module)
                     .font(Font.Vrai.callout)
@@ -50,7 +50,7 @@ struct SplitSheet: View {
                 }
                 SyncForm.Input(label: String(localized: "Summary of the second commit", bundle: .module), text: $subject) { run() }
                 if picked.count == files.count {
-                    Text("Leave at least one file in the first commit.", bundle: .module)
+                    Text("Leave at least 1 file in the first commit.", bundle: .module)
                         .font(Font.Vrai.caption)
                         .foregroundStyle(Color.Vrai.warning)
                 }

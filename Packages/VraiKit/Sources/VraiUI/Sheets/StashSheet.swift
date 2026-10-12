@@ -61,7 +61,7 @@ struct StashSheet: View {
             .frame(maxHeight: Vrai.Space.s64 * 3)
             .fixedSize(horizontal: false, vertical: true)
             .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
             RewriteCheckbox(String(localized: "Include untracked files", bundle: .module), isOn: $untracked, description: String(localized: "--include-untracked", bundle: .module))
             RewriteOptions(command: command, detail: String(localized: "Keep index, staged only", bundle: .module)) {
                 RewriteCheckbox(String(localized: "Leave staged changes in place", bundle: .module), isOn: $keepIndex, description: String(localized: "--keep-index", bundle: .module))

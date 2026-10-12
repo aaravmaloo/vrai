@@ -53,10 +53,11 @@ struct StashesView: View {
             } else {
                 HStack(spacing: 0) {
                     list(stashes, index: index, working: working)
-                        .frame(width: widthClass.isNarrow ? Vrai.Size.filelist + Vrai.Space.s8 : Vrai.Size.inspector + Vrai.Space.s40)
+                        .frame(width: widthClass < .wide ? Vrai.Size.filelist + Vrai.Space.s8 : Vrai.Size.inspector + Vrai.Space.s40)
                         .hairline(.trailing)
                     StashDetailView(stash: stashes[index])
                         .id(stashes[index].oid)
+                        .environment(\.widthClass, widthClass < .wide ? .narrow : widthClass)
                 }
             }
         }
@@ -150,7 +151,7 @@ struct StashDetailView: View {
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack(spacing: Vrai.Space.s12) {
-                    Text(stash.selector).font(Font.Vrai.codeSmall)
+                    Text(stash.selector).font(Font.Vrai.codeSmall).foregroundStyle(Color.Vrai.textSecondary)
                     if let base = stash.base {
                         Text("On \(stash.branch ?? "HEAD"), based on \(base.short)", bundle: .module)
                     }
@@ -234,6 +235,7 @@ struct StashDiffPanel: View {
     @State private var patch: FileDiff?
     @State private var loading = true
     @State private var context = RepositoryStore.defaultContext
+    @FocusState private var filesFocused: Bool
 
     var files: [FileEntry] { detail.files.map(FileEntry.init) }
 
@@ -279,13 +281,29 @@ struct StashDiffPanel: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(files) { file in
-                        FileRowView(path: file.path, oldPath: file.oldPath, status: file.status, additions: file.additions, deletions: file.deletions, binary: file.binary, selected: file.path == (path ?? files.first?.path))
-                            .onTapGesture { select(file.path) }
+                        FileRowView(path: file.path, oldPath: file.oldPath, status: file.status, additions: file.additions, deletions: file.deletions, binary: file.binary, selected: file.path == (path ?? files.first?.path), focused: filesFocused)
+                            .onTapGesture {
+                                filesFocused = true
+                                select(file.path)
+                            }
                             .accessibilityAction { select(file.path) }
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Files", bundle: .module))
                 .padding(.horizontal, Vrai.Space.s4)
                 .padding(.bottom, Vrai.Space.s8)
+            }
+            .focusable()
+            .focusEffectDisabled()
+            .focused($filesFocused)
+            .onKeyPress(keys: [.downArrow, .upArrow], phases: [.down, .repeat]) { press in
+                let current = files.firstIndex { $0.path == (path ?? files.first?.path) }
+                guard !files.isEmpty else { return .ignored }
+                let delta = press.key == .downArrow ? 1 : -1
+                let next = current.map { max(0, min(files.count - 1, $0 + delta)) } ?? 0
+                select(files[next].path)
+                return .handled
             }
             .accessibilityLabel(Text("Files", bundle: .module))
         }

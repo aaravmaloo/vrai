@@ -76,7 +76,7 @@ struct RewriteSheet<Content: View, FooterStart: View, Actions: View>: View {
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { footerHeight = $0 }
         }
         .padding(Vrai.Space.s20)
-        .frame(width: width, alignment: .leading)
+        .frame(width: window.sheetWidth(width), alignment: .leading)
         .background(Color.Vrai.surface)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(title)
@@ -175,7 +175,7 @@ struct RewriteTextField: View {
             .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .strokeBorder(error != nil ? Color.Vrai.danger : (focused ? Color.Vrai.focus : Color.Vrai.border), lineWidth: Metrics.hairline)
+                    .strokeBorder(error != nil ? Color.Vrai.danger : (focused ? Color.Vrai.focus : Color.Vrai.Contrast.border), lineWidth: Metrics.hairline)
             }
             .background {
                 if focused || error != nil {
@@ -238,7 +238,7 @@ struct RewriteSelect<Value: Hashable>: View {
             .padding(.trailing, Vrai.Space.s6)
             .frame(height: Vrai.Size.control)
             .background(Color.Vrai.surfaceRaised, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+            .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
             .contentShape(Rectangle())
         }
         .menuStyle(.button)
@@ -420,13 +420,12 @@ struct RewriteRadioCards<Value: Hashable>: View {
                 .background(on ? (option.danger ? Color.Vrai.dangerSoft : Color.Vrai.accentSoft) : (hovering ? Color.Vrai.bgSubtle : Color.Vrai.bg), in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous)
-                        .strokeBorder(on ? tint : Color.Vrai.border, lineWidth: on ? Metrics.thinStroke : Metrics.hairline)
+                        .strokeBorder(on ? tint : Color.Vrai.Contrast.border, lineWidth: on ? Metrics.thinStroke : Metrics.hairline)
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .onHover { hovering = $0 }
-            .accessibilityElement(children: .ignore)
             .accessibilityLabel(option.label)
             .accessibilityHint(option.description ?? "")
             .accessibilityAddTraits(on ? [.isButton, .isSelected] : .isButton)
@@ -441,7 +440,7 @@ struct RewriteDisclosure<Content: View>: View {
     @State var open: Bool
     @ViewBuilder let content: () -> Content
     @State private var hovering = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
 
     init(title: String, detail: String? = nil, open: Bool = false, @ViewBuilder content: @escaping () -> Content) {
         self.title = title
@@ -453,7 +452,7 @@ struct RewriteDisclosure<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Button {
-                withAnimation(reduceMotion ? Animation.Vrai.standardFast : Animation.Vrai.standardFast) { open.toggle() }
+                withAnimation(reduceMotion ? nil : Animation.Vrai.standardFast) { open.toggle() }
             } label: {
                 HStack(spacing: Vrai.Space.s6) {
                     Symbol("chevron.right", font: Font.Vrai.caption)
@@ -536,7 +535,7 @@ struct RewriteCommandPreview: View {
         .padding(.trailing, Vrai.Space.s4)
         .frame(height: Vrai.Size.control)
         .background(Color.Vrai.bgSunken, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(level == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(level == .destructive ? Color.Vrai.dangerSoft : Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
     }
 
     static func tokens(_ display: String) -> AttributedString {
@@ -630,7 +629,7 @@ struct RewriteCommitList: View {
         .padding(Vrai.Space.s4)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
     }
 }
 

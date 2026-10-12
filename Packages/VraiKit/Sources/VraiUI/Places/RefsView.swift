@@ -137,13 +137,15 @@ struct RefsView: View {
                             }
                         }
                         .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+                        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
                         .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.lg, style: .continuous))
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("refs-group-" + group.id)
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(Text("Refs", bundle: .module))
             .padding(.horizontal, Vrai.Space.s24)
             .padding(.bottom, Vrai.Space.s24)
         }
@@ -255,11 +257,12 @@ struct RefTableRow: View {
         .padding(.vertical, Vrai.Space.s6)
         .frame(minHeight: Vrai.Size.row)
         .overlay(alignment: .top) {
-            Rectangle().fill(Color.Vrai.separator).frame(height: Metrics.hairline)
+            Rectangle().fill(Color.Vrai.Contrast.separator).frame(height: Metrics.hairline)
         }
         .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(entry.name + ", " + target + ", " + RefsView.kindLabel(entry.kind))
+        .accessibilityAddTraits(.isStaticText)
         .accessibilityIdentifier("ref-" + entry.name)
     }
 

@@ -86,7 +86,7 @@ public final class AppModel {
         recents = loadRecents()
         pendingOpen = launch.open
         do {
-            gitExecutable = try GitExecutable.discover(preferred: defaults.string(forKey: "gitPath"))
+            gitExecutable = try discoverGit()
         } catch let error as GitError {
             gitError = error
         } catch {
@@ -94,11 +94,19 @@ public final class AppModel {
         }
     }
 
+    private func discoverGit() throws -> GitExecutable {
+        switch launch.isSandboxed ? launch.gitProblem : nil {
+        case "missing": throw GitError(.gitNotFound)
+        case "old": throw GitError(.gitTooOld(found: GitVersion(2, 39, 5), needed: GitVersion.minimum))
+        default: return try GitExecutable.discover(preferred: defaults.string(forKey: "gitPath"))
+        }
+    }
+
     public var gitVersion: GitVersion? { gitExecutable?.version }
 
     public func rediscoverGit() {
         do {
-            gitExecutable = try GitExecutable.discover(preferred: defaults.string(forKey: "gitPath"))
+            gitExecutable = try discoverGit()
             gitError = nil
         } catch let error as GitError {
             gitError = error

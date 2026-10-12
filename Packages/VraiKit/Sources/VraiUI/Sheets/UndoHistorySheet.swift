@@ -39,7 +39,7 @@ struct UndoHistorySheet: View {
             .padding(.top, Vrai.Space.s4)
         }
         .padding(Vrai.Space.s20)
-        .frame(width: Vrai.Size.sheet)
+        .frame(width: window.sheetWidth(Vrai.Size.sheet))
         .background(Color.Vrai.surface)
         .onExitCommand { window.sheets.dismiss() }
         .task { await load() }

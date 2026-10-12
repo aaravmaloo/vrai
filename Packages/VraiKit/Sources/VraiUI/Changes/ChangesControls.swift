@@ -13,6 +13,7 @@ enum ChangesMetrics {
     static let selectionBar = Vrai.Size.line
     static let summaryLimit = 50
     static let summaryHardLimit = 72
+    static let splitMinimum = Vrai.Size.sheet + Vrai.Space.s40
 }
 
 struct StageCheckbox: View {
@@ -163,7 +164,7 @@ struct ComposerCommandLine: View {
         .padding(.trailing, Vrai.Space.s4)
         .frame(height: Vrai.Size.control)
         .background(Color.Vrai.bgSunken, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
     }
 
     var tokens: Text {

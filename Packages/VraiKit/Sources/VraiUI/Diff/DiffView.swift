@@ -137,6 +137,8 @@ struct DiffView: View {
                         }
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Lines", bundle: .module))
                 .frame(minWidth: geometry.size.width, minHeight: geometry.size.height, alignment: .topLeading)
             }
         }
@@ -194,7 +196,7 @@ struct HunkHeaderView: View {
             .background(Color.Vrai.diffHunkBg)
             .background(Color.Vrai.bg)
             .overlay(alignment: .top) {
-                if !first { Rectangle().fill(Color.Vrai.separator).frame(height: Metrics.hairline) }
+                if !first { Rectangle().fill(Color.Vrai.Contrast.separator).frame(height: Metrics.hairline) }
             }
             .hairline(.bottom)
     }
@@ -220,6 +222,7 @@ struct UnifiedLineView: View {
             }
             .frame(minHeight: metrics.lineHeight)
             .background(gutter)
+            .accessibilityHidden(true)
             Text(CodeRenderer.attributed(line.text, language: language, words: line.wordRanges, wordColor: line.kind == .add ? Color.Vrai.diffAddWord : line.kind == .del ? Color.Vrai.diffDelWord : nil, whitespace: whitespace))
                 .font(metrics.codeFont)
                 .foregroundStyle(line.kind == .noNewline ? Color.Vrai.textTertiary : Color.Vrai.text)
@@ -228,10 +231,11 @@ struct UnifiedLineView: View {
                 .padding(.trailing, Vrai.Space.s16)
                 .frame(maxWidth: .infinity, minHeight: metrics.lineHeight, alignment: .leading)
                 .clipped()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(accessibilityText)
+                .accessibilityAddTraits(.isStaticText)
         }
         .background(background)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
     }
 
     var mark: String {
@@ -270,6 +274,7 @@ struct UnifiedLineView: View {
         switch line.kind {
         case .add: String(localized: "Added line \(line.newNumber ?? 0): \(line.text)", bundle: .module)
         case .del: String(localized: "Removed line \(line.oldNumber ?? 0): \(line.text)", bundle: .module)
+        case .context: String(localized: "Line \(line.newNumber ?? 0): \(line.text)", bundle: .module)
         default: line.text
         }
     }
@@ -311,7 +316,7 @@ struct SplitLineView: View {
     var body: some View {
         HStack(spacing: 0) {
             side(row.old, old: true)
-            Rectangle().fill(Color.Vrai.separator).frame(width: Metrics.hairline)
+            Rectangle().fill(Color.Vrai.Contrast.separator).frame(width: Metrics.hairline)
             side(row.new, old: false)
         }
         .frame(minHeight: metrics.lineHeight)
@@ -353,7 +358,7 @@ struct Hatch: View {
                 path.addLine(to: CGPoint(x: x + size.height, y: 0))
                 x += step
             }
-            context.stroke(path, with: .color(Color.Vrai.separator), lineWidth: Metrics.hairline)
+            context.stroke(path, with: .color(Color.Vrai.Contrast.separator), lineWidth: Metrics.hairline)
         }
         .accessibilityHidden(true)
     }

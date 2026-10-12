@@ -258,7 +258,7 @@ extension RepositoryStore {
         let kept = all.filter { !movedSet.contains($0) }
         let movedKept = all.filter { movedSet.contains($0) }
         guard !kept.isEmpty, !movedKept.isEmpty else {
-            throw GitError(.unknown(exit: 1, stderr: String(localized: "Pick some of the files, but not all of them. Each part needs at least one file.", bundle: .module)))
+            throw GitError(.unknown(exit: 1, stderr: String(localized: "Pick some of the files, but not all of them. Each part needs at least 1 file.", bundle: .module)))
         }
         let original = try await commitMessage(of: id)
         let history: Bool

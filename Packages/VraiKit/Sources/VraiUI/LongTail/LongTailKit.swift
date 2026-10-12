@@ -113,7 +113,7 @@ struct LongTailSheet<Content: View, Start: View, Actions: View>: View {
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { footerHeight = $0 }
         }
         .padding(Vrai.Space.s20)
-        .frame(width: width)
+        .frame(width: window?.sheetWidth(width) ?? width)
         .background(Color.Vrai.surface)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(title)
@@ -175,7 +175,7 @@ struct LongTailProgress: View {
     let label: String
     var detail: String?
     var fraction: Double?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
     @State private var sweep = false
 
     var body: some View {
@@ -221,6 +221,7 @@ struct LongTailProgress: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(label)
         .accessibilityValue(fraction.map { "\(Int(($0 * 100).rounded())) percent" } ?? (detail ?? ""))
+        .accessibilityAddTraits([.isStaticText, .updatesFrequently])
     }
 }
 
@@ -262,7 +263,7 @@ struct LongTailBox<Content: View>: View {
         .frame(maxHeight: maxHeight)
         .fixedSize(horizontal: false, vertical: true)
         .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
     }
 }
 
@@ -321,7 +322,7 @@ struct LongTailCodeEditor: View {
             .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous)
-                    .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.border, lineWidth: Metrics.hairline)
+                    .strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline)
             }
             .background {
                 if focused {

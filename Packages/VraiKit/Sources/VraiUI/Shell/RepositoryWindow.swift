@@ -10,6 +10,7 @@ public struct RepositoryWindowRoot: View {
     @Environment(\.dismissWindow) private var dismissWindow
     @State private var model: WindowModel?
     @State private var failure: GitError?
+    @State private var missing: URL?
 
     public init(reference: Binding<RepositoryReference?>) {
         _reference = reference
@@ -23,6 +24,11 @@ public struct RepositoryWindowRoot: View {
                     .environment(model.store)
                     .environment(model.toasts)
                     .environment(model.preferences)
+            } else if let missing {
+                RepositoryGoneView(name: missing.lastPathComponent, path: missing.path(percentEncoded: false)) {
+                    self.missing = nil
+                    Task { await open(missing) }
+                }
             } else if let failure {
                 EmptyStateView(icon: "exclamationmark.triangle", title: ErrorCopy(failure).title, message: ErrorCopy(failure).message) {
                     VraiButton(title: String(localized: "Try again", bundle: .module), icon: "arrow.clockwise", variant: .primary) {
@@ -36,7 +42,8 @@ public struct RepositoryWindowRoot: View {
             }
         }
         .frame(minWidth: WidthClass.compactBelow - Vrai.Space.s24, minHeight: Vrai.Size.sheet - Vrai.Space.s64)
-        .background(WindowConfigurator(launch: app.launch))
+        .background(WindowConfigurator(launch: app.launch).accessibilityHidden(true))
+        .accessibilityHostLabel()
         .task(id: reference) { await load() }
         .onAppear {
             AppSheets.register(app: app, openWindow: openWindow)
@@ -49,16 +56,24 @@ public struct RepositoryWindowRoot: View {
         }
     }
 
+    func open(_ pending: URL) async {
+        if RepositoryGone.check(pending.path(percentEncoded: false)) {
+            missing = pending
+            return
+        }
+        do {
+            reference = try await app.open(path: pending.path(percentEncoded: false))
+        } catch let error as GitError {
+            failure = error
+        } catch {
+            failure = GitError(.notARepository)
+        }
+    }
+
     func load() async {
         if reference == nil {
             if let pending = app.takePendingOpen() {
-                do {
-                    reference = try await app.open(path: pending.path(percentEncoded: false))
-                } catch let error as GitError {
-                    failure = error
-                } catch {
-                    failure = GitError(.notARepository)
-                }
+                await open(pending)
             } else {
                 openWindow(id: "welcome")
                 dismissWindow()
@@ -75,6 +90,10 @@ public struct RepositoryWindowRoot: View {
             let store = try app.store(for: reference)
             let window = WindowModel(reference: reference, store: store, preferences: app.preferences, now: app.launch.now)
             model = window
+            if app.launch.isSandboxed, let delay = app.launch.openDelay {
+                try? await store.refresh()
+                try? await Task.sleep(for: .milliseconds(delay))
+            }
             await store.open()
             app.saveColors(store.branchColors, for: reference)
         } catch let error as GitError {
@@ -90,13 +109,14 @@ struct RepositoryShell: View {
     @Environment(RepositoryStore.self) private var store
     @Environment(Preferences.self) private var preferences
     @Environment(AppModel.self) private var app
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
 
     var body: some View {
         @Bindable var window = window
         NavigationSplitView(columnVisibility: $window.columns) {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: Vrai.Size.sidebar - Vrai.Space.s48, ideal: Vrai.Size.sidebar, max: Vrai.Size.sidebar + Vrai.Space.s64 * 2)
+                .accessibilityHostLabel(String(localized: "Sidebar", bundle: .module), scope: .column)
         } detail: {
             VStack(spacing: 0) {
                 ContentArea()
@@ -104,6 +124,7 @@ struct RepositoryShell: View {
                     .overlay(alignment: .bottom) { ToastHost() }
                 ConsoleDrawerHost()
             }
+            .accessibilityHostLabel(String(localized: "Content", bundle: .module), scope: .column)
         }
         .navigationTitle(window.repositoryName)
         .toolbar(removing: .title)
@@ -132,7 +153,7 @@ struct RepositoryShell: View {
         .focusedSceneValue(\.windowModel, window)
         .tint(Color.Vrai.accent)
         .onChange(of: store.snapshotError) { _, error in
-            guard let error, store.snapshot != nil else { return }
+            guard let error, store.snapshot != nil, !RepositoryGone.check(window.reference.path) else { return }
             window.alerts.present(error) { Task { try? await store.refresh() } }
         }
         .onAppear { applyTheme() }
@@ -156,7 +177,11 @@ struct ContentArea: View {
 
     var body: some View {
         Group {
-            if let error = store.snapshotError, store.snapshot == nil {
+            if store.snapshotError != nil, RepositoryGone.check(window.reference.path) {
+                RepositoryGoneView(name: window.repositoryName, path: window.reference.path) {
+                    Task { await store.open() }
+                }
+            } else if let error = store.snapshotError, store.snapshot == nil {
                 EmptyStateView(icon: "exclamationmark.triangle", title: ErrorCopy(error).title, message: ErrorCopy(error).message) {
                     VraiButton(title: String(localized: "Try again", bundle: .module), icon: "arrow.clockwise", variant: .primary) {
                         Task { await store.open() }
@@ -200,7 +225,7 @@ struct ContentArea: View {
 struct LoadingView: View {
     @Environment(RepositoryStore.self) private var store
     @Environment(WindowModel.self) private var window
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
     @State private var pulse = false
 
     static let widths: [CGFloat] = [64, 48, 72, 40, 56, 67, 45, 59, 38, 70, 52, 47, 61, 43]
@@ -249,6 +274,8 @@ struct LoadingView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(note)
+        .accessibilityAddTraits(.isStaticText)
+        .accessibilityIdentifier("loading-view")
     }
 
     var note: String {

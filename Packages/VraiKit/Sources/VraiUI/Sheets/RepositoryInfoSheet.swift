@@ -44,7 +44,7 @@ struct RepositoryInfoSheet: View {
             } catch let error as GitError {
                 failure = ErrorCopy(error).message
             } catch {
-                failure = error.localizedDescription
+                failure = ErrorCopy.reading(error)
             }
         }
     }

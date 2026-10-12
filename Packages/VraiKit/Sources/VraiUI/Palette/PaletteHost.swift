@@ -7,7 +7,7 @@ struct PaletteHost: View {
     @Environment(WindowModel.self) private var window
     @Environment(AppModel.self) private var app
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
 
     var body: some View {
         let open = window.palette.open
@@ -158,12 +158,13 @@ struct PaletteView: View {
                 }
                 .padding(.horizontal, Vrai.Space.s16)
                 .frame(height: Self.footerHeight)
+                .background(Color.Vrai.glassFill)
                 .hairline(.top)
             }
         }
         .background(Color.Vrai.glassFill, in: RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous))
         .glassEffect(.regular, in: .rect(cornerRadius: Vrai.Radius.xl))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.xl, style: .continuous))
         .shadow(color: Color.Vrai.glassEdge, radius: Vrai.Space.s24, y: Vrai.Space.s12)
         .onChange(of: flat.count, initial: true) { _, count in
@@ -208,7 +209,7 @@ struct PaletteView: View {
             Text(label)
                 .font(Font.Vrai.caption)
         }
-        .foregroundStyle(Color.Vrai.textTertiary)
+        .foregroundStyle(Color.Vrai.textSecondary)
         .lineLimit(1)
         .fixedSize()
     }

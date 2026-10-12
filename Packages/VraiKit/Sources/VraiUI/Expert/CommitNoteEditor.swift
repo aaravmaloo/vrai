@@ -56,7 +56,7 @@ struct CommitNoteEditor: View {
                 .padding(.horizontal, Vrai.Space.s4)
                 .frame(height: Vrai.Space.s20 * 2 + Vrai.Space.s12)
                 .background(focused ? Color.Vrai.bg : Color.Vrai.fill, in: RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.border, lineWidth: Metrics.hairline))
+                .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(focused ? Color.Vrai.focus : Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
                 HStack(spacing: Vrai.Space.s6) {
                     VraiButton(title: existing == nil ? String(localized: "Add note", bundle: .module) : String(localized: "Save note", bundle: .module), size: .small) { save() }
                         .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || busy)

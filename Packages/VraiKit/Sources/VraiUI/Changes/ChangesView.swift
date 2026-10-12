@@ -44,7 +44,7 @@ struct ChangesFittedFrame<Content: View>: View {
     var body: some View {
         GeometryReader { geometry in
             content()
-                .frame(width: geometry.size.width, height: geometry.size.height)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
         }
         .clipped()
     }

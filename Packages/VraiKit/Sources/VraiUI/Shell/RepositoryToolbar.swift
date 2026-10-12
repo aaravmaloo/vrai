@@ -310,10 +310,11 @@ struct ToolbarField: View {
 
     @ViewBuilder var field: some View {
         let showText = window.widthClass == .wide
+        let prompt = window.preferences.expert ? String(localized: "Search or run a git command", bundle: .module) : String(localized: "Search actions, branches, commits", bundle: .module)
         HStack(spacing: Vrai.Space.s8) {
             Symbol("magnifyingglass", font: Font.Vrai.body)
             if showText {
-                Text(window.preferences.expert ? String(localized: "Search or run a git command", bundle: .module) : String(localized: "Search actions, branches, commits", bundle: .module))
+                Text(prompt)
                     .font(Font.Vrai.body)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -330,7 +331,7 @@ struct ToolbarField: View {
         .onTapGesture { window.openPalette() }
         .help(String(localized: "Command palette", bundle: .module))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Search actions, branches, commits", bundle: .module))
+        .accessibilityLabel(showText ? prompt : String(localized: "Command palette", bundle: .module))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { window.openPalette() }
         .accessibilityIdentifier("toolbar-palette-field")
@@ -361,6 +362,7 @@ struct NarrowActions: View {
         .menuIndicator(.hidden)
         .fixedSize()
         .help(String(localized: "Sync", bundle: .module))
+        .accessibilityLabel(Text("Sync", bundle: .module))
         ToolbarIconButton(icon: "magnifyingglass", label: String(localized: "Search", bundle: .module), shortcut: "\u{2318}K") { window.openPalette() }
         Menu {
             Button(String(localized: "New branch\u{2026}", bundle: .module), systemImage: "arrow.triangle.branch") { window.sync.newBranch() }
@@ -388,5 +390,6 @@ struct NarrowActions: View {
         .menuIndicator(.hidden)
         .fixedSize()
         .help(String(localized: "More", bundle: .module))
+        .accessibilityLabel(Text("More", bundle: .module))
     }
 }

@@ -148,11 +148,12 @@ struct KeyCaps: View {
                     .padding(.horizontal, Vrai.Space.s4)
                     .frame(minWidth: Vrai.Space.s20, minHeight: Vrai.Space.s20)
                     .background(Color.Vrai.surface, in: RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+                    .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(ShortcutCatalog.spoken(keys))
+        .accessibilityAddTraits(.isStaticText)
     }
 }
 
@@ -215,6 +216,7 @@ struct ShortcutRow: View {
         }
         .frame(minHeight: Vrai.Space.s24)
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isStaticText)
         .accessibilityIdentifier("settings.shortcut." + item.label)
     }
 }

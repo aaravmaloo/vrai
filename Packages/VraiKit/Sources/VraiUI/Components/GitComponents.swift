@@ -80,6 +80,7 @@ struct RefPill: View {
         .help(model.current ? String(localized: "\(model.name), checked out", bundle: .module) : model.name)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(model.accessibilityText)
+        .accessibilityAddTraits(.isStaticText)
     }
 
     func foreground(_ lane: Color) -> Color {
@@ -243,6 +244,7 @@ struct SignatureBadge: View {
         .help(title)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(label)
+        .accessibilityAddTraits(.isStaticText)
     }
 
     var symbol: String {
@@ -289,6 +291,7 @@ struct FileStatusTile: View {
         ZStack {
             RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous)
                 .fill(color.opacity(0.12))
+                .background(Color.Vrai.bg, in: RoundedRectangle(cornerRadius: Vrai.Radius.xs, style: .continuous))
             if status == .conflicted {
                 Symbol("exclamationmark.triangle.fill", font: Font.Vrai.overline)
             } else {
@@ -361,6 +364,7 @@ struct FileRowView: View {
     var deletions: Int?
     var binary = false
     var selected = false
+    var focused = true
 
     var body: some View {
         let parts = PathParts.split(path)
@@ -404,7 +408,7 @@ struct FileRowView: View {
         .padding(.trailing, Vrai.Space.s8)
         .frame(height: Vrai.Size.row)
         .contentShape(Rectangle())
-        .hoverHighlight(radius: Vrai.Radius.sm, selected: selected)
+        .hoverHighlight(radius: Vrai.Radius.sm, selected: selected, selectedFill: focused ? Color.Vrai.accentSoft : Color.Vrai.fillActive)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -426,6 +430,7 @@ struct PathBar: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(path)
+        .accessibilityAddTraits(.isStaticText)
     }
 }
 

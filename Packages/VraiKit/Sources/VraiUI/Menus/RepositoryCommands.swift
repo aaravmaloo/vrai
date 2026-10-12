@@ -83,6 +83,7 @@ public struct RepositoryCommands: Commands {
         CommandGroup(before: .windowList) {
             Toggle(String(localized: "Console", bundle: .module), isOn: Binding(get: { window?.console.open == true }, set: { _ in window?.console.toggle() }))
                 .disabled(window == nil)
+            SettingsLink { Text("Settings", bundle: .module) }
             Button(String(localized: "Welcome to Vrai", bundle: .module)) { openWindow(id: "welcome") }
             Divider()
         }

@@ -32,7 +32,7 @@ struct InspectorView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
-                Spacer()
+                EmptyStateView(icon: "info.circle", title: String(localized: "No commit selected", bundle: .module), message: String(localized: "Select a commit to see its author, dates, parents, branches and signature.", bundle: .module), small: true)
             }
         }
         .frame(maxHeight: .infinity)
@@ -81,7 +81,7 @@ struct InspectorView: View {
                     KeyValueRow(key: String(localized: "Author", bundle: .module)) {
                         HStack(spacing: Vrai.Space.s4) {
                             Avatar(name: commit.authorName, size: Vrai.Space.s16)
-                            Text(commit.authorName)
+                            Text(commit.authorName).foregroundStyle(Color.Vrai.text)
                         }
                     }
                     KeyValueRow(key: "") {
@@ -138,13 +138,30 @@ struct InspectorView: View {
                 }
             }
             InspectorSection(title: String(localized: "Actions", bundle: .module)) {
+                let rewrite = RewriteMenuState(window: window, id: commit.id)
                 FlowLayout(spacing: Vrai.Space.s6, lineSpacing: Vrai.Space.s6) {
-                    PendingButton(title: String(localized: "Branch", bundle: .module), icon: "arrow.triangle.branch")
-                    PendingButton(title: String(localized: "Tag", bundle: .module), icon: "tag")
-                    PendingButton(title: String(localized: "Cherry-pick", bundle: .module), icon: "arrow.turn.down.right")
-                    PendingButton(title: String(localized: "Revert", bundle: .module), icon: "arrow.uturn.backward")
-                    PendingButton(title: String(localized: "Reset to here", bundle: .module), icon: "arrow.counterclockwise")
-                    PendingButton(title: String(localized: "Check out", bundle: .module), icon: "mappin.and.ellipse")
+                    VraiButton(title: String(localized: "Branch", bundle: .module), icon: "arrow.triangle.branch", size: .small) {
+                        window.sync.newBranch(from: commit.id.rawValue)
+                    }
+                    VraiButton(title: String(localized: "Tag", bundle: .module), icon: "tag", size: .small) {
+                        window.sync.newTag(target: commit.id.rawValue)
+                    }
+                    .accessibilityIdentifier("inspector-tag")
+                    VraiButton(title: String(localized: "Cherry-pick", bundle: .module), icon: "arrow.turn.down.right", size: .small) {
+                        RewriteActions.cherryPick(window, ids: [commit.id])
+                    }
+                    .disabled(rewrite.inHead)
+                    VraiButton(title: String(localized: "Revert", bundle: .module), icon: "arrow.uturn.backward", size: .small) {
+                        RewriteActions.revert(window, id: commit.id)
+                    }
+                    .disabled(!rewrite.inHead || rewrite.isMerge)
+                    VraiButton(title: String(localized: "Reset to here", bundle: .module), icon: "arrow.counterclockwise", size: .small) {
+                        RewriteActions.openReset(window, target: commit.id)
+                    }
+                    .disabled(rewrite.isTip)
+                    VraiButton(title: String(localized: "Check out", bundle: .module), icon: "mappin.and.ellipse", size: .small) {
+                        window.sync.confirmDetach(commit.id, subject: commit.subject)
+                    }
                 }
             }
         }
@@ -157,16 +174,6 @@ struct InspectorView: View {
         formatter.locale = Locale(identifier: "en_US")
         formatter.dateFormat = "EEE, MMM d, y, h:mm a"
         return formatter.string(from: date)
-    }
-}
-
-struct PendingButton: View {
-    let title: String
-    let icon: String
-
-    var body: some View {
-        VraiButton(title: title, icon: icon, size: .small) {}
-            .disabled(true)
     }
 }
 

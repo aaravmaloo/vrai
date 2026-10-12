@@ -186,7 +186,7 @@ struct ConsoleEntryRow: View {
             try Data(log.output(of: entry).utf8).write(to: url, options: .atomic)
             NSWorkspace.shared.open(url)
         } catch {
-            window.toasts.show(Toast(tone: .danger, message: String(localized: "Couldn't open the output", bundle: .module), detail: error.localizedDescription, icon: "exclamationmark.triangle"))
+            window.toasts.show(Toast(tone: .danger, message: String(localized: "Couldn't open the output", bundle: .module), detail: ErrorCopy.writing(error), icon: "exclamationmark.triangle"))
         }
     }
 }

@@ -7,12 +7,13 @@ struct ConsoleDrawerHost: View {
     @Environment(WindowModel.self) private var window
     @Environment(RepositoryStore.self) private var store
     @Environment(Preferences.self) private var preferences
+    @Environment(\.vraiReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
             if window.console.open {
                 ConsoleDrawer()
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(.vrai(.move(edge: .bottom).combined(with: .opacity), reduceMotion: reduceMotion))
             }
         }
         .onChange(of: store.console.failures) { old, new in
@@ -73,7 +74,7 @@ struct ConsoleDrawer: View {
     @Environment(RepositoryStore.self) private var store
     @Environment(Preferences.self) private var preferences
     @Environment(\.widthClass) private var widthClass
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
     @State private var dragStart: CGFloat?
     @FocusState private var promptFocused: Bool
 
@@ -225,6 +226,8 @@ struct ConsoleDrawer: View {
                         .frame(height: Metrics.hairline)
                         .id("console-bottom")
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Commands", bundle: .module))
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .overlay {

@@ -424,7 +424,7 @@ struct SidebarItem: View {
         .help(help ?? label)
         .accessibilityLabel(label)
         .accessibilityAddTraits(selected ? .isSelected : [])
-        .accessibilityValue(expanded.map { $0 ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module) } ?? Text(verbatim: ""))
+        .accessibilityValue(expanded.map { $0 ? Text("Expanded", bundle: .module) : Text("Collapsed", bundle: .module) } ?? Text(verbatim: count.map { $0 == 0 ? "" : String($0) } ?? ""))
     }
 }
 

@@ -97,41 +97,70 @@ struct ConflictsPane: View {
     }
 
     func head(_ path: String, kind: ConflictFile.Kind) -> some View {
-        let name = PathParts.split(path).name
-        let left = session.path == path ? session.left : 0
-        let structural = !kind.hasMarkers
-        let busy = store.busy.contains("markResolved")
-        return HStack(spacing: Vrai.Space.s8) {
-            Symbol(left > 0 || structural ? "exclamationmark.triangle.fill" : "checkmark.circle.fill", font: Font.Vrai.title3)
-                .foregroundStyle(left > 0 || structural ? Color.Vrai.danger : Color.Vrai.success)
-            Text(structural ? Self.structuralText(kind, name: name) : left > 0 ? String(localized: "\(n(left, "conflict")) left in \(name). Pick a side for each, or open it in your merge tool.", bundle: .module) : String(localized: "Every conflict in \(name) has a resolution. Mark it resolved to stage it.", bundle: .module))
-                .font(Font.Vrai.callout)
-                .foregroundStyle(Color.Vrai.textSecondary)
-                .lineLimit(2)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityIdentifier("conflict-summary")
-            VraiButton(title: String(localized: "Merge tool", bundle: .module), icon: "arrow.triangle.merge", size: .small) {
-                RewriteActions.openMergeTool(window, path: path)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: Vrai.Space.s8) {
+                headIcon(path, kind: kind)
+                headText(path, kind: kind)
+                    .lineLimit(2)
+                    .frame(minWidth: Metrics.bannerText, idealWidth: Metrics.bannerText, maxWidth: .infinity, alignment: .leading)
+                headActions(path, kind: kind)
             }
-            .disabled(structural)
-            Button {
-                RewriteActions.markResolved(window, path: path) { done in
-                    if done { session.advance(after: path, store: store) }
+            VStack(alignment: .trailing, spacing: Vrai.Space.s8) {
+                HStack(alignment: .top, spacing: Vrai.Space.s8) {
+                    headIcon(path, kind: kind)
+                    headText(path, kind: kind)
+                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            } label: {
-                HStack(spacing: Vrai.Space.s4) {
-                    if busy { Spinner() } else { Symbol("checkmark", font: Font.Vrai.callout) }
-                    Text("Mark as resolved", bundle: .module)
-                }
+                HStack(spacing: Vrai.Space.s8) { headActions(path, kind: kind) }
             }
-            .buttonStyle(VraiButtonStyle(variant: .primary, size: .small))
-            .disabled(left > 0 || structural || busy || session.path != path || session.working != nil)
-            .accessibilityIdentifier("mark-resolved")
         }
         .padding(.vertical, Vrai.Space.s8)
         .padding(.horizontal, Vrai.Space.s12)
         .background(Color.Vrai.bgSubtle)
         .hairline(.bottom)
+    }
+
+    func headIcon(_ path: String, kind: ConflictFile.Kind) -> some View {
+        let left = session.path == path ? session.left : 0
+        let warn = left > 0 || !kind.hasMarkers
+        return Symbol(warn ? "exclamationmark.triangle.fill" : "checkmark.circle.fill", font: Font.Vrai.title3)
+            .foregroundStyle(warn ? Color.Vrai.danger : Color.Vrai.success)
+    }
+
+    func headText(_ path: String, kind: ConflictFile.Kind) -> some View {
+        let name = PathParts.split(path).name
+        let left = session.path == path ? session.left : 0
+        return Text(!kind.hasMarkers ? Self.structuralText(kind, name: name) : left > 0 ? String(localized: "\(n(left, "conflict")) left in \(name). Pick a side for each, or open it in your merge tool.", bundle: .module) : String(localized: "Every conflict in \(name) has a resolution. Mark it resolved to stage it.", bundle: .module))
+            .font(Font.Vrai.callout)
+            .foregroundStyle(Color.Vrai.textSecondary)
+            .accessibilityIdentifier("conflict-summary")
+    }
+
+    @ViewBuilder func headActions(_ path: String, kind: ConflictFile.Kind) -> some View {
+        let left = session.path == path ? session.left : 0
+        let structural = !kind.hasMarkers
+        let busy = store.busy.contains("markResolved")
+        VraiButton(title: String(localized: "Merge tool", bundle: .module), icon: "arrow.triangle.merge", size: .small) {
+            RewriteActions.openMergeTool(window, path: path)
+        }
+        .disabled(structural)
+        .fixedSize()
+        Button {
+            RewriteActions.markResolved(window, path: path) { done in
+                if done { session.advance(after: path, store: store) }
+            }
+        } label: {
+            HStack(spacing: Vrai.Space.s4) {
+                if busy { Spinner() } else { Symbol("checkmark", font: Font.Vrai.callout) }
+                Text("Mark as resolved", bundle: .module)
+            }
+        }
+        .buttonStyle(VraiButtonStyle(variant: .primary, size: .small))
+        .disabled(left > 0 || structural || busy || session.path != path || session.working != nil)
+        .fixedSize()
+        .accessibilityIdentifier("mark-resolved")
     }
 
     @ViewBuilder func content(_ path: String, kind: ConflictFile.Kind) -> some View {
@@ -389,6 +418,8 @@ struct ConflictBlocksView: View {
                     }
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(Text("Conflicts", bundle: .module))
             .padding(.vertical, Vrai.Space.s8)
             .frame(width: geometry.size.width, alignment: .leading)
             .clipped()
@@ -476,7 +507,13 @@ struct CodeLine: View {
                 .clipped()
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(text)
+        .accessibilityLabel(spoken)
+        .accessibilityAddTraits(.isStaticText)
+    }
+
+    var spoken: String {
+        if let number { return String(localized: "Line \(number): \(text)", bundle: .module) }
+        return text.trimmingCharacters(in: .whitespaces).isEmpty ? String(localized: "Blank line", bundle: .module) : text
     }
 }
 
@@ -496,26 +533,18 @@ struct ConflictCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: Vrai.Space.s8) {
-                if working {
-                    Spinner()
-                } else {
-                    Symbol("exclamationmark.triangle.fill", font: Font.Vrai.callout)
-                        .foregroundStyle(Color.Vrai.danger)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Vrai.Space.s8) {
+                    heading
+                    Spacer(minLength: Vrai.Space.s8)
+                    HStack(spacing: Vrai.Space.s4) { choices }
+                        .fixedSize()
                 }
-                Text("Conflict \(conflict.index)", bundle: .module)
-                    .font(Font.Vrai.captionStrong)
-                    .foregroundStyle(Color.Vrai.text)
-                Spacer(minLength: Vrai.Space.s8)
-                HStack(spacing: Vrai.Space.s4) {
-                    choiceButton(String(localized: "Accept current", bundle: .module), .ours, variant: .secondary, id: "accept-current")
-                    choiceButton(String(localized: "Accept incoming", bundle: .module), .theirs, variant: .secondary, id: "accept-incoming")
-                    choiceButton(String(localized: "Accept both", bundle: .module), .both, variant: .plain, id: "accept-both")
-                    if expert, base != nil {
-                        choiceButton(String(localized: "Accept base", bundle: .module), .base, variant: .plain, id: "accept-base")
-                    }
+                VStack(alignment: .leading, spacing: Vrai.Space.s4) {
+                    heading
+                    FlowLayout(spacing: Vrai.Space.s4, lineSpacing: Vrai.Space.s4) { choices }
                 }
-                .fixedSize()
+                .padding(.vertical, Vrai.Space.s2)
             }
             .padding(.vertical, Vrai.Space.s4)
             .padding(.leading, Vrai.Space.s12)
@@ -530,11 +559,36 @@ struct ConflictCard: View {
             side(String(localized: "Incoming \u{00B7} \(conflict.theirsLabel)", bundle: .module), lines: theirs, tint: Color.Vrai.conflictTheirs, background: Color.Vrai.conflictTheirsBg, dashed: true)
         }
         .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         .padding(.vertical, Vrai.Space.s6)
         .padding(.horizontal, Vrai.Space.s8)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("conflict-\(conflict.index)")
+    }
+
+    var heading: some View {
+        HStack(spacing: Vrai.Space.s8) {
+            if working {
+                Spinner()
+            } else {
+                Symbol("exclamationmark.triangle.fill", font: Font.Vrai.callout)
+                    .foregroundStyle(Color.Vrai.danger)
+            }
+            Text("Conflict \(conflict.index)", bundle: .module)
+                .font(Font.Vrai.captionStrong)
+                .foregroundStyle(Color.Vrai.text)
+                .lineLimit(1)
+                .fixedSize()
+        }
+    }
+
+    @ViewBuilder var choices: some View {
+        choiceButton(String(localized: "Accept current", bundle: .module), .ours, variant: .secondary, id: "accept-current")
+        choiceButton(String(localized: "Accept incoming", bundle: .module), .theirs, variant: .secondary, id: "accept-incoming")
+        choiceButton(String(localized: "Accept both", bundle: .module), .both, variant: .plain, id: "accept-both")
+        if expert, base != nil {
+            choiceButton(String(localized: "Accept base", bundle: .module), .base, variant: .plain, id: "accept-base")
+        }
     }
 
     func choiceButton(_ title: String, _ choice: ConflictChoice, variant: ButtonVariant, id: String) -> some View {
@@ -566,7 +620,7 @@ struct ConflictCard: View {
             if dashed {
                 Rectangle()
                     .stroke(style: StrokeStyle(lineWidth: Metrics.hairline, dash: [Vrai.Space.s4, Vrai.Space.s4]))
-                    .foregroundStyle(Color.Vrai.borderStrong)
+                    .foregroundStyle(Color.Vrai.Contrast.borderStrong)
                     .frame(height: Metrics.hairline)
             }
         }
@@ -615,7 +669,7 @@ struct ResolvedCard: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.border, lineWidth: Metrics.hairline))
+        .overlay(RoundedRectangle(cornerRadius: Vrai.Radius.md, style: .continuous).strokeBorder(Color.Vrai.Contrast.border, lineWidth: Metrics.hairline))
         .padding(.vertical, Vrai.Space.s6)
         .padding(.horizontal, Vrai.Space.s8)
         .accessibilityElement(children: .contain)

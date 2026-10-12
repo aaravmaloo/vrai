@@ -7,6 +7,9 @@ struct ChangesDiffPane: View {
     @Environment(WindowModel.self) private var window
     @Environment(Preferences.self) private var preferences
     @Environment(\.widthClass) private var widthClass
+    @State private var paneWidth = ChangesMetrics.splitMinimum
+
+    var roomy: Bool { !widthClass.isNarrow && paneWidth >= ChangesMetrics.splitMinimum }
 
     var body: some View {
         let changes = window.changes
@@ -33,6 +36,7 @@ struct ChangesDiffPane: View {
             }
         }
         .background(Color.Vrai.bg)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { paneWidth = $0 }
     }
 
     var backBar: some View {
@@ -72,7 +76,7 @@ struct ChangesDiffPane: View {
                 ])
                 .accessibilityLabel(Text("Which changes", bundle: .module))
             }
-            if !widthClass.isNarrow {
+            if roomy {
                 SegmentedControl(selection: Binding(get: { preferences.diffMode }, set: { preferences.diffMode = $0 }), items: [
                     SegmentItem(value: Preferences.DiffMode.unified, icon: "text.alignleft", label: String(localized: "Unified", bundle: .module)),
                     SegmentItem(value: Preferences.DiffMode.split, icon: "rectangle.split.2x1", label: String(localized: "Side by side", bundle: .module))
@@ -125,7 +129,7 @@ struct ChangesDiffPane: View {
                         side: pick.side,
                         selectable: changes.isLineLevel,
                         selection: changes.lines,
-                        mode: widthClass.isNarrow ? .unified : preferences.diffMode,
+                        mode: roomy ? preferences.diffMode : .unified,
                         wrap: preferences.wrap,
                         whitespace: preferences.whitespace,
                         codeSize: preferences.codeSize

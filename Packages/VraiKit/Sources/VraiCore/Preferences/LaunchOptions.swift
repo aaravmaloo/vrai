@@ -14,6 +14,8 @@ public struct LaunchOptions: Sendable, Equatable {
     public var windowSize: CGSize?
     public var capture = false
     public var settings: String?
+    public var gitProblem: String?
+    public var openDelay: Int?
 
     public init(sandbox: URL? = nil, open: URL? = nil, appearance: Appearance? = nil, now: Date? = nil, windowSize: CGSize? = nil, capture: Bool = false, settings: String? = nil) {
         self.sandbox = sandbox
@@ -49,6 +51,10 @@ public struct LaunchOptions: Sendable, Equatable {
                 capture = ["YES", "1", "true"].contains(value)
             case "-VraiSettings":
                 settings = value
+            case "-VraiGitProblem":
+                gitProblem = value
+            case "-VraiOpenDelay":
+                openDelay = Int(value)
             default:
                 index = next
                 continue

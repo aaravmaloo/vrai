@@ -37,12 +37,10 @@ struct WorktreeSheet: View {
             busy: store.busy.contains("addWorktree"),
             onSubmit: { run(path: destination, branch: branch) }
         ) {
-            SyncForm.Field(label: String(localized: "Branch", bundle: .module)) {
-                SyncForm.Tabs(selection: $mode, items: [
-                    SyncForm.Option(value: Mode.new, label: String(localized: "New branch", bundle: .module)),
-                    SyncForm.Option(value: Mode.existing, label: String(localized: "Existing branch", bundle: .module))
-                ], label: String(localized: "Branch", bundle: .module))
-            }
+            SyncForm.Tabs(selection: $mode, items: [
+                SyncForm.Option(value: Mode.new, label: String(localized: "New branch", bundle: .module)),
+                SyncForm.Option(value: Mode.existing, label: String(localized: "Existing branch", bundle: .module))
+            ], label: String(localized: "Branch", bundle: .module))
             if mode == .new {
                 SyncForm.Input(label: String(localized: "Branch name", bundle: .module), text: $name, placeholder: "fix/sync-button-overlap", error: nameError, mono: true, autofocus: true) {
                     if ok { run(path: destination, branch: branch) }

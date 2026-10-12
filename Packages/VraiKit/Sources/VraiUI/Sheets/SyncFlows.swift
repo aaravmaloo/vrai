@@ -289,7 +289,7 @@ extension SyncModel {
         present(SyncAlert(
             icon: "key",
             title: SyncCopy.authTitle(host: target.host, repository: target.repository),
-            message: String(localized: "Fetch, pull and push to \(target.remote ?? target.host) fail until you sign in again.", bundle: .module),
+            message: web ? String(localized: "The token Vrai uses for \(target.repository) was rejected, so fetch, pull and push can't reach \(target.host). Sign in again, or switch to SSH.", bundle: .module) : String(localized: "The credentials Vrai uses for \(target.repository) were rejected, so fetch, pull and push can't reach \(target.host). Sign in again.", bundle: .module),
             actions: actions
         ))
     }

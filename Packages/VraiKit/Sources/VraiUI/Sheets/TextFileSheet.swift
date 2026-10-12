@@ -11,6 +11,7 @@ struct TextFileSheet: View {
     @State private var mapped: [(from: String, to: String)] = []
     @State private var busy = false
     @State private var failure: String?
+    @State private var readFailed = false
 
     var description: String {
         switch kind {
@@ -43,7 +44,7 @@ struct TextFileSheet: View {
             icon: icon
         ) {
             if let failure {
-                SyncForm.Callout(tone: .danger, title: String(localized: "Vrai couldn't save \(kind.fileName)", bundle: .module), message: failure)
+                SyncForm.Callout(tone: .danger, title: readFailed ? String(localized: "Vrai couldn't read \(kind.fileName)", bundle: .module) : String(localized: "Vrai couldn't save \(kind.fileName)", bundle: .module), message: failure)
             }
             if original == nil {
                 Spinner()
@@ -74,7 +75,8 @@ struct TextFileSheet: View {
                 original = loaded
             } catch {
                 original = ""
-                failure = error.localizedDescription
+                readFailed = true
+                failure = Self.problem(error, file: kind.fileName)
             }
         }
         .task(id: kind == .mailmap ? text : "") {
@@ -125,6 +127,7 @@ struct TextFileSheet: View {
         }
         busy = true
         failure = nil
+        readFailed = false
         let contents = text
         Task {
             defer { busy = false }
@@ -135,8 +138,13 @@ struct TextFileSheet: View {
                     window.show(.changes)
                 })
             } catch {
-                failure = error.localizedDescription
+                failure = Self.problem(error, file: kind.fileName)
             }
         }
+    }
+
+    static func problem(_ error: Error, file: String) -> String {
+        if let error = error as? GitError { return ErrorCopy(error).message }
+        return String(localized: "\(ErrorCopy.describe(error)) Check that you can read and write \(file) at the top of the repository, then try again.", bundle: .module)
     }
 }

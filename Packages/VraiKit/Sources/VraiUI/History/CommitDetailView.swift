@@ -14,6 +14,7 @@ struct DetailPane: View {
                     VraiButton(title: String(localized: "Commits", bundle: .module), icon: "chevron.left", variant: .plain, size: .small) {
                         window.pane = .list
                     }
+                    .accessibilityIdentifier("history-back")
                     Spacer()
                 }
                 .padding(.leading, Vrai.Space.s12)
@@ -125,7 +126,7 @@ struct CommitHeaderView: View {
             FlowLayout(spacing: Vrai.Space.s12, lineSpacing: Vrai.Space.s6) {
                 HStack(spacing: Vrai.Space.s6) {
                     Avatar(name: commit.authorName, size: Vrai.Space.s16 + Vrai.Space.s2)
-                    Text(commit.authorName).lineLimit(1)
+                    Text(commit.authorName).lineLimit(1).foregroundStyle(Color.Vrai.textSecondary)
                 }
                 Text(RelativeDate.text(commit.authorDate, now: now))
                     .foregroundStyle(Color.Vrai.textTertiary)

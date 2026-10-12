@@ -34,6 +34,6 @@ struct StashBranchSheet: View {
         let invalid = name.hasPrefix("-") || name.hasPrefix("/") || name.hasSuffix("/") || name.hasSuffix(".") || name.hasSuffix(".lock")
             || name.contains("..") || name.contains("//") || name.contains("@{") || name == "@"
             || name.contains(where: { "~^:?*[\\".contains($0) || $0.asciiValue.map { $0 < 32 || $0 == 127 } == true })
-        return invalid ? String(localized: "git doesn't allow that name. Use letters, numbers, dashes and slashes.", bundle: .module) : nil
+        return invalid ? String(localized: "git won't accept that name: avoid .., ~ ^ : ? * [ \\ and a trailing slash.", bundle: .module) : nil
     }
 }

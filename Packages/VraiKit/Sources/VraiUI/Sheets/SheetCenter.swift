@@ -37,6 +37,7 @@ struct SheetHost: ViewModifier {
         content.sheet(item: $center.current) { request in
             request.content
                 .modifier(CommandDraftScope())
+                .accessibilityHostLabel(scope: .any)
         }
     }
 }

@@ -62,6 +62,7 @@ enum Metrics {
     static let toolbarButton = Vrai.Size.toolbarItem - Vrai.Space.s4
     static let toolbarButtonMin = Vrai.Size.toolbarItem + Vrai.Space.s4
     static let bannerHeight = Vrai.Size.control + Vrai.Space.s16
+    static let bannerText = Vrai.Size.sidebar - Vrai.Space.s48
     static let narrowFiles = Vrai.Space.s64 * 2.5
     static let mediumFiles = Vrai.Size.filelist - Vrai.Space.s64
     static let switchWidth = Vrai.Space.s24
@@ -144,7 +145,7 @@ extension View {
     func hairline(_ edge: Edge) -> some View {
         overlay(alignment: edge.alignment) {
             Rectangle()
-                .fill(Color.Vrai.separator)
+                .fill(Color.Vrai.Contrast.separator)
                 .frame(width: edge.isHorizontal ? Metrics.hairline : nil, height: edge.isHorizontal ? nil : Metrics.hairline)
         }
     }
@@ -186,10 +187,18 @@ struct HoverHighlight: ViewModifier {
     var hoverFill: Color = Color.Vrai.fill
     @State private var hovering = false
     @Environment(\.captureMode) private var capture
+    @Environment(\.vraiIncreaseContrast) private var increaseContrast
 
     func body(content: Content) -> some View {
         content
             .background(selected ? selectedFill : (hovering && !capture ? hoverFill : Color.clear), in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .overlay {
+                if selected, increaseContrast {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(selectedFill == Color.Vrai.accentSoft ? Color.Vrai.focus : Color.Vrai.borderControl, lineWidth: Metrics.hairline)
+                        .allowsHitTesting(false)
+                }
+            }
             .onHover { hovering = $0 }
     }
 }
@@ -207,7 +216,7 @@ struct Avatar: View {
     var body: some View {
         Circle()
             .fill(Color.Vrai.fillActive)
-            .overlay(Circle().strokeBorder(Color.Vrai.separator, lineWidth: Metrics.hairline))
+            .overlay(Circle().strokeBorder(Color.Vrai.Contrast.separator, lineWidth: Metrics.hairline))
             .overlay {
                 Text(Self.initial(name))
                     .font(Font.Vrai.overline)

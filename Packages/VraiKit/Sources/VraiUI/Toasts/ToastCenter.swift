@@ -47,6 +47,7 @@ public final class ToastCenter {
     @discardableResult
     public func show(_ toast: Toast) -> UUID {
         toasts = Array((toasts + [toast]).suffix(Self.limit))
+        AccessibilityNotification.Announcement(toast.detail.map { toast.message + ". " + $0 } ?? toast.message).post()
         let id = toast.id
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(toast.duration))
@@ -125,7 +126,7 @@ struct ToastActionStyle: ButtonStyle {
 
 struct ToastHost: View {
     @Environment(ToastCenter.self) private var center
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.vraiReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: Vrai.Space.s8) {

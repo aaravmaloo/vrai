@@ -57,6 +57,7 @@ final class SyncModel {
     var toggleOn = false
     var isKey = true
     var windowHeight: CGFloat = 0
+    var windowWidth: CGFloat = 0
     var userNetwork = 0
     @ObservationIgnored var fetcher: BackgroundFetcher?
     @ObservationIgnored var retryWhenOnline: (@MainActor () -> Void)?
@@ -379,6 +380,7 @@ struct SyncWiring: ViewModifier {
             .onDisappear { SyncHub.shared.remove(window) }
             .onChange(of: active, initial: true) { _, value in sync.isKey = value }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sync.windowHeight = $0 }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { sync.windowWidth = $0 }
             .onChange(of: window.preferences.backgroundFetch) { _, _ in sync.restartFetcher() }
             .onChange(of: window.preferences.fetchInterval) { _, _ in sync.restartFetcher() }
             .onChange(of: window.preferences.notifications) { _, value in sync.fetcher?.notifyAboutNewCommits = value }
