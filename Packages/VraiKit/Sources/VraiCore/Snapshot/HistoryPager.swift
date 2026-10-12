@@ -69,8 +69,8 @@ public actor HistoryPager {
     private let scope: HistoryScope
     private let filter: HistoryFilter
     private var layout: LaneLayout
-    private let colors: [OID: Int]
-    private let head: OID?
+    private var colors: [OID: Int]
+    private var head: OID?
     private var wip: LayoutCommit?
     private var iterator: AsyncThrowingStream<Data, Error>.AsyncIterator?
     private var buffer = Data()
@@ -91,6 +91,18 @@ public actor HistoryPager {
         self.head = head
         self.layout = LaneLayout(keepMissing: filter.isEmpty)
         self.command = .read(LogParser.historyArguments(scope: scope.arguments, extra: filter.arguments, paths: filter.paths))
+    }
+
+    public func start() {
+        guard iterator == nil, !finished, delivered == 0 else { return }
+        iterator = git.stream(command).makeAsyncIterator()
+    }
+
+    public func configure(colors: [OID: Int], head: OID?, wip: LayoutCommit?) {
+        guard delivered == 0 else { return }
+        self.colors = colors
+        self.head = head
+        self.wip = wip
     }
 
     public func nextPage() async throws -> HistoryPage? {

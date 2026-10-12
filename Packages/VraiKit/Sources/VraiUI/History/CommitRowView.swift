@@ -2,12 +2,37 @@ import SwiftUI
 import VraiCore
 import VraiGit
 
+@MainActor
+final class RefPillsCache {
+    struct Key: Equatable {
+        var head: Head
+        var branches: [Branch]
+        var remoteBranches: [RemoteBranch]
+        var remotes: [Remote]
+        var tags: [Tag]
+        var state: RepoState
+        var skipped: [OID]
+    }
+
+    private var key: Key?
+    private var value: [OID: [RefPillModel]] = [:]
+
+    func pills(_ snapshot: RepositorySnapshot, skipped: [OID]) -> [OID: [RefPillModel]] {
+        let next = Key(head: snapshot.head, branches: snapshot.branches, remoteBranches: snapshot.remoteBranches, remotes: snapshot.remotes, tags: snapshot.tags, state: snapshot.state, skipped: skipped)
+        if next != key {
+            value = RefPills.byCommit(snapshot, skipped: skipped)
+            key = next
+        }
+        return value
+    }
+}
+
 enum RefPills {
-    static func byCommit(_ snapshot: RepositorySnapshot, skipped: [OID] = []) -> [OID: [RefPillModel]] {
+    static func byCommit(_ snapshot: RepositorySnapshot, skipped: [OID] = [], only: OID? = nil) -> [OID: [RefPillModel]] {
         var map: [OID: [RefPillModel]] = [:]
-        func add(_ id: OID?, _ pill: RefPillModel) {
-            guard let id else { return }
-            map[id, default: []].append(pill)
+        func add(_ id: OID?, _ pill: @autoclosure () -> RefPillModel) {
+            guard let id, only == nil || id == only else { return }
+            map[id, default: []].append(pill())
         }
         if case .detached(let id) = snapshot.head { add(id, RefPillModel(kind: .head, name: "HEAD")) }
         let current = snapshot.head.branchName

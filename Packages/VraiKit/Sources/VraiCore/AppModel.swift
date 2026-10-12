@@ -77,6 +77,8 @@ public final class AppModel {
     public static let maximumRecents = 20
 
     public init(launch: LaunchOptions) {
+        PerfLog.sinceLaunch("launch.model.start")
+        PerfLog.watchLaunch()
         self.launch = launch
         defaults = launch.makeDefaults()
         askpassHelper = AskpassBridge.bundledHelper()
@@ -85,6 +87,7 @@ public final class AppModel {
         preferences = Preferences(defaults: defaults)
         recents = loadRecents()
         pendingOpen = launch.open
+        PerfLog.sinceLaunch("launch.model.git")
         do {
             gitExecutable = try discoverGit()
         } catch let error as GitError {
@@ -92,6 +95,7 @@ public final class AppModel {
         } catch {
             gitError = GitError(.gitNotFound)
         }
+        PerfLog.sinceLaunch("launch.model.end")
     }
 
     private func discoverGit() throws -> GitExecutable {

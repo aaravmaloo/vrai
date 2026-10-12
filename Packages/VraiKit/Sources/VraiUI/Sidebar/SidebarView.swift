@@ -137,9 +137,8 @@ struct SidebarView: View {
 
     @ViewBuilder var tags: some View {
         if let snapshot, !snapshot.tags.isEmpty {
-            let sorted = snapshot.tags.sorted { $0.name.compare($1.name, options: .numeric) == .orderedDescending }
-            SidebarSection(title: String(localized: "Tags", bundle: .module), key: "tags", count: sorted.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "New tag", bundle: .module)), perform: { window.sync.newTag() }) {
-                ForEach(sorted.prefix(500)) { tag in
+            SidebarSection(title: String(localized: "Tags", bundle: .module), key: "tags", count: snapshot.tags.count, defaultOpen: false, action: (icon: "plus", label: String(localized: "New tag", bundle: .module)), perform: { window.sync.newTag() }) {
+                ForEach(snapshot.tags.sorted { $0.name.compare($1.name, options: .numeric) == .orderedDescending }.prefix(500)) { tag in
                     SidebarItem(icon: "tag", label: tag.name, detail: tag.annotated ? nil : String(localized: "lightweight", bundle: .module), selected: store.sidebarSelection == "tag:" + tag.name) {
                         pick("tag:" + tag.name, ref: tag.name)
                     }

@@ -201,6 +201,13 @@ for (let i = step; i < mainTips.length && tagCount < TAGS; i += step) {
     await emit("reset refs/tags/" + name + "\nfrom :" + mainTips[i] + "\n\n");
   }
 }
+const TABLE_LINES = 5000;
+const table = ["import Foundation", "", "enum LexerTable {", "    static let entries: [(token: String, weight: Int, next: Int)] = ["];
+for (let i = 0; table.length < TABLE_LINES - 2; i++) {
+  table.push("        (token: \"" + pick(NOUNS).replace(/ /g, "_") + "_" + i + "\", weight: " + ((i * 7919) % 1000) + ", next: " + ((i * 104729) % TABLE_LINES) + "),");
+}
+table.push("    ]", "}");
+mainTip = await commit("refs/heads/main", mainTip, 0, "Generated: add the lexer tables", [["Sources/Generated/LexerTable.swift", table]], PEOPLE[2]);
 await emit("done\n");
 await flush();
 importer.stdin.end();

@@ -40,6 +40,7 @@ public final class RepositoryStore {
     public static let wipID = OID(String(repeating: "0", count: 40))!
 
     @ObservationIgnored private var pager: HistoryPager?
+    @ObservationIgnored private var earlyPager: (pager: HistoryPager, scope: HistoryScope)?
     @ObservationIgnored private var historyGeneration = 0
     @ObservationIgnored private var historyKey: HistoryKey?
     @ObservationIgnored private var historyActive = false
@@ -56,6 +57,7 @@ public final class RepositoryStore {
     @ObservationIgnored private var refreshing = false
     @ObservationIgnored private var refreshAgain = false
     @ObservationIgnored private var scrollSequence = 0
+    @ObservationIgnored var ownIndexStamp: IndexStamp?
 
     public init(git: GitProcess, colors: BranchColors = BranchColors(), console: ConsoleLog = ConsoleLog()) {
         self.git = git
@@ -89,13 +91,17 @@ public final class RepositoryStore {
     public func perform<T: Sendable>(_ action: String, refresh shouldRefresh: Bool = true, _ body: () async throws -> T) async throws -> T {
         busy.insert(action)
         defer { busy.remove(action) }
+        PerfLog.begin("action." + action)
         do {
             let value = try await body()
             if shouldRefresh { try await refresh() }
+            noteOwnIndex()
+            PerfLog.endAfterCommit("action." + action)
             emit(.operationFinished(id: action, outcome: .succeeded))
             return value
         } catch {
             if shouldRefresh { try? await refresh() }
+            noteOwnIndex()
             emit(.operationFinished(id: action, outcome: .failed(error as? GitError ?? GitError(.unknown(exit: -1, stderr: String(describing: error))))))
             throw error
         }
@@ -119,9 +125,16 @@ public final class RepositoryStore {
         historyActive = true
         isOpening = true
         defer { isOpening = false }
+        if history.phase == .idle, earlyPager == nil {
+            let early = HistoryPager(git: git, scope: scope, pageSize: pageSize)
+            await early.start()
+            earlyPager = (early, scope)
+        }
         do {
             try await refresh()
         } catch {
+            if let early = earlyPager?.pager { await early.cancel() }
+            earlyPager = nil
             return
         }
         if history.phase == .idle { await reloadHistory() }
@@ -135,6 +148,10 @@ public final class RepositoryStore {
         patchTask?.cancel()
         inspectorTask?.cancel()
         signatureTask?.cancel()
+        let pagers = [pager, earlyPager?.pager].compactMap { $0 }
+        pager = nil
+        earlyPager = nil
+        if !pagers.isEmpty { Task { for pager in pagers { await pager.cancel() } } }
         for continuation in continuations.values { continuation.finish() }
         continuations.removeAll()
     }
@@ -152,7 +169,20 @@ public final class RepositoryStore {
         let generation = historyGeneration
         if let old = pager { await old.cancel() }
         let key = HistoryKey(snapshot, scope: scope)
-        let pager = HistoryPager(git: git, scope: scope, colors: snapshot.tipColors, head: snapshot.headOID, pageSize: pageSize, wip: wipCommit(for: snapshot))
+        let pager: HistoryPager
+        if let early = earlyPager, early.scope == scope {
+            earlyPager = nil
+            pager = early.pager
+            await pager.configure(colors: snapshot.tipColors, head: snapshot.headOID, wip: wipCommit(for: snapshot))
+        } else {
+            if let early = earlyPager?.pager { await early.cancel() }
+            earlyPager = nil
+            pager = HistoryPager(git: git, scope: scope, colors: snapshot.tipColors, head: snapshot.headOID, pageSize: pageSize, wip: wipCommit(for: snapshot))
+        }
+        guard generation == historyGeneration else {
+            await pager.cancel()
+            return
+        }
         self.pager = pager
         loadingMore = false
         if history.phase != .loaded { history.phase = .loading }
@@ -257,6 +287,7 @@ public final class RepositoryStore {
     public func select(_ selection: CommitSelection?, scroll: Bool = false) {
         if scroll, let selection { requestScroll(to: selection) }
         guard selection != self.selection else { return }
+        if case .commit = selection { PerfLog.begin("select-commit") }
         self.selection = selection
         detailTask?.cancel()
         patchTask?.cancel()
@@ -361,7 +392,7 @@ public final class RepositoryStore {
         return snapshot.working.filter { $0.status != .conflicted }
     }
 
-    private func refreshWipSelection() {
+    func refreshWipSelection() {
         history.wipFiles = snapshot?.working.count ?? 0
         guard selection == .wip else { return }
         let files = wipFiles
@@ -400,6 +431,7 @@ public final class RepositoryStore {
     public func selectFile(_ path: String) {
         guard let selection else { return }
         if selectedPath != path { contextLines = Self.defaultContext }
+        PerfLog.begin("diff")
         selectedPath = path
         loadPatch(for: selection, path: path, quiet: false)
     }
@@ -608,6 +640,7 @@ public final class RepositoryStore {
 
     private func outsideChanged(_ changes: Set<RepositoryChange>) async {
         guard busy.isEmpty else { return }
+        if isOwnIndexChange(changes) { return }
         emit(.changedOutside(changes))
         if refreshing {
             refreshAgain = true
@@ -615,10 +648,12 @@ public final class RepositoryStore {
         }
         refreshing = true
         defer { refreshing = false }
+        PerfLog.begin("refresh.outside")
         repeat {
             refreshAgain = false
             try? await refresh()
         } while refreshAgain
+        PerfLog.endAfterCommit("refresh.outside", detail: changes.map(\.rawValue).sorted().joined(separator: ","))
     }
 }
 
@@ -726,6 +761,7 @@ public struct HistoryState: Sendable {
     public var phase: LoadState = .idle
     public var isComplete = false
     public var totalCount: Int?
+    public private(set) var authorCounts: [String: Int] = [:]
 
     public init(phase: LoadState = .idle, isComplete: Bool = false) {
         self.phase = phase
@@ -736,7 +772,10 @@ public struct HistoryState: Sendable {
         let start = commits.count
         commits.append(contentsOf: page.commits)
         rows.append(contentsOf: page.rows)
-        for (offset, commit) in page.commits.enumerated() { index[commit.id] = start + offset }
+        for (offset, commit) in page.commits.enumerated() {
+            index[commit.id] = start + offset
+            authorCounts[commit.authorName, default: 0] += 1
+        }
         lanes = max(lanes, page.lanes)
         if page.isLast {
             isComplete = true
@@ -745,9 +784,7 @@ public struct HistoryState: Sendable {
     }
 
     public var authors: [(name: String, count: Int)] {
-        var counts: [String: Int] = [:]
-        for commit in commits { counts[commit.authorName, default: 0] += 1 }
-        return counts.map { ($0.key, $0.value) }.sorted { $0.count != $1.count ? $0.count > $1.count : $0.name < $1.name }
+        authorCounts.map { ($0.key, $0.value) }.sorted { $0.count != $1.count ? $0.count > $1.count : $0.name < $1.name }
     }
 }
 

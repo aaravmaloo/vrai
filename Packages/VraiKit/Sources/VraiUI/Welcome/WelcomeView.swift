@@ -58,6 +58,7 @@ public struct WelcomeView: View {
         .accessibilityHostLabel()
         .tint(Color.Vrai.accent)
         .onAppear { AppSheets.register(app: app, openWindow: openWindow) }
+        .perfLaunch("launch")
     }
 }
 
@@ -218,6 +219,7 @@ struct WelcomeContent: View {
             model.missing = recent
             return
         }
+        PerfLog.begin("open")
         context.opened(RepositoryReference(path: recent.path))
     }
 

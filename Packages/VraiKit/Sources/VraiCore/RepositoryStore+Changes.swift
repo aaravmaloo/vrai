@@ -6,8 +6,10 @@ extension RepositoryStore {
 
     public func stage(paths: [String]) async throws {
         guard !paths.isEmpty else { return }
-        try await perform("stage") {
-            _ = try await git.run(StagingService.stageCommand(paths: paths))
+        try await perform("stage", refresh: false) {
+            try await refreshingPaths(paths) {
+                _ = try await git.run(StagingService.stageCommand(paths: paths))
+            }
         }
     }
 
@@ -17,9 +19,11 @@ extension RepositoryStore {
         for path in paths {
             if let old = snapshot?.working.first(where: { $0.path == path })?.oldPath, !expanded.contains(old) { expanded.append(old) }
         }
-        try await perform("unstage") {
-            let unborn = try await staging.isUnborn()
-            _ = try await git.run(StagingService.unstageCommand(paths: expanded, unborn: unborn))
+        try await perform("unstage", refresh: false) {
+            try await refreshingPaths(expanded) {
+                let unborn = try await staging.isUnborn()
+                _ = try await git.run(StagingService.unstageCommand(paths: expanded, unborn: unborn))
+            }
         }
     }
 
@@ -38,15 +42,19 @@ extension RepositoryStore {
 
     public func stage(lines selection: LineSelection) async throws {
         guard let command = try StagingService.lineCommand(selection, action: .stage) else { return }
-        try await perform("stage") {
-            _ = try await git.run(command)
+        try await perform("stage", refresh: false) {
+            try await refreshingPaths([selection.path]) {
+                _ = try await git.run(command)
+            }
         }
     }
 
     public func unstage(lines selection: LineSelection) async throws {
         guard let command = try StagingService.lineCommand(selection, action: .unstage) else { return }
-        try await perform("unstage") {
-            _ = try await git.run(command)
+        try await perform("unstage", refresh: false) {
+            try await refreshingPaths([selection.path]) {
+                _ = try await git.run(command)
+            }
         }
     }
 

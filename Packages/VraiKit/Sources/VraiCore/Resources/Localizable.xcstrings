@@ -64,9 +64,6 @@
     "Amended %@" : {
 
     },
-    "and" : {
-
-    },
     "Applied %@" : {
 
     },
@@ -138,9 +135,6 @@
     "Deleted tag %@" : {
 
     },
-    "detached HEAD" : {
-
-    },
     "Discarded %@ in %@" : {
       "localizations" : {
         "en" : {
@@ -194,12 +188,6 @@
     "From %@." : {
 
     },
-    "git keeps this repository fast while you work." : {
-
-    },
-    "git shows the original object again." : {
-
-    },
     "Initialized %@" : {
 
     },
@@ -216,9 +204,6 @@
 
     },
     "Its commits stay in the repository." : {
-
-    },
-    "just now" : {
 
     },
     "Locked %@" : {
@@ -258,7 +243,13 @@
     "Not on a branch. Create one to keep commits you make here." : {
 
     },
+    "ORIG_HEAD %@" : {
+
+    },
     "On %@" : {
+
+    },
+    "On %@." : {
 
     },
     "On %@: changes from worktree %@" : {
@@ -271,13 +262,7 @@
         }
       }
     },
-    "On %@." : {
-
-    },
-    "ORIG_HEAD %@" : {
-
-    },
-    "Pick some of the files, but not all of them. Each part needs at least one file." : {
+    "Pick some of the files, but not all of them. Each part needs at least 1 file." : {
 
     },
     "Pruned %@" : {
@@ -455,12 +440,6 @@
     "Updated %@" : {
 
     },
-    "vrai-editor is missing, so Vrai can't hand the message to git. Reinstall Vrai." : {
-
-    },
-    "vrai-editor is missing, so Vrai can't hand the rebase plan to git. Reinstall Vrai." : {
-
-    },
     "Was at %@" : {
 
     },
@@ -490,6 +469,27 @@
 
     },
     "Your earlier version stays in Undo history for 14 days" : {
+
+    },
+    "and" : {
+
+    },
+    "detached HEAD" : {
+
+    },
+    "git keeps this repository fast while you work." : {
+
+    },
+    "git shows the original object again." : {
+
+    },
+    "just now" : {
+
+    },
+    "vrai-editor is missing, so Vrai can't hand the message to git. Reinstall Vrai." : {
+
+    },
+    "vrai-editor is missing, so Vrai can't hand the rebase plan to git. Reinstall Vrai." : {
 
     }
   },

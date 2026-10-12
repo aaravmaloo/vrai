@@ -50,7 +50,7 @@ final class StreamBox: @unchecked Sendable {
                 if self.head.count < 65_536 { self.head.append(data.prefix(65_536 - self.head.count)) }
                 return self.cancelled ? nil : self.continuation
             }
-            target?.yield(data)
+            target?.yield(data.withUnsafeBytes { Data($0) })
         }
         spawned.onStderr = { [weak self] data in self?.lock.withLock { self?.stderr.append(data) } }
         spawned.onStdoutEnd = { [weak self] in self?.finishOne() }

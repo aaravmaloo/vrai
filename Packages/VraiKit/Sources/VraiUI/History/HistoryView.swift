@@ -203,8 +203,10 @@ struct CommitList: View {
     @Environment(WindowModel.self) private var window
     @Environment(Preferences.self) private var preferences
     @Environment(\.widthClass) private var widthClass
+    @Environment(\.expert) private var expert
     @FocusState private var focused: Bool
     @State private var bisectSkipped: [OID] = []
+    @State private var refPills = RefPillsCache()
 
     var rowHeight: CGFloat {
         switch preferences.density {
@@ -216,78 +218,28 @@ struct CommitList: View {
 
     var body: some View {
         let history = store.history
-        let refs = store.snapshot.map { RefPills.byCommit($0, skipped: bisectSkipped) } ?? [:]
+        let refs = store.snapshot.map { refPills.pills($0, skipped: bisectSkipped) } ?? [:]
         let columns: CommitColumns = widthClass.isNarrow ? [.date] : .all
         let showHeader = widthClass >= .regular
-        let filter = CommitFilter(query: window.query, author: window.author)
-        let selection = store.selection
-        let lanes = history.lanes
-        let height = rowHeight
-        let isFocused = focused || window.listFocused
-        ScrollViewReader { proxy in
-            ScrollView(.vertical) {
-                LazyVStack(spacing: 0, pinnedViews: showHeader ? [.sectionHeaders] : []) {
-                    Section {
-                        if let wip = history.wipRow {
-                            WipRowView(row: wip, lanes: lanes, height: height, files: store.snapshot?.working.count ?? 0, selected: selection == .wip, focused: isFocused, columns: columns)
-                                .id(CommitSelection.wip)
-                                .onTapGesture { choose(.wip) }
-                                .accessibilityAction { choose(.wip) }
-                                .simultaneousGesture(TapGesture(count: 2).onEnded { window.show(.changes) })
-                                .contextMenu { WipMenu(window: window) }
-                        }
-                        ForEach(history.commits) { commit in
-                            let index = history.index[commit.id] ?? 0
-                            CommitRowView(
-                                commit: commit,
-                                row: history.rows[index],
-                                lanes: lanes,
-                                height: height,
-                                refs: refs[commit.id] ?? [],
-                                selected: selection == .commit(commit.id),
-                                focused: isFocused,
-                                dim: filter.isActive && !filter.matches(commit),
-                                query: filter.query,
-                                columns: columns,
-                                signature: store.signature(of: commit)
-                            )
-                            .id(CommitSelection.commit(commit.id))
-                            .onTapGesture { choose(.commit(commit.id)) }
-                            .accessibilityAction { choose(.commit(commit.id)) }
-                            .simultaneousGesture(TapGesture(count: 2).onEnded { confirmCheckout(commit) })
-                            .contextMenu { CommitMenu(id: commit.id, window: window) }
-                            .modifier(RewriteCommitDrag(commit: commit))
-                            .onAppear {
-                                store.requestSignatures(for: [commit.id])
-                                if index >= history.commits.count - 200 {
-                                    Task { await store.loadMoreHistory() }
-                                }
-                            }
-                        }
-                    } header: {
-                        if showHeader {
-                            HistoryHeader(graphWidth: GraphCell.width(lanes: lanes), columns: columns)
-                        }
-                    }
-                }
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel(Text("Commits", bundle: .module))
-                .padding(.horizontal, Vrai.Space.s4)
-                .padding(.bottom, Vrai.Space.s8)
+        let state = CommitTableState(
+            history: history,
+            refs: refs,
+            selection: store.selection,
+            focused: focused || window.listFocused,
+            filter: CommitFilter(query: window.query, author: window.author),
+            columns: columns,
+            height: rowHeight,
+            expert: expert,
+            files: store.snapshot?.working.count ?? 0,
+            scrollRequest: store.scrollRequest,
+            signatures: expert ? store.signatures : [:]
+        )
+        VStack(spacing: 0) {
+            if showHeader {
+                HistoryHeader(graphWidth: GraphCell.width(lanes: history.lanes), columns: columns)
+                    .padding(.horizontal, Vrai.Space.s4)
             }
-            .onChange(of: store.scrollRequest) { _, request in
-                guard let request else { return }
-                withAnimation(nil) { proxy.scrollTo(request.target, anchor: .center) }
-            }
-            .onAppear {
-                if let request = store.scrollRequest {
-                    proxy.scrollTo(request.target, anchor: .center)
-                }
-            }
-            .onChange(of: store.selection) { _, selection in
-                guard let selection, focused else { return }
-                proxy.scrollTo(selection)
-            }
+            CommitTable(state: state, content: row, onRowShown: shown)
         }
         .focusable()
         .focusEffectDisabled()
@@ -323,7 +275,46 @@ struct CommitList: View {
         .accessibilityLabel(Text("Commits", bundle: .module))
         .accessibilityIdentifier("commits")
         .task(id: store.snapshot?.state) { bisectSkipped = await BisectMarks.skipped(store) }
+        .perfEnd("open", when: !history.commits.isEmpty)
     }
+
+    @ViewBuilder func row(_ model: CommitTableRow) -> some View {
+        if let commit = model.commit {
+            CommitRowView(
+                commit: commit,
+                row: model.graph,
+                lanes: model.lanes,
+                height: model.height,
+                refs: model.refs,
+                selected: model.selected,
+                focused: model.focused,
+                dim: model.dim,
+                query: model.query,
+                columns: model.columns,
+                signature: model.signature
+            )
+            .onTapGesture { choose(.commit(commit.id)) }
+            .accessibilityAction { choose(.commit(commit.id)) }
+            .simultaneousGesture(TapGesture(count: 2).onEnded { confirmCheckout(commit) })
+            .contextMenu { CommitMenu(id: commit.id, window: window) }
+            .modifier(RewriteCommitDrag(commit: commit))
+        } else {
+            WipRowView(row: model.graph, lanes: model.lanes, height: model.height, files: model.files, selected: model.selected, focused: model.focused, columns: model.columns)
+                .onTapGesture { choose(.wip) }
+                .accessibilityAction { choose(.wip) }
+                .simultaneousGesture(TapGesture(count: 2).onEnded { window.show(.changes) })
+                .contextMenu { WipMenu(window: window) }
+        }
+    }
+
+    func shown(_ index: Int, _ state: CommitTableState) {
+        if state.expert, case .commit(let id)? = state.target(at: index) { store.requestSignatures(for: [id]) }
+        if index >= state.count - Self.loadAhead, !state.history.isComplete {
+            Task { await store.loadMoreHistory() }
+        }
+    }
+
+    static let loadAhead = 200
 
     func choose(_ selection: CommitSelection) {
         focused = true

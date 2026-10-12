@@ -73,6 +73,7 @@ public struct RepositoryWindowRoot: View {
     func load() async {
         if reference == nil {
             if let pending = app.takePendingOpen() {
+                PerfLog.begin("open")
                 await open(pending)
             } else {
                 openWindow(id: "welcome")

@@ -53,6 +53,7 @@ struct CommitDetailView: View {
                     } filesHeader: {
                         if commit.parents.count > 1 { ParentPicker(commit: commit) }
                     }
+                    .perfEnd("select-commit", when: store.detail?.commit.id == id && store.detailState == .loaded, detail: "\(store.detail?.files.count ?? 0)")
                 }
             }
         } else if case .failed(let error) = store.detailState {
@@ -98,7 +99,7 @@ struct CommitHeaderView: View {
     @Environment(\.vraiNow) private var now
 
     var body: some View {
-        let refs = store.snapshot.map { RefPills.byCommit($0)[commit.id] ?? [] } ?? []
+        let refs = store.snapshot.map { RefPills.byCommit($0, only: commit.id)[commit.id] ?? [] } ?? []
         let signature = store.detail?.commit.id == commit.id ? store.detail?.commit.signature ?? .unchecked : store.signature(of: commit)
         VStack(alignment: .leading, spacing: Vrai.Space.s6) {
             HStack(alignment: .top, spacing: Vrai.Space.s8) {

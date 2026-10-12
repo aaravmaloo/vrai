@@ -160,6 +160,7 @@ struct DiffPanel<FileMenu: View, Header: View>: View {
                 DiffView(diff: patch, mode: widthClass.isNarrow ? .unified : preferences.diffMode, wrap: preferences.wrap, whitespace: preferences.whitespace, codeSize: preferences.codeSize) {
                     store.showMoreContext()
                 }
+                .perfEnd("diff", when: patch.path == file.path, detail: "\(patch.hunks.reduce(0) { $0 + $1.lines.count })")
             } else {
                 Text(file.binary || store.patch?.isBinary == true ? String(localized: "Binary file, not shown.", bundle: .module) : String(localized: "No text changes.", bundle: .module))
                     .font(Font.Vrai.callout)
