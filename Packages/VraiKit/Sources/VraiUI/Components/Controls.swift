@@ -52,9 +52,9 @@ struct VraiButtonStyle: PrimitiveButtonStyle {
         }
         .controlSize(size.control)
         switch variant {
-        case .primary: button.buttonStyle(.borderedProminent)
-        case .danger: button.buttonStyle(.borderedProminent).tint(Color.Vrai.danger)
-        case .secondary: button.buttonStyle(.bordered)
+        case .primary: button.buttonStyle(.glassProminent)
+        case .danger: button.buttonStyle(.glassProminent).tint(Color.Vrai.danger)
+        case .secondary: button.buttonStyle(.glass)
         case .plain: button.buttonStyle(.borderless)
         }
     }
@@ -128,14 +128,12 @@ struct IconMenu<Content: View>: View {
     var body: some View {
         Menu(content: content) {
             Image(systemName: icon)
-                .font(small ? Font.Vrai.callout : Font.Vrai.body)
-                .foregroundStyle(Color.Vrai.textSecondary)
-                .frame(width: small ? Vrai.Size.controlSm : Vrai.Size.control, height: small ? Vrai.Size.controlSm : Vrai.Size.control)
-                .contentShape(Rectangle())
         }
         .menuStyle(.button)
-        .buttonStyle(IconButtonStyle(small: small))
+        .buttonStyle(.borderless)
         .menuIndicator(.hidden)
+        .controlSize(small ? .small : .regular)
+        .foregroundStyle(.secondary)
         .fixedSize()
         .help(label)
         .accessibilityLabel(label)

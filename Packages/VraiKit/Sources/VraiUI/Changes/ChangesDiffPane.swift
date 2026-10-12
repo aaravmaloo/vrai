@@ -130,11 +130,6 @@ struct ChangesDiffPane: View {
                 ? String(localized: "Renamed from \(old), \(n(lines, "line")) changed.", bundle: .module)
                 : String(localized: "Renamed from \(old), no content changes.", bundle: .module))
         }
-        if changes.isLineLevel, !widthClass.isNarrow, changes.lines?.isEmpty ?? true, changes.diffState == .loaded {
-            DiffNote(icon: "info.circle", text: pick.side == .staged
-                ? String(localized: "Click line numbers to pick lines, Shift-click to extend, then unstage just those.", bundle: .module)
-                : String(localized: "Click line numbers to pick lines, Shift-click to extend, then stage just those.", bundle: .module))
-        }
     }
 
     @ViewBuilder func content(pick: ChangesPick) -> some View {

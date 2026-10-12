@@ -15,31 +15,97 @@ struct RepositoryToolbar: ToolbarContent {
         }
         .sharedBackgroundVisibility(.hidden)
         if window.widthClass.isNarrow {
-            ToolbarItemGroup {
-                NarrowActions(window: window)
+            ToolbarItem {
+                ToolbarGlassGroup { NarrowActions(window: window) }
             }
+            .sharedBackgroundVisibility(.hidden)
         } else {
-            ToolbarItemGroup {
-                SyncButtons(window: window)
+            ToolbarItem {
+                ToolbarGlassGroup { SyncButtons(window: window) }
             }
-            ToolbarSpacer(.fixed)
+            .sharedBackgroundVisibility(.hidden)
             if window.widthClass >= .regular {
-                ToolbarItemGroup {
-                    BranchButtons(window: window)
-                }
-                ToolbarSpacer(.fixed)
                 ToolbarItem {
-                    StashButton(window: window)
+                    ToolbarGlassGroup { BranchButtons(window: window) }
                 }
-                ToolbarSpacer(.fixed)
+                .sharedBackgroundVisibility(.hidden)
+                ToolbarItem {
+                    ToolbarGlassGroup { StashButton(window: window) }
+                }
+                .sharedBackgroundVisibility(.hidden)
             }
             ToolbarItem {
-                PaletteButton(window: window)
+                ToolbarGlassGroup { PaletteButton(window: window) }
             }
-            ToolbarSpacer(.fixed)
-            ToolbarItemGroup {
-                PanelToggles(window: window)
+            .sharedBackgroundVisibility(.hidden)
+            ToolbarItem {
+                ToolbarGlassGroup { PanelToggles(window: window) }
             }
+            .sharedBackgroundVisibility(.hidden)
+        }
+    }
+}
+
+struct ToolbarGlassGroup<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        HStack(spacing: 0) {
+            content()
+        }
+        .padding(.horizontal, Vrai.Space.s2)
+        .glassEffect(.regular.interactive(), in: .capsule)
+    }
+}
+
+enum ToolbarMotion {
+    case bounce
+    case bounceDown
+    case bounceUp
+    case spin
+}
+
+struct ToolbarIcon: View {
+    let icon: String
+    var motion: ToolbarMotion = .bounce
+    var busy = false
+    var count = 0
+    var tinted = false
+    let taps: Int
+
+    var body: some View {
+        symbol
+            .font(.title3.weight(.regular))
+            .foregroundStyle(tinted ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+            .frame(width: Vrai.Size.toolbarItem + Vrai.Space.s4, height: Vrai.Size.toolbarItem)
+            .overlay(alignment: .topTrailing) {
+                if count > 0 {
+                    Text(verbatim: String(count))
+                        .font(.caption2.weight(.semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, Vrai.Space.s4)
+                        .frame(minWidth: Vrai.Space.s16, minHeight: Vrai.Space.s16)
+                        .background(Color.Vrai.accent, in: Capsule())
+                        .accessibilityHidden(true)
+                }
+            }
+            .contentShape(Rectangle())
+    }
+
+    @ViewBuilder var symbol: some View {
+        let image = Image(systemName: icon)
+        switch motion {
+        case .spin:
+            image
+                .symbolEffect(.rotate, value: taps)
+                .symbolEffect(.rotate, isActive: busy)
+        case .bounceDown:
+            if busy { Spinner() } else { image.symbolEffect(.bounce.down, value: taps) }
+        case .bounceUp:
+            if busy { Spinner() } else { image.symbolEffect(.bounce.up, value: taps) }
+        case .bounce:
+            if busy { Spinner() } else { image.symbolEffect(.bounce, value: taps) }
         }
     }
 }
@@ -52,24 +118,22 @@ struct ToolbarAction: View {
     var count = 0
     var busy = false
     var enabled = true
+    var motion: ToolbarMotion = .bounce
     let action: () -> Void
+    @State private var taps = 0
 
     var body: some View {
-        Button(action: action) {
-            Label {
-                Text(title)
-            } icon: {
-                if busy {
-                    Spinner()
-                } else {
-                    Image(systemName: icon)
-                }
-            }
+        Button {
+            taps += 1
+            action()
+        } label: {
+            ToolbarIcon(icon: icon, motion: motion, busy: busy, count: count, taps: taps)
         }
-        .badge(count)
+        .buttonStyle(.borderless)
         .disabled(!enabled)
         .help(shortcut.map { title + "  " + $0 } ?? title)
         .accessibilityLabel(title)
+        .accessibilityValue(count > 0 ? Text(verbatim: String(count)) : Text(verbatim: ""))
         .accessibilityIdentifier(identifier)
     }
 }
@@ -80,14 +144,19 @@ struct ToolbarToggle: View {
     let identifier: String
     let shortcut: String
     @Binding var isOn: Bool
+    @State private var taps = 0
 
     var body: some View {
-        Toggle(isOn: $isOn) {
-            Label(title, systemImage: icon)
+        Button {
+            taps += 1
+            isOn.toggle()
+        } label: {
+            ToolbarIcon(icon: icon, tinted: isOn, taps: taps)
         }
-        .toggleStyle(.button)
+        .buttonStyle(.borderless)
         .help(title + "  " + shortcut)
         .accessibilityLabel(title)
+        .accessibilityAddTraits(isOn ? .isSelected : [])
         .accessibilityIdentifier(identifier)
     }
 }
@@ -207,9 +276,9 @@ struct SyncButtons: View {
         let labels = SyncLabels(window: window)
         let alt = window.optionDown
         let sync = window.sync
-        ToolbarAction(title: sync.busyLabel(.fetch) ?? labels.fetch, icon: "arrow.triangle.2.circlepath", identifier: "toolbar-fetch", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}F" : "\u{21E7}\u{2318}F", busy: sync.isBusy(.fetch)) { alt ? sync.fetch(all: true) : sync.fetch() }
-        ToolbarAction(title: sync.busyLabel(.pull) ?? labels.pull, icon: "arrow.down.to.line", identifier: "toolbar-pull", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}L" : "\u{21E7}\u{2318}L", count: alt ? 0 : labels.behind, busy: sync.isBusy(.pull), enabled: labels.onBranch) { alt ? sync.pull(mode: .rebase) : sync.pull() }
-        ToolbarAction(title: sync.busyLabel(.push) ?? labels.push, icon: "arrow.up.to.line", identifier: "toolbar-push", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}P" : "\u{21E7}\u{2318}P", count: alt ? 0 : labels.ahead, busy: sync.isBusy(.push), enabled: labels.onBranch) { alt ? sync.push(force: .withLease) : sync.push() }
+        ToolbarAction(title: sync.busyLabel(.fetch) ?? labels.fetch, icon: "arrow.triangle.2.circlepath", identifier: "toolbar-fetch", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}F" : "\u{21E7}\u{2318}F", busy: sync.isBusy(.fetch), motion: .spin) { alt ? sync.fetch(all: true) : sync.fetch() }
+        ToolbarAction(title: sync.busyLabel(.pull) ?? labels.pull, icon: "arrow.down.to.line", identifier: "toolbar-pull", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}L" : "\u{21E7}\u{2318}L", count: alt ? 0 : labels.behind, busy: sync.isBusy(.pull), enabled: labels.onBranch, motion: .bounceDown) { alt ? sync.pull(mode: .rebase) : sync.pull() }
+        ToolbarAction(title: sync.busyLabel(.push) ?? labels.push, icon: "arrow.up.to.line", identifier: "toolbar-push", shortcut: alt ? "\u{2325}\u{21E7}\u{2318}P" : "\u{21E7}\u{2318}P", count: alt ? 0 : labels.ahead, busy: sync.isBusy(.push), enabled: labels.onBranch, motion: .bounceUp) { alt ? sync.push(force: .withLease) : sync.push() }
     }
 }
 
@@ -238,14 +307,9 @@ struct PaletteButton: View {
 
     var body: some View {
         let prompt = window.preferences.expert ? String(localized: "Search or run a git command", bundle: .module) : String(localized: "Search actions, branches, commits", bundle: .module)
-        Button {
+        ToolbarAction(title: prompt, icon: "magnifyingglass", identifier: "toolbar-palette-field", shortcut: "\u{2318}K") {
             window.openPalette()
-        } label: {
-            Label(String(localized: "Search", bundle: .module), systemImage: "magnifyingglass")
         }
-        .help(prompt + "  \u{2318}K")
-        .accessibilityLabel(String(localized: "Command palette", bundle: .module))
-        .accessibilityIdentifier("toolbar-palette-field")
     }
 }
 
@@ -281,10 +345,12 @@ struct NarrowActions: View {
         Menu {
             SyncMenuItems(window: window, labels: labels)
         } label: {
-            Label(String(localized: "Sync", bundle: .module), systemImage: "arrow.up.arrow.down")
+            ToolbarIcon(icon: "arrow.up.arrow.down", count: labels.ahead + labels.behind, taps: 0)
         }
+        .menuStyle(.button)
+        .buttonStyle(.borderless)
         .menuIndicator(.hidden)
-        .badge(labels.ahead + labels.behind)
+        .accessibilityLabel(String(localized: "Sync", bundle: .module))
         .help(String(localized: "Sync", bundle: .module))
         .accessibilityIdentifier("toolbar-sync")
         PaletteButton(window: window)
@@ -307,9 +373,12 @@ struct NarrowActions: View {
             }
             Button(String(localized: "Settings\u{2026}", bundle: .module), systemImage: "gearshape") { openSettings() }
         } label: {
-            Label(String(localized: "More", bundle: .module), systemImage: "ellipsis")
+            ToolbarIcon(icon: "ellipsis", taps: 0)
         }
+        .menuStyle(.button)
+        .buttonStyle(.borderless)
         .menuIndicator(.hidden)
+        .accessibilityLabel(String(localized: "More", bundle: .module))
         .help(String(localized: "More", bundle: .module))
         .accessibilityIdentifier("toolbar-more")
     }

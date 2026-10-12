@@ -72,13 +72,6 @@ struct WorkingDiffView: View {
         .focusable(selectable)
         .focusEffectDisabled()
         .focused($focused)
-        .overlay {
-            if focused {
-                Rectangle()
-                    .strokeBorder(Color.Vrai.focus, lineWidth: Vrai.Size.line)
-                    .allowsHitTesting(false)
-            }
-        }
         .onChange(of: window.changes.diffFocusRequest) { _, _ in
             guard selectable else { return }
             focused = true
@@ -147,6 +140,10 @@ struct WorkingDiffView: View {
         dragging = nil
         window.changes.listFocusRequest += 1
     }
+}
+
+enum LineHint {
+    static var text: String { String(localized: "Click to pick lines, Shift-click to extend", bundle: .module) }
 }
 
 struct LineDrag {
@@ -330,6 +327,7 @@ struct SelectableUnifiedLine: View {
             .accessibilityAddTraits(selected ? .isSelected : [])
             .accessibilityIdentifier("gutter-\(id.hunk)-\(id.line)")
             .accessibilityAction { if selectable { onClick(id) } }
+            .help(selectable ? LineHint.text : "")
             Text(CodeRenderer.attributed(line.text, language: language, words: line.wordRanges, wordColor: line.kind == .add ? Color.Vrai.diffAddWord : line.kind == .del ? Color.Vrai.diffDelWord : nil, whitespace: whitespace))
                 .font(metrics.codeFont)
                 .foregroundStyle(line.kind == .noNewline ? Color.Vrai.textTertiary : Color.Vrai.text)
@@ -472,6 +470,7 @@ struct SelectableSplitLine: View {
                     .accessibilityAddTraits(selectable && change ? [.isButton] : [.isStaticText])
                     .accessibilityAction { if selectable, change { onClick(id) } }
                     .accessibilityIdentifier("gutter-\(hunk)-\(entry.index)")
+                    .help(selectable && change ? LineHint.text : "")
                 Text(CodeRenderer.attributed(entry.line.text, language: language, words: change ? entry.line.wordRanges : [], wordColor: old ? Color.Vrai.diffDelWord : Color.Vrai.diffAddWord, whitespace: whitespace))
                     .font(metrics.codeFont)
                     .foregroundStyle(Color.Vrai.text)
