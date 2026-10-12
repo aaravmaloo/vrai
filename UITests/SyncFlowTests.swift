@@ -119,7 +119,7 @@ final class SyncFlowTests: XCTestCase {
 
         XCTAssertTrue(text(app, "Push rejected").waitForExistence(timeout: 15))
         XCTAssertTrue(text(app, "origin has 2 commits you don't have. Pull them first, or force push with lease to replace them.").exists)
-        XCTAssertTrue(button(app, "Pull").exists)
+        XCTAssertTrue(button(app, "Pull and push").exists)
         let force = button(app, "Force push with lease")
         XCTAssertTrue(force.exists)
         attach(app, "sync-push-rejected-light")
@@ -130,6 +130,28 @@ final class SyncFlowTests: XCTestCase {
         XCTAssertTrue(try eventually(15) { try copy.value(["rev-parse", "refs/heads/feature/graph-renderer"], in: copy.remote("origin")) == local })
         XCTAssertTrue(textContaining(app, "Force pushed").waitForExistence(timeout: 5))
         attach(app, "sync-force-pushed-light")
+        app.terminate()
+    }
+
+    @MainActor
+    func testPullAndPushAfterARejectedPushMergesThenPushes() throws {
+        let copy = try Copy.make("push-rejected")
+        defer { copy.remove() }
+        XCTAssertEqual(try copy.git(["config", "core.hooksPath", copy.folder + "/no-hooks"]).status, 0)
+        XCTAssertEqual(try copy.git(["stash", "push", "--include-untracked", "--quiet"]).status, 0)
+        let app = launch(copy.repo)
+        let push = button(app, "Push 2 commits")
+        XCTAssertTrue(push.waitForExistence(timeout: 5))
+        push.click()
+
+        XCTAssertTrue(text(app, "Push rejected").waitForExistence(timeout: 15))
+        button(app, "Pull and push").click()
+        XCTAssertTrue(try eventually(20) {
+            let local = try copy.value(["rev-parse", "refs/heads/feature/graph-renderer"])
+            let remote = try copy.value(["rev-parse", "refs/heads/feature/graph-renderer"], in: copy.remote("origin"))
+            return !local.isEmpty && remote == local
+        })
+        XCTAssertEqual(try copy.value(["rev-list", "--parents", "-n", "1", "HEAD"]).split(separator: " ").count, 3)
         app.terminate()
     }
 
@@ -154,7 +176,7 @@ final class SyncFlowTests: XCTestCase {
 
         let username = app.textFields["Username"].firstMatch
         XCTAssertTrue(username.waitForExistence(timeout: 5))
-        XCTAssertTrue(text(app, "Sign in to 127.0.0.1").exists)
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", "Sign in to 127.0.0.1", "Sign in to 127.0.0.1")).firstMatch.exists)
         username.click()
         username.typeKey("a", modifierFlags: .command)
         username.typeText("avery")

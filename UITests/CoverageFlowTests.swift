@@ -52,7 +52,7 @@ final class CoverageFlowTests: XCTestCase {
         let item = app.menuItems["Start over"]
         XCTAssertTrue(item.waitForExistence(timeout: 5))
         item.click()
-        let confirm = app.buttons["Start over"]
+        let confirm = app.windows.firstMatch.sheets.buttons.matching(NSPredicate(format: "label == %@", "Start over")).firstMatch
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.click()
         XCTAssertTrue(app.buttons["accept-current-1"].waitForExistence(timeout: 10))

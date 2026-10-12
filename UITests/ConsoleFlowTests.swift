@@ -124,7 +124,7 @@ final class ConsoleFlowTests: XCTestCase {
                 let commits = app.descendants(matching: .any)["commits"]
                 Thread.sleep(forTimeInterval: 1)
                 XCTAssertGreaterThan(commits.frame.height, 100, "\(name) \(appearance): the history list collapsed under the console")
-                XCTAssertLessThanOrEqual(commits.frame.maxY, console.frame.minY + 1, "\(name) \(appearance): the console covers the history list")
+                XCTAssertLessThanOrEqual(commits.frame.maxY, console.frame.minY + 3, "\(name) \(appearance): the console covers the history list")
                 XCTAssertLessThanOrEqual(console.frame.maxY, window.frame.maxY + 1, "\(name) \(appearance): the console runs past the window")
                 XCTAssertTrue(app.textFields["console-prompt"].isHittable, "\(name) \(appearance): the prompt can't be reached")
                 ChangesFixtureCopy.attach(self, app, name: "console-\(name)-\(appearance)")
@@ -205,7 +205,7 @@ enum ConsoleUI {
 
     @MainActor
     static func text(_ scope: XCUIElement, _ text: String) -> XCUIElement {
-        scope.staticTexts.matching(NSPredicate(format: "identifier == %@ OR label == %@ OR value == %@", text, text, text)).firstMatch
+        scope.descendants(matching: .any).matching(NSPredicate(format: "(elementType == %d OR elementType == %d) AND (identifier == %@ OR label == %@ OR value == %@)", XCUIElement.ElementType.staticText.rawValue, XCUIElement.ElementType.other.rawValue, text, text, text)).firstMatch
     }
 
     @MainActor

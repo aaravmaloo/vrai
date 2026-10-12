@@ -17,7 +17,7 @@ struct VraiApp: App {
         .defaultLaunchBehavior(app.launch.open == nil ? .suppressed : .presented)
         .restorationBehavior(app.launch.isSandboxed || app.preferences.openAt == .welcome ? .disabled : .automatic)
         .windowResizability(.contentMinSize)
-        .commands { RepositoryCommands(app: app) }
+        .commands { RepositoryCommands(app: app, updates: appDelegate.updater.check) }
 
         Window(String(localized: "Welcome to Vrai"), id: "welcome") {
             WelcomeView()
@@ -53,6 +53,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         LaunchOptions()
         #endif
     }()
+
+    let updater = SoftwareUpdater()
 
     static var windowSize: CGSize {
         launch.windowSize ?? WindowDefaults.size

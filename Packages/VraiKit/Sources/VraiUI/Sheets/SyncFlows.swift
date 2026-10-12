@@ -49,7 +49,7 @@ extension SyncModel {
         }
     }
 
-    func pull(mode: PullMode? = nil, autostash: Bool? = nil, remote: String? = nil, branch: String? = nil) {
+    func pull(mode: PullMode? = nil, autostash: Bool? = nil, remote: String? = nil, branch: String? = nil, then next: (@MainActor () -> Void)? = nil) {
         guard running[.pull] == nil, let snapshot else { return }
         guard let current = snapshot.currentBranch else {
             toasts.show(Toast(message: String(localized: "You're not on a branch", bundle: .module), detail: String(localized: "Switch to a branch to pull into it.", bundle: .module)))
@@ -70,7 +70,7 @@ extension SyncModel {
             self.running[.pull] = nil
             let source = remote.map { $0 + "/" + (branch ?? "") } ?? current.upstream ?? ""
             let handle = self.store.pullOperation(mode: mode ?? defaults.mode, autostash: autostash ?? defaults.autostash, remote: remote, branch: branch)
-            self.run(.pull, handle, busy: String(localized: "Pulling from \(source)", bundle: .module), retry: { [weak self] in self?.pull(mode: mode, autostash: autostash, remote: remote, branch: branch) }) { [weak self] result in
+            self.run(.pull, handle, busy: String(localized: "Pulling from \(source)", bundle: .module), retry: { [weak self] in self?.pull(mode: mode, autostash: autostash, remote: remote, branch: branch, then: next) }) { [weak self] result in
                 guard let self else { return }
                 if result.upToDate {
                     self.toast(result.summary, icon: "checkmark.circle")
@@ -78,6 +78,7 @@ extension SyncModel {
                     self.toast(result.summary, icon: "arrow.down.to.line", action: String(localized: "Undo", bundle: .module)) { [weak self] in self?.undo() }
                     if let head = self.snapshot?.headOID { self.store.select(.commit(head), scroll: true) }
                 }
+                next?()
             }
         }
     }
@@ -220,7 +221,7 @@ extension SyncModel {
             title: copy.title,
             message: copy.message,
             actions: [
-                AlertAction(title: String(localized: "Pull", bundle: .module)) { [weak self] in self?.pull() },
+                AlertAction(title: String(localized: "Pull and push", bundle: .module)) { [weak self] in self?.pull { [weak self] in self?.push() } },
                 AlertAction(title: String(localized: "Force push with lease", bundle: .module)) { [weak self] in self?.push(force: .withLease, remote: remote, confirmed: true) },
                 AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel)
             ]

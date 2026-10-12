@@ -14,8 +14,9 @@ for arg in "$@"; do only+=("-only-testing:VraiFlowTests/$arg"); done
 mkdir -p "$out" "$(dirname "$results")"
 (cd "$vrai" && xcodegen generate --quiet)
 set +e
-TEST_RUNNER_VRAI_SANDBOX="$sandbox" TEST_RUNNER_VRAI_AUTH_PORT="${VRAI_AUTH_PORT:-47801}" /usr/bin/lockf -k "${tmp%/}/vrai-ui-tests.lock" xcodebuild test \
+GIT_TERMINAL_PROMPT=0 TEST_RUNNER_VRAI_SANDBOX="$sandbox" TEST_RUNNER_VRAI_AUTH_PORT="${VRAI_AUTH_PORT:-47801}" /usr/bin/lockf -k "${tmp%/}/vrai-ui-tests.lock" xcodebuild test \
   -project "$vrai/Vrai.xcodeproj" -scheme Vrai -destination 'platform=macOS' \
+  -scmProvider system -packageAuthorizationProvider netrc \
   -resultBundlePath "$results" "${only[@]+"${only[@]}"}" 2>&1 | grep -E "Test Case|error:|failed|passed|\*\* TEST" | sed 's/^/  /'
 status=${PIPESTATUS[0]}
 set -e

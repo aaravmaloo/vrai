@@ -305,6 +305,7 @@ struct CommitList: View {
             }
         }
         .onKeyPress(characters: CharacterSet(charactersIn: "jk")) { press in
+            guard press.modifiers.isDisjoint(with: [.command, .control, .option]) else { return .ignored }
             move(press.characters == "j" ? 1 : -1)
             return .handled
         }

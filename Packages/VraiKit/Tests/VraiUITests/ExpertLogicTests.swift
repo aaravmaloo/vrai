@@ -19,6 +19,19 @@ struct ExpertLogicTests {
         #expect(ran.isEmpty)
     }
 
+    @Test func anUneditedPreviewFollowsTheOptionsAfterTheFieldCommits() {
+        let draft = CommandDraft()
+        var ran: [[String]] = []
+        draft.runner = { commands in ran.append(contentsOf: commands.map(\.command.arguments)) }
+        draft.register(0, RewriteCommands.reset(to: "HEAD~1", mode: .mixed))
+        draft.edit(0, draft.text(0))
+        draft.register(0, RewriteCommands.reset(to: "HEAD~1", mode: .hard))
+        #expect(draft.text(0) == "git reset --hard HEAD~1")
+        #expect(!draft.isEdited)
+        #expect(!draft.submit())
+        #expect(ran.isEmpty)
+    }
+
     @Test func anEditedPreviewRunsWhatWasTypedAsArguments() {
         let draft = CommandDraft()
         var ran: [[String]] = []

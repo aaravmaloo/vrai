@@ -126,6 +126,33 @@ final class ChangesFlowTests: XCTestCase {
     }
 
     @MainActor
+    func testSignedCommitShowsVerified() throws {
+        let copy = try ChangesFixtureCopy.everyday()
+        addTeardownBlock { copy.remove() }
+        let subject = "Sign this commit"
+
+        let app = ChangesFixtureCopy.launch(copy.repo)
+        ChangesFixtureCopy.openChanges(app)
+        let summary = app.textFields["commit-summary"]
+        XCTAssertTrue(summary.waitForExistence(timeout: 10))
+        ChangesFixtureCopy.type(subject, into: summary)
+        app.typeKey(.return, modifierFlags: .command)
+        ChangesFixtureCopy.expect(self, app, app.staticTexts["Committed to feature/graph-renderer"], timeout: 15, "signed-commit-toast")
+        XCTAssertEqual(try copy.git(["log", "-1", "--format=%G?"]), "G")
+
+        app.typeKey("1", modifierFlags: .command)
+        let commits = app.descendants(matching: .any)["commits"]
+        XCTAssertTrue(commits.waitForExistence(timeout: 10))
+        let row = commits.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", subject)).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        row.click()
+        let verified = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "Verified", "Verified")).firstMatch
+        ChangesFixtureCopy.expect(self, app, verified, timeout: 15, "signed-commit-verified")
+        ChangesFixtureCopy.attach(self, app, name: "changes-signed-commit-verified")
+        app.terminate()
+    }
+
+    @MainActor
     func testUndoHistoryRestoresAnEntry() throws {
         let copy = try ChangesFixtureCopy.everyday()
         addTeardownBlock { copy.remove() }

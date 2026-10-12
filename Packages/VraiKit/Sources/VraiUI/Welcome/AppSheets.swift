@@ -102,6 +102,17 @@ enum AppSheets {
         window.sheets.present { AppSheetView(kind: kind, context: context) }
     }
 
+    static func closeWelcome(_ dismissWindow: DismissWindowAction) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(150))
+            dismissWindow(id: "welcome")
+            try? await Task.sleep(for: .milliseconds(300))
+            for window in NSApp.windows where window.identifier?.rawValue.hasPrefix("welcome") == true && window.isVisible {
+                window.close()
+            }
+        }
+    }
+
     static func welcomeContext(openWindow: OpenWindowAction, dismissWindow: DismissWindowAction, app: AppModel) -> AppSheetContext {
         AppSheetContext(
             dismiss: { WelcomeModel.shared.sheet = nil },
@@ -109,7 +120,7 @@ enum AppSheets {
                 openWindow(value: app.request(reference))
                 let model = WelcomeModel.shared
                 guard model.sheet != nil else {
-                    dismissWindow(id: "welcome")
+                    closeWelcome(dismissWindow)
                     return
                 }
                 model.closeAfterSheet = true
@@ -118,7 +129,7 @@ enum AppSheets {
                     try? await Task.sleep(for: .milliseconds(700))
                     guard model.closeAfterSheet else { return }
                     model.closeAfterSheet = false
-                    dismissWindow(id: "welcome")
+                    closeWelcome(dismissWindow)
                 }
             },
             switchTo: { next in

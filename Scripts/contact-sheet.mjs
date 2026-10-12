@@ -7,7 +7,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const prototypeHTML = path.join(root, "prototype_ui/app/dist/local.html");
 
-export const SCENARIOS = ["everyday", "detached", "empty", "bisect", "rebase"];
+export const SCENARIOS = ["everyday", "push-rejected", "conflict", "rebase", "detached", "bisect", "auth", "offline", "loading", "empty", "welcome"];
+const KEEP_VIEW = new Set(["conflict", "empty", "welcome"]);
+const SETTLE = { loading: 450, "push-rejected": 2200 };
 export const VARIANTS = {
   light: { theme: "light", width: 1280, height: 800 },
   dark: { theme: "dark", width: 1280, height: 800 },
@@ -30,12 +32,13 @@ function usage() {
     "  --prototype <dir>  prototype screenshots (default build/prototype)",
     "  --out <dir>        contact sheets (default build/contact)",
     "  --variant <name>   only this variant (light, dark, w700, w460); repeatable",
-    "  --crop x,y,w,h     also write a zoomed sheet of this region (in window points)"
+    "  --crop x,y,w,h     also write a zoomed sheet of this region (in window points)",
+    "  --prefix <name>    file name prefix: scenario (default) or history"
   ].join("\n"));
 }
 
 function parseArgs(argv) {
-  const options = { mode: "all", native: path.join(root, "build/screens"), prototype: path.join(root, "build/prototype"), out: path.join(root, "build/contact"), scenarios: [], variants: [], crop: null };
+  const options = { mode: "all", native: path.join(root, "build/screens"), prototype: path.join(root, "build/prototype"), out: path.join(root, "build/contact"), scenarios: [], variants: [], crop: null, prefix: "scenario" };
   const rest = [...argv];
   if (rest[0] && ["capture", "sheet", "all"].includes(rest[0])) options.mode = rest.shift();
   while (rest.length) {
@@ -45,6 +48,7 @@ function parseArgs(argv) {
     else if (arg === "--out") options.out = path.resolve(rest.shift());
     else if (arg === "--variant") options.variants.push(rest.shift());
     else if (arg === "--crop") options.crop = rest.shift().split(",").map(Number);
+    else if (arg === "--prefix") options.prefix = rest.shift();
     else if (arg === "-h" || arg === "--help") { usage(); process.exit(0); }
     else options.scenarios.push(arg);
   }
@@ -113,6 +117,7 @@ async function capturePrototype(options) {
   try {
     for (const scenario of options.scenarios) {
       for (const variantName of options.variants) {
+        if (scenario === "welcome" && VARIANTS[variantName].width < NARROW_VIEWPORT) continue;
         const variant = VARIANTS[variantName];
         const narrow = variant.width < NARROW_VIEWPORT;
         const viewport = narrow ? { width: variant.width, height: variant.height } : { width: variant.width + DESKTOP_X, height: variant.height + DESKTOP_Y };
@@ -121,12 +126,13 @@ async function capturePrototype(options) {
         await sleep(400);
         await browser.evaluate("localStorage.setItem('vrai.prototype.v1', " + JSON.stringify(JSON.stringify({ scenario, theme: variant.theme })) + ")");
         await browser.send("Page.reload", { ignoreCache: true });
-        await sleep(1200);
-        await browser.evaluate("(() => { const item = [...document.querySelectorAll('.vr-sbitem')].find((e) => e.textContent.trim() === 'History'); if (item) { if (!item.classList.contains('is-selected')) item.click(); } else { document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '1', code: 'Digit1', metaKey: true, bubbles: true })); } })()");
-        await sleep(500);
-        const rect = await browser.evaluate("(() => { const w = document.querySelector('.app-mainwin > .vr-window'); const r = w.getBoundingClientRect(); return { x: r.left, y: r.top, width: r.width, height: r.height }; })()");
+        await sleep(SETTLE[scenario] ?? 1200);
+        if (!KEEP_VIEW.has(scenario) && scenario !== "loading") await browser.evaluate("(() => { const item = [...document.querySelectorAll('.vr-sbitem')].find((e) => e.textContent.trim() === 'History'); if (item) { if (!item.classList.contains('is-selected')) item.click(); } else { document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '1', code: 'Digit1', metaKey: true, bubbles: true })); } })()");
+        if (!KEEP_VIEW.has(scenario) && scenario !== "loading") await sleep(500);
+        const selector = scenario === "welcome" ? ".wel-window" : ".app-mainwin > .vr-window";
+        const rect = await browser.evaluate("(() => { const w = document.querySelector('" + selector + "'); const r = w.getBoundingClientRect(); return { x: r.left, y: r.top, width: r.width, height: r.height }; })()");
         const shot = await browser.send("Page.captureScreenshot", { format: "png", clip: { ...rect, scale: 1 }, captureBeyondViewport: false });
-        const file = path.join(options.prototype, "history-" + scenario + "-" + variantName + ".png");
+        const file = path.join(options.prototype, options.prefix + "-" + scenario + "-" + variantName + ".png");
         fs.writeFileSync(file, Buffer.from(shot.result.data, "base64"));
         console.log("  " + path.relative(root, file) + "  " + Math.round(rect.width) + "x" + Math.round(rect.height));
       }
@@ -177,8 +183,9 @@ async function buildSheets(options) {
   try {
     for (const scenario of options.scenarios) {
       for (const variantName of options.variants) {
+        if (scenario === "welcome" && VARIANTS[variantName].width < NARROW_VIEWPORT) continue;
         const variant = VARIANTS[variantName];
-        const name = "history-" + scenario + "-" + variantName;
+        const name = options.prefix + "-" + scenario + "-" + variantName;
         const prototype = path.join(options.prototype, name + ".png");
         const native = path.join(options.native, name + ".png");
         const pair = {

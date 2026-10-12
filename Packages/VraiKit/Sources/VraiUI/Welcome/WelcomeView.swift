@@ -170,7 +170,7 @@ struct WelcomeContent: View {
         .sheet(item: $model.sheet, onDismiss: {
             guard model.closeAfterSheet else { return }
             model.closeAfterSheet = false
-            dismissWindow(id: "welcome")
+            AppSheets.closeWelcome(dismissWindow)
         }) { kind in
             AppSheetView(kind: kind, context: context)
                 .environment(app)

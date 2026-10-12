@@ -20,7 +20,11 @@ final class CommandDraft {
     }
 
     func edit(_ index: Int, _ text: String) {
-        texts[index] = text
+        if let command = built[index], text.trimmingCharacters(in: .whitespacesAndNewlines) == command.display {
+            texts.removeValue(forKey: index)
+        } else {
+            texts[index] = text
+        }
         problem = nil
     }
 

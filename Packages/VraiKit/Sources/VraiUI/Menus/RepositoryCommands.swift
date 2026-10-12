@@ -5,11 +5,13 @@ import VraiGit
 
 public struct RepositoryCommands: Commands {
     let app: AppModel
+    let updates: UpdateCheck
     @FocusedValue(\.windowModel) private var window
     @Environment(\.openWindow) private var openWindow
 
-    public init(app: AppModel) {
+    public init(app: AppModel, updates: UpdateCheck) {
         self.app = app
+        self.updates = updates
     }
 
     public var body: some Commands {
@@ -17,8 +19,8 @@ public struct RepositoryCommands: Commands {
             Button(String(localized: "About Vrai", bundle: .module)) { openWindow(id: "about") }
         }
         CommandGroup(after: .appSettings) {
-            Button(String(localized: "Check for updates\u{2026}", bundle: .module)) {}
-                .disabled(true)
+            Button(String(localized: "Check for updates\u{2026}", bundle: .module)) { updates.check() }
+                .disabled(!updates.canCheck)
         }
         CommandGroup(replacing: .newItem) {
             Button(String(localized: "New repository\u{2026}", bundle: .module)) { AppSheets.present(.newRepository(folder: nil), window: window, app: app, openWindow: openWindow) }

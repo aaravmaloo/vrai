@@ -239,7 +239,10 @@ final class SettingsFlowTests: XCTestCase {
         clickWhenEnabled(app, "settings.repository.localIdentity")
         XCTAssertTrue(eventually { box.local("user.name") == nil && box.local("user.email") == nil }, "local identity removed")
 
-        let hook = box.repository() + "/.git/hooks/pre-push"
+        let hooksPath = (try? box.git(["config", "--get", "core.hooksPath"], in: box.repository()).output.trimmingCharacters(in: .whitespacesAndNewlines)) ?? ""
+        let hook = (hooksPath.isEmpty ? box.repository() + "/.git/hooks" : hooksPath) + "/pre-push"
+        let mode = (try? FileManager.default.attributesOfItem(atPath: hook)[.posixPermissions]) as? NSNumber
+        addTeardownBlock { if let mode { try? FileManager.default.setAttributes([.posixPermissions: mode], ofItemAtPath: hook) } }
         XCTAssertFalse(FileManager.default.isExecutableFile(atPath: hook))
         clickWhenEnabled(app, "settings.hook.pre-push")
         XCTAssertTrue(eventually { FileManager.default.isExecutableFile(atPath: hook) }, "pre-push is not executable")

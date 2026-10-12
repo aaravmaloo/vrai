@@ -30,5 +30,9 @@
 	<string>A beautiful Git client, made for Mac.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUFeedURL</key>
+	<string>$(VRAI_FEED_URL)</string>
+	<key>SUPublicEDKey</key>
+	<string>$(VRAI_PUBLIC_ED_KEY)</string>
 </dict>
 </plist>

@@ -12,7 +12,7 @@ settings:
     SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
     GCC_TREAT_WARNINGS_AS_ERRORS: YES
     MACOSX_DEPLOYMENT_TARGET: "26.0"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     ARCHS: "$(ARCHS_STANDARD)"
     ONLY_ACTIVE_ARCH: NO
@@ -24,6 +24,8 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     SWIFT_EMIT_LOC_STRINGS: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    VRAI_FEED_URL: ""
+    VRAI_PUBLIC_ED_KEY: ""
   configs:
     Debug:
       ONLY_ACTIVE_ARCH: YES
@@ -32,6 +34,9 @@ settings:
 packages:
   VraiKit:
     path: Packages/VraiKit
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.0
 targets:
   Vrai:
     type: application
@@ -55,6 +60,7 @@ targets:
         product: VraiCore
       - package: VraiKit
         product: VraiUI
+      - package: Sparkle
       - target: vrai-askpass
         copy:
           destination: executables

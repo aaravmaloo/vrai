@@ -265,6 +265,80 @@ final class RewriteFlowTests: XCTestCase {
     }
 
     @MainActor
+    func testRewritesAreUndoneFromUndoHistory() throws {
+        let fixture = try RewriteFixture.copy("everyday")
+        defer { fixture.remove() }
+        try fixture.clean()
+        let refsBefore = try fixture.refs()
+        let app = fixture.launch()
+        let commits = app.descendants(matching: .any)["commits"]
+        XCTAssertTrue(commits.waitForExistence(timeout: 10))
+
+        app.menuBars.menuBarItems["Branch"].click()
+        app.menuBars.menuItems.matching(NSPredicate(format: "title BEGINSWITH %@", "Merge into")).firstMatch.click()
+        let run = app.buttons["merge-run"]
+        XCTAssertTrue(run.waitForExistence(timeout: 10))
+        XCTAssertTrue(wait(timeout: 20) { run.isEnabled })
+        run.click()
+        XCTAssertTrue(wait(timeout: 15) { (try? fixture.refs()) != refsBefore })
+        restoreLatestFromUndoHistory(app, "rewrite-undo-history-merge")
+        XCTAssertTrue(wait(timeout: 15) { (try? fixture.refs()) == refsBefore })
+
+        let target = try fixture.git(["log", "-1", "--skip=1", "--format=%s"]).output.trimmingCharacters(in: .whitespacesAndNewlines)
+        let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", target + ",")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        row.rightClick()
+        let item = app.menuItems.matching(NSPredicate(format: "title BEGINSWITH 'Reset ' AND title ENDSWITH 'to here\u{2026}'")).firstMatch
+        XCTAssertTrue(item.waitForExistence(timeout: 5))
+        item.click()
+        let soft = app.descendants(matching: .any)["Soft"]
+        XCTAssertTrue(soft.waitForExistence(timeout: 10))
+        soft.click()
+        app.buttons["reset-run"].click()
+        XCTAssertTrue(wait(timeout: 15) { (try? fixture.refs()) != refsBefore })
+        restoreLatestFromUndoHistory(app, "rewrite-undo-history-reset")
+        XCTAssertTrue(wait(timeout: 15) { (try? fixture.refs()) == refsBefore })
+        XCTAssertEqual(try fixture.refs(), refsBefore)
+        app.terminate()
+    }
+
+    @MainActor
+    private func restoreLatestFromUndoHistory(_ app: XCUIApplication, _ name: String) {
+        app.menuBars.menuBarItems["Edit"].click()
+        app.menuBars.menuItems["Undo history\u{2026}"].click()
+        let entry = app.descendants(matching: .any)["undo-row-0"]
+        XCTAssertTrue(entry.waitForExistence(timeout: 10))
+        attach(app, name)
+        entry.buttons["undo-restore"].click()
+        let done = app.buttons["undo-history-done"]
+        if done.waitForExistence(timeout: 3) { done.click() }
+    }
+
+    @MainActor
+    func testShortcutsWorkRightAfterLaunch() throws {
+        let fixture = try RewriteFixture.copy("everyday")
+        defer { fixture.remove() }
+        let app = fixture.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["commits"].waitForExistence(timeout: 10))
+        app.typeKey("j", modifierFlags: .command)
+        let console = app.descendants(matching: .any)["console"]
+        let opened = console.waitForExistence(timeout: 5)
+        attach(app, "shortcut-console")
+        XCTAssertTrue(opened, "Cmd-J did not open the console")
+        app.typeKey("j", modifierFlags: .command)
+        app.typeKey("b", modifierFlags: [.command, .shift])
+        let title = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", "New branch", "New branch")).firstMatch
+        let sheet = title.waitForExistence(timeout: 5)
+        attach(app, "shortcut-new-branch")
+        XCTAssertTrue(sheet, "Cmd-Shift-B did not open New branch")
+        app.typeKey(.escape, modifierFlags: [])
+        app.typeKey("k", modifierFlags: .command)
+        let palette = app.descendants(matching: .any)["command-palette"]
+        XCTAssertTrue(palette.waitForExistence(timeout: 5), "Cmd-K did not open the palette")
+        app.terminate()
+    }
+
+    @MainActor
     func testDropStashThenUndo() throws {
         let fixture = try RewriteFixture.copy("everyday")
         defer { fixture.remove() }
