@@ -32,6 +32,10 @@ jobs:
       - name: Build the fixtures
         run: Scripts/make-fixtures.sh
 
+      # The suites drive real git processes, file watchers and timers against
+      # copied fixtures. Run in parallel on a 3-core runner they starve each
+      # other: index writes collide and 60-second waits expire. One at a time
+      # they finish in a few minutes and stay deterministic.
       - name: Run VraiGit, VraiCore and VraiUI tests
         working-directory: Packages/VraiKit
-        run: swift test
+        run: swift test --no-parallel
