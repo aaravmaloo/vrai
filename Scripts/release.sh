@@ -19,6 +19,10 @@ appcast. Everything goes to build/release.
   --adhoc   Same pipeline with ad hoc signing; skips notarization, stapling
             and the appcast. Needs no Apple Developer account.
 
+Optional environment:
+  VRAI_VERSION              Version to stamp, such as 1.5.0 or 1.5.0-beta
+                            (default: MARKETING_VERSION in project.yml)
+
 Environment for a Developer ID release:
   VRAI_SIGN_IDENTITY        Developer ID Application certificate name
   VRAI_TEAM_ID              Apple Developer team id (10 characters)
@@ -103,6 +107,8 @@ archive_signing=(CODE_SIGN_IDENTITY="$identity")
 if [[ "$mode" == developer-id ]]; then
   archive_signing+=(DEVELOPMENT_TEAM="$team" OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime")
 fi
+versioning=(CURRENT_PROJECT_VERSION="$build")
+[[ -z "${VRAI_VERSION:-}" ]] || versioning+=(MARKETING_VERSION="$VRAI_VERSION")
 xcodebuild archive \
   -project "$root/Vrai.xcodeproj" -scheme Vrai -configuration Release \
   -destination 'generic/platform=macOS' \
@@ -110,7 +116,7 @@ xcodebuild archive \
   -derivedDataPath "$out/DerivedData" \
   -clonedSourcePackagesDirPath "$packages" \
   -scmProvider system -packageAuthorizationProvider netrc \
-  CURRENT_PROJECT_VERSION="$build" \
+  "${versioning[@]}" \
   VRAI_FEED_URL="$feed" VRAI_PUBLIC_ED_KEY="$key" \
   "${archive_signing[@]}" \
   -quiet
@@ -136,6 +142,7 @@ info="$app/Contents/Info.plist"
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$info")"
 bundle_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$info")"
 [[ "$bundle_build" == "$build" ]] || fail "The app says build $bundle_build, expected $build."
+[[ -z "${VRAI_VERSION:-}" || "$version" == "$VRAI_VERSION" ]] || fail "The app says version $version, expected $VRAI_VERSION."
 echo "Vrai $version ($bundle_build)"
 
 sign() {

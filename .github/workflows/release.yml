@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  version:
+    name: Read the version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+    steps:
+      - id: tag
+        run: |
+          if [[ ! "$GITHUB_REF_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?)$ ]]; then
+            echo "::error::Tags look like v1.5.0 or v1.5.0-beta, not $GITHUB_REF_NAME."
+            exit 1
+          fi
+          echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  tests:
+    needs: version
+    uses: ./.github/workflows/tests.yml
+
+  release:
+    name: Build and publish
+    needs: [version, tests]
+    runs-on: xcode-27
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      # Full history: the build number is the commit count.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build the DMG
+        env:
+          VRAI_VERSION: ${{ needs.version.outputs.version }}
+        run: Scripts/release.sh --adhoc
+
+      - name: Check every binary runs on Apple silicon and Intel
+        run: |
+          for binary in build/release/export/Vrai.app/Contents/MacOS/*; do
+            archs="$(lipo -archs "$binary")"
+            echo "$(basename "$binary"): $archs"
+            for arch in arm64 x86_64; do
+              [[ " $archs " == *" $arch "* ]] || { echo "::error::$(basename "$binary") has no $arch slice."; exit 1; }
+            done
+          done
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
+        run: |
+          flags=(--verify-tag --title "Vrai $VERSION" --generate-notes)
+          [[ "$PRERELEASE" == true ]] && flags+=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" "build/release/Vrai-$VERSION.dmg" "${flags[@]}"

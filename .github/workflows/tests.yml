@@ -1,0 +1,37 @@
+name: Tests
+
+on:
+  push:
+    branches: ["**"]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  package:
+    name: Package tests
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      # Without the sandbox fixtures most suites skip instead of running.
+      - name: Build the fixtures
+        run: Scripts/make-fixtures.sh
+
+      - name: Run VraiGit, VraiCore and VraiUI tests
+        working-directory: Packages/VraiKit
+        run: swift test
