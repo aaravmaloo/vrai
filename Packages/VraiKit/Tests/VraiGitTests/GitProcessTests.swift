@@ -159,7 +159,10 @@ struct GitProcessTests {
         } throws: { error in
             (error as? GitError)?.code == .cancelled
         }
-        #expect(ContinuousClock.now - started < .seconds(4))
+        // The backgrounded child ignores SIGINT, so this ends at the SIGTERM after
+        // a 2 second grace. The bound only has to prove it never waits out the 30
+        // second sleep; a busy CI runner can add seconds on top of the grace.
+        #expect(ContinuousClock.now - started < .seconds(10))
         try await Task.sleep(for: .seconds(6))
         let survivors = Process()
         survivors.executableURL = URL(filePath: "/usr/bin/pgrep")

@@ -112,7 +112,9 @@ struct SyncStoreTests {
         let started = clock.now
         hanging.cancel()
         await expectCode("cancelled") { _ = try await hanging.value }
-        #expect(clock.now - started < .seconds(4))
+        // The silent server never answers, so anything short of forever proves the
+        // cancel worked. A busy CI runner can add seconds of scheduling delay.
+        #expect(clock.now - started < .seconds(10))
         #expect(store.busy.isEmpty)
     }
 
