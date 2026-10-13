@@ -34,13 +34,43 @@ final class CloneRunner {
         hidden = false
         let handle = app.startClone(request)
         self.handle = handle
+        let island = IslandCenter.shared
+        let notch: UUID? = island.allows(.sync) ? island.show(IslandActivity(
+            phase: .running,
+            title: String(localized: "Cloning \(name)", bundle: .module),
+            detail: folder,
+            icon: "square.and.arrow.down",
+            actions: [IslandAction(title: String(localized: "Cancel", bundle: .module), activates: false) { handle.cancel() }]
+        )) : nil
         Task { @MainActor in
-            for await event in handle.progress { self.progress = event }
+            for await event in handle.progress {
+                self.progress = event
+                if let notch {
+                    island.update(notch) { activity in
+                        activity.progress = event.fraction
+                        activity.badge = event.fraction.map { String(Int(($0 * 100).rounded())) + "%" }
+                        activity.detail = event.phase
+                    }
+                }
+            }
         }
         Task { @MainActor in
             do {
                 let reference = try await handle.value
                 self.running = false
+                if let notch {
+                    island.finish(notch) { activity in
+                        activity.phase = .success
+                        activity.title = String(localized: "Cloned \(name)", bundle: .module)
+                        activity.detail = folder
+                        activity.progress = nil
+                        activity.badge = nil
+                        activity.actions = []
+                    }
+                    if !self.hidden { context.dismiss() }
+                    if request.opensWindow { context.opened(reference) } else { LongTailReveal.show([reference.url]) }
+                    return
+                }
                 if request.opensWindow {
                     if !self.hidden { context.dismiss() }
                     context.toasts?.show(Toast(message: String(localized: "Cloned \(name)", bundle: .module), detail: String(localized: "Into \(folder).", bundle: .module), icon: "square.and.arrow.down"))
@@ -53,10 +83,21 @@ final class CloneRunner {
             } catch {
                 self.running = false
                 if let error = error as? GitError, error.code == .cancelled {
+                    if let notch { island.dismiss(notch) }
                     if !self.hidden { context.dismiss() }
                     return
                 }
                 let copy = LongTailCopy.cloneFailure(error, url: request.url, folder: folder)
+                if let notch {
+                    island.finish(notch) { activity in
+                        activity.phase = .failure
+                        activity.title = copy.title
+                        activity.detail = copy.message
+                        activity.progress = nil
+                        activity.badge = nil
+                        activity.actions = []
+                    }
+                }
                 if self.hidden {
                     context.toasts?.show(Toast(tone: .danger, message: copy.title, detail: copy.message))
                 } else {

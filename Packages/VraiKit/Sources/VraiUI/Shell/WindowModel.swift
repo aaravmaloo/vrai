@@ -22,6 +22,7 @@ public final class WindowModel {
     public let console = ConsoleModel()
     public let palette = PaletteModel()
     public let switcher = SwitcherModel()
+    public let checks: ChecksStore
     public let now: Date?
     public var pane: Pane = .list
     public var columns: NavigationSplitViewVisibility = .all
@@ -36,11 +37,26 @@ public final class WindowModel {
     public var switchRequest: RepositoryReference?
     public var branchPicker = false
 
-    public init(reference: RepositoryReference, store: RepositoryStore, preferences: Preferences, now: Date?) {
+    @ObservationIgnored lazy var router = IslandRouter(window: self)
+    @ObservationIgnored var checksActivities: [String: UUID] = [:]
+
+    public init(reference: RepositoryReference, store: RepositoryStore, preferences: Preferences, now: Date?, checks: ChecksStore? = nil) {
         self.reference = reference
         self.store = store
         self.preferences = preferences
         self.now = now
+        self.checks = checks ?? ChecksStore(client: nil)
+    }
+
+    func checksActivity(for sha: String) -> UUID {
+        if let id = checksActivities[sha] { return id }
+        let id = UUID()
+        checksActivities[sha] = id
+        return id
+    }
+
+    func forgetChecksActivity(_ sha: String) {
+        checksActivities[sha] = nil
     }
 
     public var repositoryName: String { reference.name }

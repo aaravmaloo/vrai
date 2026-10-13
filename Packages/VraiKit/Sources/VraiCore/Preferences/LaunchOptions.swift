@@ -16,6 +16,8 @@ public struct LaunchOptions: Sendable, Equatable {
     public var settings: String?
     public var gitProblem: String?
     public var openDelay: Int?
+    public var island: String?
+    public var auth: String?
 
     public init(sandbox: URL? = nil, open: URL? = nil, appearance: Appearance? = nil, now: Date? = nil, windowSize: CGSize? = nil, capture: Bool = false, settings: String? = nil) {
         self.sandbox = sandbox
@@ -55,6 +57,10 @@ public struct LaunchOptions: Sendable, Equatable {
                 gitProblem = value
             case "-VraiOpenDelay":
                 openDelay = Int(value)
+            case "-VraiIsland":
+                island = value
+            case "-VraiAuth":
+                auth = value
             default:
                 index = next
                 continue

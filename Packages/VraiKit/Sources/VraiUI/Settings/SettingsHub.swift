@@ -5,6 +5,7 @@ import VraiGit
 
 public enum SettingsPane: String, Sendable, Hashable, CaseIterable, Identifiable {
     case general
+    case notch
     case git
     case accounts
     case appearance
@@ -17,6 +18,7 @@ public enum SettingsPane: String, Sendable, Hashable, CaseIterable, Identifiable
     var title: String {
         switch self {
         case .general: String(localized: "General", bundle: .module)
+        case .notch: String(localized: "Notch", bundle: .module)
         case .git: String(localized: "Git", bundle: .module)
         case .accounts: String(localized: "Accounts", bundle: .module)
         case .appearance: String(localized: "Appearance", bundle: .module)
@@ -29,6 +31,7 @@ public enum SettingsPane: String, Sendable, Hashable, CaseIterable, Identifiable
     var icon: String {
         switch self {
         case .general: "gearshape"
+        case .notch: "menubar.rectangle"
         case .git: "arrow.triangle.branch"
         case .accounts: "person.crop.circle"
         case .appearance: "paintbrush"

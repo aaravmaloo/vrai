@@ -139,5 +139,9 @@
   ["option", "Option key"],
   ["shift", "Shift key"],
   ["control", "Control key"],
-  ["escape", "Escape key"]
+  ["escape", "Escape key"],
+  ["touchid", "Touch ID: confirm a sensitive action"],
+  ["circle.dashed", "Checks queued"],
+  ["checklist", "CI checks for a commit"],
+  ["menubar.rectangle", "Settings: the notch"]
 ]

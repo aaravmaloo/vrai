@@ -26,6 +26,32 @@ public final class Preferences {
         case welcome
     }
 
+    public enum Island: String, Sendable, CaseIterable {
+        case off
+        case activity
+        case everything
+    }
+
+    public enum IslandLinger: String, Sendable, CaseIterable {
+        case short
+        case standard
+        case long
+
+        public var scale: Double {
+            switch self {
+            case .short: 0.6
+            case .standard: 1
+            case .long: 2
+            }
+        }
+    }
+
+    public enum IslandScreen: String, Sendable, CaseIterable {
+        case window
+        case builtIn
+        case pointer
+    }
+
     @ObservationIgnored public let defaults: UserDefaults
 
     public var theme: Theme { didSet { write("theme", theme.rawValue) } }
@@ -49,6 +75,19 @@ public final class Preferences {
     public var openAt: OpenAt { didSet { write("openAt", openAt.rawValue) } }
     public var gitPath: String? { didSet { writeOptional("gitPath", gitPath) } }
     public var accounts: [SignedInAccount] { didSet { writeAccounts() } }
+    public var island: Island { didSet { write("island", island.rawValue) } }
+    public var touchID: Bool { didSet { write("touchID", touchID) } }
+    public var checks: Bool { didSet { write("checks", checks) } }
+    public var checksNotify: Bool { didSet { write("checksNotify", checksNotify) } }
+    public var islandSync: Bool { didSet { write("islandSync", islandSync) } }
+    public var islandStates: Bool { didSet { write("islandStates", islandStates) } }
+    public var islandFetch: Bool { didSet { write("islandFetch", islandFetch) } }
+    public var islandChecks: Bool { didSet { write("islandChecks", islandChecks) } }
+    public var islandAuth: Bool { didSet { write("islandAuth", islandAuth) } }
+    public var islandAttention: Bool { didSet { write("islandAttention", islandAttention) } }
+    public var islandHover: Bool { didSet { write("islandHover", islandHover) } }
+    public var islandLinger: IslandLinger { didSet { write("islandLinger", islandLinger.rawValue) } }
+    public var islandScreen: IslandScreen { didSet { write("islandScreen", islandScreen.rawValue) } }
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -73,6 +112,19 @@ public final class Preferences {
         openAt = OpenAt(rawValue: defaults.string(forKey: "openAt") ?? "") ?? .reopen
         gitPath = defaults.string(forKey: "gitPath").flatMap { $0.isEmpty ? nil : $0 }
         accounts = defaults.data(forKey: "accounts").flatMap { try? JSONDecoder().decode([SignedInAccount].self, from: $0) } ?? []
+        island = Island(rawValue: defaults.string(forKey: "island") ?? "") ?? .everything
+        touchID = defaults.object(forKey: "touchID") as? Bool ?? true
+        checks = defaults.object(forKey: "checks") as? Bool ?? true
+        checksNotify = defaults.object(forKey: "checksNotify") as? Bool ?? true
+        islandSync = defaults.object(forKey: "islandSync") as? Bool ?? true
+        islandStates = defaults.object(forKey: "islandStates") as? Bool ?? true
+        islandFetch = defaults.object(forKey: "islandFetch") as? Bool ?? true
+        islandChecks = defaults.object(forKey: "islandChecks") as? Bool ?? true
+        islandAuth = defaults.object(forKey: "islandAuth") as? Bool ?? true
+        islandAttention = defaults.object(forKey: "islandAttention") as? Bool ?? true
+        islandHover = defaults.object(forKey: "islandHover") as? Bool ?? true
+        islandLinger = IslandLinger(rawValue: defaults.string(forKey: "islandLinger") ?? "") ?? .standard
+        islandScreen = IslandScreen(rawValue: defaults.string(forKey: "islandScreen") ?? "") ?? .window
     }
 
     private func write(_ key: String, _ value: Any) {

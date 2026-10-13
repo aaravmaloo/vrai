@@ -60,6 +60,14 @@ struct GeneralPane: View {
                     SettingsSwitch(label: String(localized: "Notify me about new commits", bundle: .module), isOn: preferences.notifications, id: "settings.notifications", disabled: !preferences.backgroundFetch) { preferences.notifications = $0 }
                 }
             }
+            SettingsSection(String(localized: "CI and deploys", bundle: .module)) {
+                SettingsRow(String(localized: "Show GitHub checks", bundle: .module), description: String(localized: "Shows CI and deploy status next to commits and branches on GitHub remotes. Vrai reads it with your GitHub CLI login or the token git saved for github.com.", bundle: .module)) {
+                    SettingsSwitch(label: String(localized: "Show GitHub checks", bundle: .module), isOn: preferences.checks, id: "settings.checks") { preferences.checks = $0 }
+                }
+                SettingsRow(String(localized: "Tell me when checks finish", bundle: .module), description: String(localized: "After you push, Vrai follows the run and reports when it passes or fails.", bundle: .module)) {
+                    SettingsSwitch(label: String(localized: "Tell me when checks finish", bundle: .module), isOn: preferences.checksNotify, id: "settings.checksNotify", disabled: !preferences.checks) { preferences.checksNotify = $0 }
+                }
+            }
             SettingsSection(String(localized: "Console and tools", bundle: .module)) {
                 SettingsRow(String(localized: "Open the console when a command fails", bundle: .module), description: String(localized: "Shows git's own output and exit code, so you see exactly what went wrong.", bundle: .module)) {
                     SettingsSwitch(label: String(localized: "Open the console when a command fails", bundle: .module), isOn: preferences.consoleOnFailure, id: "settings.consoleOnFailure") { preferences.consoleOnFailure = $0 }

@@ -120,12 +120,14 @@ extension SyncModel {
             }
             run(.push, handle, busy: busy, retry: retry) { [weak self] _ in
                 self?.toasts.show(Toast(message: String(localized: "Pushed \(local.name) to \(target)/\(remoteBranch)", bundle: .module), icon: "arrow.up.to.line"))
+                self?.window.checks.watch(local.tip, branch: remoteBranch)
             }
             return
         }
         let handle = store.pushOperation(remote: remote ?? (local.upstream == nil ? target : nil), branch: branch, force: force, setUpstream: setUpstream, tags: tags, noVerify: noVerify, pushOptions: pushOptions)
         run(.push, handle, busy: busy, retry: retry) { [weak self] result in
             self?.toast(result.summary, icon: "arrow.up.to.line")
+            self?.window.checks.watch(local.tip, branch: local.name)
         }
     }
 
@@ -140,19 +142,27 @@ extension SyncModel {
         message += " " + (lease
             ? String(localized: "The push stops if anyone pushed to it since your last fetch.", bundle: .module)
             : String(localized: "Commits anyone pushed since your last fetch are lost too.", bundle: .module))
-        present(SyncAlert(
-            icon: "exclamationmark.triangle",
-            title: lease ? String(localized: "Force push \(branch.name) with lease?", bundle: .module) : String(localized: "Force push \(branch.name)?", bundle: .module),
-            message: message,
-            toggle: lease ? String(localized: "Don't ask again", bundle: .module) : nil,
-            actions: [
-                AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel),
-                AlertAction(title: String(localized: "Force push", bundle: .module), role: .destructive) { [weak self] in
-                    if lease, self?.toggleOn == true { self?.preferences.confirmForcePush = false }
-                    retry()
-                }
-            ]
-        ))
+        let request = SensitiveRequest(
+            title: lease ? String(localized: "Force push \(branch.name) to \(remote) with lease", bundle: .module) : String(localized: "Force push \(branch.name) to \(remote)", bundle: .module),
+            detail: message,
+            reason: String(localized: "force push \(branch.name) to \(remote)", bundle: .module),
+            icon: "arrow.up.to.line"
+        )
+        Sensitive.confirm(request, preferences: preferences, source: window.repositoryName, alert: { [weak self] in
+            self?.present(SyncAlert(
+                icon: "exclamationmark.triangle",
+                title: lease ? String(localized: "Force push \(branch.name) with lease?", bundle: .module) : String(localized: "Force push \(branch.name)?", bundle: .module),
+                message: message,
+                toggle: lease ? String(localized: "Don't ask again", bundle: .module) : nil,
+                actions: [
+                    AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel),
+                    AlertAction(title: String(localized: "Force push", bundle: .module), role: .destructive) { [weak self] in
+                        if lease, self?.toggleOn == true { self?.preferences.confirmForcePush = false }
+                        retry()
+                    }
+                ]
+            ))
+        }, perform: retry)
     }
 
     func failed(_ error: any Error, kind: SyncKind?, retry: (@MainActor () -> Void)?) {
@@ -216,7 +226,7 @@ extension SyncModel {
 
     func rejected(behind: Int?, remote: String) {
         let copy = SyncCopy.rejected(remote: remote, behind: behind)
-        present(SyncAlert(
+        let alert = SyncAlert(
             icon: "exclamationmark.triangle",
             title: copy.title,
             message: copy.message,
@@ -225,7 +235,8 @@ extension SyncModel {
                 AlertAction(title: String(localized: "Force push with lease", bundle: .module)) { [weak self] in self?.push(force: .withLease, remote: remote, confirmed: true) },
                 AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel)
             ]
-        ))
+        )
+        if !island(alert) { present(alert) }
     }
 
     func diverged() {
@@ -233,7 +244,7 @@ extension SyncModel {
         let ahead = branch?.ahead ?? 0
         let behind = branch?.behind ?? 0
         let upstream = branch?.upstream ?? String(localized: "its upstream", bundle: .module)
-        present(SyncAlert(
+        let alert = SyncAlert(
             icon: "arrow.triangle.merge",
             title: String(localized: "Can't fast-forward \(headName)", bundle: .module),
             message: String(localized: "You have \(n(ahead, "commit")) that \(upstream) doesn't, and it has \(behind) you don't. Merge them, or rebase your \(ahead == 1 ? String(localized: "commit", bundle: .module) : String(localized: "commits", bundle: .module)) on top of it.", bundle: .module),
@@ -242,7 +253,8 @@ extension SyncModel {
                 AlertAction(title: String(localized: "Pull and rebase", bundle: .module)) { [weak self] in self?.pull(mode: .rebase) },
                 AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel)
             ]
-        ))
+        )
+        if !island(alert, tone: .warning) { present(alert) }
     }
 
     func offline(host: String?, kind: SyncKind?, retry: (@MainActor () -> Void)?) {
@@ -286,12 +298,13 @@ extension SyncModel {
             actions.append(AlertAction(title: String(localized: "Use SSH instead", bundle: .module)) { [weak self] in self?.useSSH(remote: remote, url: url) })
         }
         actions.append(AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel))
-        present(SyncAlert(
+        let alert = SyncAlert(
             icon: "key",
             title: SyncCopy.authTitle(host: target.host, repository: target.repository),
             message: web ? String(localized: "The token Vrai uses for \(target.repository) was rejected, so fetch, pull and push can't reach \(target.host). Sign in again, or switch to SSH.", bundle: .module) : String(localized: "The credentials Vrai uses for \(target.repository) were rejected, so fetch, pull and push can't reach \(target.host). Sign in again.", bundle: .module),
             actions: actions
-        ))
+        )
+        if !island(alert) { present(alert) }
     }
 
     func signIn(_ error: GitError?, retry: (@MainActor () -> Void)?) {
@@ -472,21 +485,30 @@ extension SyncModel {
         if !tracking.isEmpty {
             message += " " + (tracking.count == 1 ? String(localized: "\(tracking[0]) loses its upstream.", bundle: .module) : String(localized: "\(tracking.joined(separator: ", ")) lose their upstream.", bundle: .module))
         }
-        present(SyncAlert(
-            icon: "cloud",
-            title: String(localized: "Delete \(name) on \(remote)?", bundle: .module),
-            message: message,
-            actions: [
-                AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel),
-                AlertAction(title: String(localized: "Delete on \(remote)", bundle: .module), role: .destructive) { [weak self] in
-                    self?.perform(network: true, { [weak self] in
-                        guard let self else { return }
-                        let summary = try await self.store.deleteRemoteBranch(remote: remote, name: name)
-                        self.toast(summary, icon: "trash")
-                    }, kind: .push)
-                }
-            ]
-        ))
+        let delete: @MainActor () -> Void = { [weak self] in
+            self?.perform(network: true, { [weak self] in
+                guard let self else { return }
+                let summary = try await self.store.deleteRemoteBranch(remote: remote, name: name)
+                self.toast(summary, icon: "trash")
+            }, kind: .push)
+        }
+        let request = SensitiveRequest(
+            title: String(localized: "Delete \(name) on \(remote)", bundle: .module),
+            detail: message,
+            reason: String(localized: "delete \(full) for everyone", bundle: .module),
+            icon: "trash"
+        )
+        Sensitive.confirm(request, preferences: preferences, source: window.repositoryName, alert: { [weak self] in
+            self?.present(SyncAlert(
+                icon: "cloud",
+                title: String(localized: "Delete \(name) on \(remote)?", bundle: .module),
+                message: message,
+                actions: [
+                    AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel),
+                    AlertAction(title: String(localized: "Delete on \(remote)", bundle: .module), role: .destructive, action: delete)
+                ]
+            ))
+        }, perform: delete)
     }
 
     func rename(_ name: String) {

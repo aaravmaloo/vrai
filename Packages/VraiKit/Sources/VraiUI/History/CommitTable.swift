@@ -19,6 +19,7 @@ struct CommitTableRow: Equatable {
     var files: Int
     var expert: Bool
     var layout: CommitColumnLayout
+    var checks: CheckState?
 }
 
 struct CommitColumnLayout: Equatable {
@@ -112,6 +113,7 @@ struct CommitTableState {
     var files: Int
     var scrollRequest: ScrollRequest?
     var signatures: [OID: SignatureState]
+    var checks: [OID: CheckState] = [:]
 
     var offset: Int { history.wipRow == nil ? 0 : 1 }
     var count: Int { history.commits.count + offset }
@@ -155,7 +157,8 @@ struct CommitTableState {
             signature: signatures[commit.id] ?? commit.signature,
             files: 0,
             expert: expert,
-            layout: layout
+            layout: layout,
+            checks: checks[commit.id]
         )
     }
 }

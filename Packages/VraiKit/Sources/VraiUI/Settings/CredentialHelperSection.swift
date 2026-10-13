@@ -168,14 +168,22 @@ struct CredentialHelperSection: View {
     }
 
     func confirmDelete() {
-        context.window?.alerts.present(AlertRequest(
-            title: String(localized: "Delete saved passwords?", bundle: .module),
-            message: String(localized: "git credential-store removes every HTTPS password it saved. Remotes ask you to sign in again.", bundle: .module),
-            actions: [
-                AlertAction(title: String(localized: "Delete", bundle: .module), role: .destructive) { deleteSaved() },
-                AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel)
-            ]
-        ))
+        let request = SensitiveRequest(
+            title: String(localized: "Delete saved passwords", bundle: .module),
+            detail: String(localized: "git credential-store removes every HTTPS password it saved. Remotes ask you to sign in again.", bundle: .module),
+            reason: String(localized: "delete the passwords git saved", bundle: .module),
+            icon: "key"
+        )
+        Sensitive.confirm(request, preferences: context.app.preferences, source: nil, alert: {
+            context.window?.alerts.present(AlertRequest(
+                title: String(localized: "Delete saved passwords?", bundle: .module),
+                message: String(localized: "git credential-store removes every HTTPS password it saved. Remotes ask you to sign in again.", bundle: .module),
+                actions: [
+                    AlertAction(title: String(localized: "Delete", bundle: .module), role: .destructive) { deleteSaved() },
+                    AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel)
+                ]
+            ))
+        }, perform: { deleteSaved() })
     }
 
     func deleteSaved() {

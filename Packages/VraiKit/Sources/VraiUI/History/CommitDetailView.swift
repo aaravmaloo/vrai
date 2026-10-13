@@ -94,6 +94,7 @@ struct CommitHeaderView: View {
     let commit: Commit
     let signer: String?
     @Environment(RepositoryStore.self) private var store
+    @Environment(Preferences.self) private var preferences
     @Environment(WindowModel.self) private var window
     @Environment(\.expert) private var expert
     @Environment(\.vraiNow) private var now
@@ -148,6 +149,9 @@ struct CommitHeaderView: View {
                 }
                 if expert || signature == .bad {
                     SignatureCheck(target: .commit(commit.id), state: signature, signer: signer ?? commit.authorName)
+                }
+                if preferences.checks {
+                    ChecksPill(id: commit.id, branch: ChecksActions.label(for: commit.id, in: store.snapshot))
                 }
                 if !refs.isEmpty {
                     PillRow {

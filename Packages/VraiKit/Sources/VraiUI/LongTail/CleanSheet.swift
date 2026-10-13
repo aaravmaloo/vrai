@@ -72,6 +72,21 @@ struct CleanSheet: View {
         guard let plan, !plan.paths.isEmpty, !busy else { return }
         busy = true
         window.sheets.dismiss()
+        guard !plan.keepsCopy else {
+            remove(plan)
+            return
+        }
+        let request = SensitiveRequest(
+            title: String(localized: "Remove \(n(plan.files.count, "untracked file"))", bundle: .module),
+            detail: String(localized: "They're deleted for good. git keeps no copy of untracked files.", bundle: .module),
+            reason: String(localized: "delete \(n(plan.files.count, "untracked file")) for good", bundle: .module),
+            icon: "trash"
+        )
+        Sensitive.confirm(request, preferences: window.preferences, source: window.repositoryName, alert: { remove(plan) }, perform: { remove(plan) })
+        busy = false
+    }
+
+    func remove(_ plan: CleanPlan) {
         Task {
             defer { busy = false }
             do {

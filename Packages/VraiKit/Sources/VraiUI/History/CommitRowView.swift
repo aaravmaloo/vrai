@@ -92,6 +92,7 @@ struct CommitRowView: View {
     let columns: CommitColumns
     let signature: SignatureState
     var layout: CommitColumnLayout?
+    var checks: CheckState?
     @Environment(\.expert) private var expert
     @Environment(\.vraiNow) private var now
 
@@ -110,9 +111,17 @@ struct CommitRowView: View {
                 }
                 SubjectText(subject: commit.subject, query: query)
                     .layoutValue(key: SubjectRole.self, value: 1)
-                if expert, signature != .unchecked {
-                    SignatureBadge(state: signature, compact: true)
-                        .layoutValue(key: SubjectRole.self, value: 2)
+                if checks != nil || (expert && signature != .unchecked) {
+                    HStack(spacing: Vrai.Space.s6) {
+                        if let checks {
+                            ChecksGlyph(state: checks)
+                                .help(ChecksCopy.state(checks))
+                        }
+                        if expert, signature != .unchecked {
+                            SignatureBadge(state: signature, compact: true)
+                        }
+                    }
+                    .layoutValue(key: SubjectRole.self, value: 2)
                 }
             }
             .padding(.horizontal, CommitColumnLayout.inset)

@@ -94,6 +94,10 @@ public final class AppModel {
         let socketFolder = launch.sandbox?.appending(path: "askpass", directoryHint: .isDirectory) ?? FileManager.default.temporaryDirectory.appending(path: "vrai-askpass", directoryHint: .isDirectory)
         askpass = askpassHelper == nil ? nil : try? AskpassBridge(socketURL: AskpassBridge.socketURL(in: socketFolder))
         preferences = Preferences(defaults: defaults)
+        if launch.isSandboxed {
+            preferences.island = launch.island.flatMap(Preferences.Island.init(rawValue:)) ?? .off
+            defaults.removeObject(forKey: "island")
+        }
         recents = loadRecents()
         pendingOpen = launch.open
         PerfLog.sinceLaunch("launch.model.git")

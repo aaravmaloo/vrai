@@ -108,6 +108,17 @@ final class SyncModel {
         }
     }
 
+    @discardableResult
+    func island(_ alert: SyncAlert, tone: Tone = .danger) -> Bool {
+        let island = IslandCenter.shared
+        guard island.isActive, island.attentionOpens else { return false }
+        let actions = alert.actions.filter { $0.role != .cancel }.enumerated().map { index, action in
+            IslandAction(title: action.title, prominent: index == 0, activates: action.title.hasSuffix("\u{2026}")) { action.action?() }
+        }
+        island.show(IslandActivity(phase: tone == .danger ? .failure : .warning, title: alert.title, detail: alert.message, icon: alert.icon, source: window.repositoryName, actions: actions, linger: 14, attention: true))
+        return true
+    }
+
     private func show(_ alert: SyncAlert) {
         toggleOn = alert.toggleDefault
         self.alert = alert
@@ -142,12 +153,18 @@ final class SyncModel {
         Task { [weak self] in
             for await progress in handle.progress {
                 self?.running[kind]?.progress = progress
+                self?.window.router.progress(self?.running[kind]?.toast, progress)
             }
         }
         let notice = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(0.8))
+            try? await Task.sleep(for: .seconds(IslandCenter.shared.allows(.sync) ? 0 : 0.8))
             guard !Task.isCancelled, let self, self.running[kind] != nil else { return }
-            self.running[kind]?.toast = self.toasts.show(Toast(message: busy, action: String(localized: "Cancel", bundle: .module), timeout: 3600, busy: true) { [weak self] in
+            let icon = switch kind {
+            case .fetch: "arrow.triangle.2.circlepath"
+            case .pull: "arrow.down.to.line"
+            case .push: "arrow.up.to.line"
+            }
+            self.running[kind]?.toast = self.toasts.show(Toast(message: busy, icon: icon, action: String(localized: "Cancel", bundle: .module), timeout: 3600, busy: true) { [weak self] in
                 self?.running[kind]?.cancel()
             })
         }
@@ -160,7 +177,9 @@ final class SyncModel {
             }
             notice.cancel()
             guard let self else { return }
-            if let id = self.running[kind]?.toast { self.toasts.dismiss(id) }
+            let toastID = self.running[kind]?.toast
+            if case .failure(let error) = outcome { self.window.router.failed(toastID, error) }
+            if let id = toastID { self.toasts.dismiss(id) }
             self.running[kind] = nil
             self.userNetwork -= 1
             switch outcome {
@@ -195,6 +214,8 @@ final class SyncHub: NSObject, UNUserNotificationCenterDelegate {
     private(set) weak var app: AppModel?
     private var installed = false
 
+    var allModels: [SyncModel] { Array(models.values) }
+
     func model(for window: WindowModel) -> SyncModel {
         let key = ObjectIdentifier(window)
         if let existing = models[key] { return existing }
@@ -213,6 +234,8 @@ final class SyncHub: NSObject, UNUserNotificationCenterDelegate {
         guard !installed else { return }
         installed = true
         self.app = app
+        Authenticator.configure(launch: app.launch)
+        if app.launch.isSandboxed, app.launch.island == Preferences.Island.everything.rawValue { IslandCenter.shared.notchOverride = true }
         app.askpass?.setHandler { request in
             await SyncHub.answer(request)
         }
@@ -314,7 +337,7 @@ extension SyncModel {
         guard preferences.backgroundFetch else { return }
         let fetcher = BackgroundFetcher(
             store: store,
-            notifier: SyncHub.shared.notifier,
+            notifier: IslandNotifier(fallback: SyncHub.shared.notifier),
             interval: BackgroundFetcher.interval(minutes: preferences.fetchInterval),
             notifyAboutNewCommits: preferences.notifications,
             isWindowKey: { [weak self] in self?.isKey ?? false }

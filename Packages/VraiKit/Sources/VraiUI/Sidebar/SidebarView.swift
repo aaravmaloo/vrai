@@ -160,7 +160,7 @@ struct SidebarView: View {
                     if preferences.showRemotes {
                         DisclosureGroup(isExpanded: folder("remote:" + remote.name, default: false)) {
                             ForEach(snapshot.remoteBranches.filter { $0.remote == remote.name }.sorted { $0.name < $1.name }) { branch in
-                                SidebarItem(icon: "cloud", iconColor: Color.Vrai.lane(branch.colorIndex), label: branch.name, help: branch.fullName)
+                                SidebarItem(icon: "cloud", iconColor: Color.Vrai.lane(branch.colorIndex), label: branch.name, help: branch.fullName, trailing: SidebarChecks.glyph(window, branch.tip))
                                     .simultaneousGesture(TapGesture(count: 2).onEnded { window.sync.checkOut(remote: branch) })
                                     .contextMenu { RemoteBranchMenu(remote: branch, window: window) }
                                     .tag("remote:" + branch.fullName)
@@ -303,6 +303,9 @@ struct BranchTreeView: View {
         } else if branch.upstreamGone, let upstream = branch.upstream {
             trailing = AnyView(Badge(text: String(localized: "gone", bundle: .module), tone: .warning).help(String(localized: "Its upstream \(upstream) is gone", bundle: .module)))
         }
+        if branch.upstream != nil, branch.ahead == 0, !branch.upstreamGone, let glyph = SidebarChecks.glyph(window, branch.tip) {
+            trailing = trailing.map { existing in AnyView(HStack(spacing: Vrai.Space.s6) { existing; glyph }) } ?? glyph
+        }
         return SidebarItem(
             icon: "arrow.triangle.branch",
             iconColor: Color.Vrai.lane(branch.colorIndex),
@@ -378,6 +381,14 @@ struct SidebarSection<Content: View>: View {
 struct SidebarAnchor: Hashable {
     static let revealed = ["worktrees", "submodules"]
     let key: String
+}
+
+@MainActor
+enum SidebarChecks {
+    static func glyph(_ window: WindowModel, _ tip: OID) -> AnyView? {
+        guard window.preferences.checks, let state = window.checks.state(of: tip) else { return nil }
+        return AnyView(ChecksGlyph(state: state).help(ChecksCopy.state(state)))
+    }
 }
 
 struct SidebarItem: View {

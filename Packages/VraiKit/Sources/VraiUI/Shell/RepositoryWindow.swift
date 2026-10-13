@@ -99,7 +99,7 @@ public struct RepositoryWindowRoot: View {
         }
         do {
             let store = try app.store(for: reference)
-            let window = WindowModel(reference: reference, store: store, preferences: app.preferences, now: app.launch.now)
+            let window = WindowModel(reference: reference, store: store, preferences: app.preferences, now: app.launch.now, checks: app.makeChecks(for: store, reference: reference))
             let previous = model
             if let previous { window.inherit(previous) }
             if !app.launch.isSandboxed, let layout = app.layout(for: reference) { window.restore(layout) }
@@ -173,6 +173,7 @@ struct RepositoryShell: View {
         .modifier(AlertHost(center: window.alerts))
         .modifier(SheetHost(center: window.sheets))
         .modifier(SyncWiring(window: window))
+        .modifier(IslandWiring(window: window))
         .settingsWiring(window)
         .focusedSceneValue(\.windowModel, window)
         .onChange(of: store.snapshotError) { _, error in

@@ -87,6 +87,11 @@ struct GitPaneForm: View {
                     SettingsSwitch(label: String(localized: "Confirm before force pushing", bundle: .module), isOn: preferences.confirmForcePush, id: "settings.confirmForcePush") { preferences.confirmForcePush = $0 }
                 }
             }
+            SettingsSection(String(localized: "Sensitive actions", bundle: .module)) {
+                SettingsRow(String(localized: "Confirm with Touch ID", bundle: .module), description: Authenticator.biometricsAvailable ? String(localized: "Force pushing, deleting a branch on a remote, removing untracked files and signing out ask for your fingerprint instead of an alert.", bundle: .module) : String(localized: "This Mac has no Touch ID set up, so Vrai asks with an alert.", bundle: .module)) {
+                    SettingsSwitch(label: String(localized: "Confirm with Touch ID", bundle: .module), isOn: preferences.touchID && Authenticator.biometricsAvailable, id: "settings.touchID", disabled: !Authenticator.biometricsAvailable) { preferences.touchID = $0 }
+                }
+            }
             SettingsSection(String(localized: "Diffs", bundle: .module)) {
                 SettingsRow(String(localized: "Diff algorithm", bundle: .module), description: Self.algorithmHelp(git.diffAlgorithm)) {
                     SettingsSelect(

@@ -297,6 +297,18 @@ struct AccountsForm: View {
     }
 
     func signOut(_ item: AccountItem) {
+        guard let name = item.username else { return }
+        let host = RemoteURL(item.url)?.host ?? item.host
+        let request = SensitiveRequest(
+            title: String(localized: "Sign out of \(host) as \(name)", bundle: .module),
+            detail: String(localized: "git forgets the token. HTTPS remotes on \(host) ask you to sign in again.", bundle: .module),
+            reason: String(localized: "sign out of \(host)", bundle: .module),
+            icon: "person.crop.circle"
+        )
+        Sensitive.confirm(request, preferences: context.app.preferences, source: nil, alert: { signOutNow(item) }, perform: { signOutNow(item) })
+    }
+
+    func signOutNow(_ item: AccountItem) {
         guard let name = item.username, let setup else { return }
         let host = RemoteURL(item.url)?.host ?? item.host
         signingOut = item.id

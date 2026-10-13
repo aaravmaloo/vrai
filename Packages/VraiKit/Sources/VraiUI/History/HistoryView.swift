@@ -231,7 +231,8 @@ struct CommitList: View {
             expert: expert,
             files: store.snapshot?.working.count ?? 0,
             scrollRequest: store.scrollRequest,
-            signatures: expert ? store.signatures : [:]
+            signatures: expert ? store.signatures : [:],
+            checks: preferences.checks ? window.checks.states : [:]
         )
         VStack(spacing: 0) {
             CommitTable(state: state, content: row, onRowShown: shown)
@@ -287,7 +288,8 @@ struct CommitList: View {
                 query: model.query,
                 columns: model.columns,
                 signature: model.signature,
-                layout: model.layout
+                layout: model.layout,
+                checks: model.checks
             )
             .onTapGesture { choose(.commit(commit.id)) }
             .accessibilityAction { choose(.commit(commit.id)) }

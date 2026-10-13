@@ -30,7 +30,7 @@ struct IconNamesTests {
     }
 
     @Test func iconListIsComplete() throws {
-        #expect(try Self.allowedNames().count == 141)
+        #expect(try Self.allowedNames().count == 145)
     }
 
     @Test func everySymbolInSourceIsInIconsJSON() throws {

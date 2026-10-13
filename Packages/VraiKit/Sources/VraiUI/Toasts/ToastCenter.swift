@@ -41,11 +41,14 @@ public struct Toast: Identifiable {
 public final class ToastCenter {
     public private(set) var toasts: [Toast] = []
     public static let limit = 3
+    @ObservationIgnored public var route: (@MainActor (Toast) -> Bool)?
+    @ObservationIgnored public var onDismiss: (@MainActor (UUID) -> Void)?
 
     public init() {}
 
     @discardableResult
     public func show(_ toast: Toast) -> UUID {
+        if let route, route(toast) { return toast.id }
         toasts = Array((toasts + [toast]).suffix(Self.limit))
         AccessibilityNotification.Announcement(toast.detail.map { toast.message + ". " + $0 } ?? toast.message).post()
         let id = toast.id
@@ -58,6 +61,7 @@ public final class ToastCenter {
 
     public func dismiss(_ id: UUID) {
         toasts.removeAll { $0.id == id }
+        onDismiss?(id)
     }
 }
 

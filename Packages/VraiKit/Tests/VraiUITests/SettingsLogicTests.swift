@@ -7,8 +7,8 @@ import VraiGit
 @MainActor
 struct SettingsLogicTests {
     @Test func everyPaneHasATitleAndAnAllowedIcon() {
-        #expect(SettingsPane.allCases.map(\.rawValue) == ["general", "git", "accounts", "appearance", "shortcuts", "repository", "expert"])
-        #expect(SettingsPane.allCases.map(\.icon) == ["gearshape", "arrow.triangle.branch", "person.crop.circle", "paintbrush", "keyboard", "folder", "terminal"])
+        #expect(SettingsPane.allCases.map(\.rawValue) == ["general", "notch", "git", "accounts", "appearance", "shortcuts", "repository", "expert"])
+        #expect(SettingsPane.allCases.map(\.icon) == ["gearshape", "menubar.rectangle", "arrow.triangle.branch", "person.crop.circle", "paintbrush", "keyboard", "folder", "terminal"])
         #expect(SettingsPane.allCases.allSatisfy { !$0.title.isEmpty })
     }
 
