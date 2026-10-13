@@ -122,7 +122,10 @@ extension AppModel {
     }
 
     public func startClone(_ request: CloneRequest) -> CloneHandle {
-        let (stream, continuation) = AsyncStream.makeStream(of: CloneProgress.self, bufferingPolicy: .bufferingNewest(512))
+        // Keep every event: a clone with submodules sends hundreds of them, and a
+        // reader that falls behind would otherwise lose the early submodule ones.
+        // Git throttles progress output, so even large clones stay small.
+        let (stream, continuation) = AsyncStream.makeStream(of: CloneProgress.self, bufferingPolicy: .unbounded)
         let destination = request.destination.standardizedFileURL
         let parent = destination.deletingLastPathComponent()
         let existed = FileManager.default.fileExists(atPath: destination.path(percentEncoded: false))
