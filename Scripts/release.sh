@@ -97,7 +97,7 @@ else
 fi
 
 if [[ "$mode" == developer-id ]]; then
-  git -C "$root" diff --quiet HEAD -- || fail "Commit or stash your changes first; the build number comes from the commit count."
+  git -C "$root" diff --quiet HEAD -- || fail "Commit or stash your changes first; the build number comes from the commit time."
   identity="$VRAI_SIGN_IDENTITY"
   timestamp=(--timestamp)
   team="$VRAI_TEAM_ID"
@@ -111,7 +111,10 @@ for tool in xcodegen xcodebuild git hdiutil codesign ditto python3; do
   command -v "$tool" >/dev/null || fail "$tool was not found."
 done
 
-build="$(git -C "$root" rev-list --count HEAD)"
+# The commit time in UTC, such as 20261013.1215. Sparkle only offers a build
+# whose number is higher, and unlike a commit count this never goes down when
+# history is squashed or rewritten.
+build="$(TZ=UTC git -C "$root" log -1 --format=%cd --date=format-local:%Y%m%d.%H%M HEAD)"
 archive="$out/Vrai.xcarchive"
 export_dir="$out/export"
 app="$export_dir/Vrai.app"

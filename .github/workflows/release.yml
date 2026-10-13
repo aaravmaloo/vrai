@@ -51,10 +51,7 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
       VERSION: ${{ needs.version.outputs.version }}
     steps:
-      # Full history: the build number is the commit count.
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -87,3 +84,9 @@ jobs:
           flags=(--verify-tag --title "Vrai $VERSION" --generate-notes)
           [[ "$PRERELEASE" == true ]] && flags+=(--prerelease)
           gh release create "$GITHUB_REF_NAME" "build/release/Vrai-$VERSION.dmg" build/release/appcast.xml "${flags[@]}"
+
+      # Later edits on GitHub go through the Release notes workflow.
+      - name: Copy the notes into the appcast
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: Scripts/appcast-notes.sh "$GITHUB_REF_NAME"

@@ -20,7 +20,7 @@ public struct RepositoryCommands: Commands {
         }
         CommandGroup(after: .appSettings) {
             Button(String(localized: "Check for updates\u{2026}", bundle: .module)) { updates.check() }
-                .disabled(!updates.canCheck)
+                .disabled(updates.disabled)
         }
         CommandGroup(replacing: .newItem) {
             Button(String(localized: "New repository\u{2026}", bundle: .module)) { AppSheets.present(.newRepository(folder: nil), window: window, app: app, openWindow: openWindow) }

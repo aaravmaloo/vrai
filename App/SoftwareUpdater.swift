@@ -15,6 +15,7 @@ final class SoftwareUpdater {
         let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
         self.controller = controller
         let check = check
+        check.managed = true
         check.perform = { [weak controller] in controller?.checkForUpdates(nil) }
         availability = controller.updater.publisher(for: \.canCheckForUpdates)
             .receive(on: RunLoop.main)

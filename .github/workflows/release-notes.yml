@@ -1,0 +1,28 @@
+name: Release notes
+
+# Editing a release on GitHub copies its notes into the appcast, so Sparkle's
+# update window shows them. Releases published by the Release workflow get
+# their notes there instead: GitHub starts no workflows for releases created
+# with the workflow's own token.
+on:
+  release:
+    types: [published, edited]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-notes-${{ github.event.release.tag_name }}
+  cancel-in-progress: true
+
+jobs:
+  notes:
+    name: Copy the notes into the appcast
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Update appcast.xml
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: Scripts/appcast-notes.sh "${{ github.event.release.tag_name }}"

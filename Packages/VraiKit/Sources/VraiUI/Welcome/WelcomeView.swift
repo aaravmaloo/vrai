@@ -13,6 +13,16 @@ enum AppInfo {
     }
 
     @MainActor static var icon: NSImage { NSApp.applicationIconImage }
+
+    static let releases = URL(string: "https://github.com/aaravmaloo/vrai/releases")!
+
+    // Only builds made from a release tag carry an update feed, and only those
+    // have a release page of their own.
+    static var releaseNotes: URL {
+        let info = Bundle.main.infoDictionary ?? [:]
+        guard UpdateFeed(info: info, arguments: []) != nil, let version = info["CFBundleShortVersionString"] as? String else { return releases }
+        return releases.appending(path: "tag/v" + version)
+    }
 }
 
 struct MarkImage: View {
@@ -426,6 +436,7 @@ struct OnboardingView: View {
 public struct AboutView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismissWindow) private var dismissWindow
+    @Environment(\.openURL) private var openURL
 
     public init() {}
 
@@ -450,8 +461,9 @@ public struct AboutView: View {
             .multilineTextAlignment(.center)
             .padding(.top, Vrai.Space.s4)
             HStack(spacing: Vrai.Space.s8) {
-                VraiButton(title: String(localized: "Release notes", bundle: .module), full: true) {}
-                    .disabled(true)
+                VraiButton(title: String(localized: "Release notes", bundle: .module), full: true) {
+                    openURL(AppInfo.releaseNotes)
+                }
                 VraiButton(title: String(localized: "Close", bundle: .module), variant: .primary, full: true) {
                     dismissWindow(id: "about")
                 }
