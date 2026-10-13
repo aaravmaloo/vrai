@@ -39,7 +39,7 @@ public extension Color {
         public static let separator = dynamic(NSColor(srgbRed: 0.1176, green: 0.1176, blue: 0.1961, alpha: 0.080), NSColor(srgbRed: 0.9216, green: 0.9216, blue: 0.9804, alpha: 0.070))
         public static let text = dynamic(NSColor(srgbRed: 0.1059, green: 0.1059, blue: 0.1255, alpha: 1.000), NSColor(srgbRed: 0.9490, green: 0.9490, blue: 0.9608, alpha: 1.000))
         public static let textSecondary = dynamic(NSColor(srgbRed: 0.3020, green: 0.3020, blue: 0.3412, alpha: 1.000), NSColor(srgbRed: 0.7412, green: 0.7412, blue: 0.7765, alpha: 1.000))
-        public static let textTertiary = dynamic(NSColor(srgbRed: 0.3647, green: 0.3647, blue: 0.4078, alpha: 1.000), NSColor(srgbRed: 0.6314, green: 0.6314, blue: 0.6745, alpha: 1.000))
+        public static let textTertiary = dynamic(NSColor(srgbRed: 0.3490, green: 0.3490, blue: 0.3922, alpha: 1.000), NSColor(srgbRed: 0.6314, green: 0.6314, blue: 0.6745, alpha: 1.000))
         public static let textDisabled = dynamic(NSColor(srgbRed: 0.6471, green: 0.6471, blue: 0.6863, alpha: 1.000), NSColor(srgbRed: 0.3569, green: 0.3569, blue: 0.3961, alpha: 1.000))
         public static let onAccent = dynamic(NSColor(srgbRed: 1.0000, green: 1.0000, blue: 1.0000, alpha: 1.000), NSColor(srgbRed: 1.0000, green: 1.0000, blue: 1.0000, alpha: 1.000))
         public static let accent = systemAccent()

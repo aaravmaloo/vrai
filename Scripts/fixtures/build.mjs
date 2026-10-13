@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { seedRepo, emptyRepo, recentRepos, rng, numberHunk } from "../../prototype_ui/app/src/seed.js";
+import { seedRepo, emptyRepo, recentRepos, rng, numberHunk } from "./seed.js";
 import * as K from "./content.mjs";
 import { writeKeys } from "./keys.mjs";
 

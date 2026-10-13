@@ -16,17 +16,22 @@ notarizes and staples the app, builds a read-only DMG with an Applications
 link, signs, notarizes and staples the DMG, and writes an EdDSA-signed Sparkle
 appcast. Everything goes to build/release.
 
-  --adhoc   Same pipeline with ad hoc signing; skips notarization, stapling
-            and the appcast. Needs no Apple Developer account.
+  --adhoc   Same pipeline with ad hoc signing; skips notarization and
+            stapling. Needs no Apple Developer account. Writes the appcast
+            only when VRAI_FEED_URL is set.
 
 Optional environment:
   VRAI_VERSION              Version to stamp, such as 1.5.0 or 1.5.0-beta
                             (default: MARKETING_VERSION in project.yml)
+  VRAI_PRIVATE_ED_KEY       Sparkle private EdDSA key (default: read from
+                            the keychain by generate_appcast)
 
 Environment for a Developer ID release:
   VRAI_SIGN_IDENTITY        Developer ID Application certificate name
   VRAI_TEAM_ID              Apple Developer team id (10 characters)
   VRAI_NOTARY_PROFILE       notarytool keychain profile name
+
+Environment for updates (always for Developer ID, optional with --adhoc):
   VRAI_FEED_URL             https URL of appcast.xml
   VRAI_PUBLIC_ED_KEY        Sparkle public EdDSA key (base64)
   VRAI_DOWNLOAD_URL_PREFIX  https URL of the folder that hosts the DMG
@@ -55,35 +60,50 @@ describe() {
   esac
 }
 
-required=(VRAI_SIGN_IDENTITY VRAI_TEAM_ID VRAI_NOTARY_PROFILE VRAI_FEED_URL VRAI_PUBLIC_ED_KEY VRAI_DOWNLOAD_URL_PREFIX)
+required=()
+[[ "$mode" != developer-id ]] || required+=(VRAI_SIGN_IDENTITY VRAI_TEAM_ID VRAI_NOTARY_PROFILE)
+with_updates=""
+if [[ "$mode" == developer-id || -n "${VRAI_FEED_URL:-}" ]]; then
+  with_updates=1
+  required+=(VRAI_FEED_URL VRAI_PUBLIC_ED_KEY VRAI_DOWNLOAD_URL_PREFIX)
+fi
 
-if [[ "$mode" == developer-id ]]; then
-  missing=()
-  for name in "${required[@]}"; do
-    [[ -n "${!name:-}" ]] || missing+=("$name")
-  done
-  if (( ${#missing[@]} > 0 )); then
-    {
-      echo "release.sh: a Developer ID release needs these environment variables, and they are not set:"
-      for name in "${missing[@]}"; do printf '  %-26s %s\n' "$name" "$(describe "$name")"; done
+missing=()
+for name in ${required[@]+"${required[@]}"}; do
+  [[ -n "${!name:-}" ]] || missing+=("$name")
+done
+if (( ${#missing[@]} > 0 )); then
+  {
+    echo "release.sh: this release needs these environment variables, and they are not set:"
+    for name in "${missing[@]}"; do printf '  %-26s %s\n' "$name" "$(describe "$name")"; done
+    if [[ "$mode" == developer-id ]]; then
       echo "Set them and run again, or run Scripts/release.sh --adhoc to test the pipeline without signing."
-    } >&2
-    exit 1
-  fi
+    else
+      echo "Set them and run again, or unset VRAI_FEED_URL to build without updates."
+    fi
+  } >&2
+  exit 1
+fi
+
+if [[ -n "$with_updates" ]]; then
   [[ "$VRAI_FEED_URL" == https://?* ]] || fail "VRAI_FEED_URL must be an https URL."
   [[ "$VRAI_DOWNLOAD_URL_PREFIX" == https://?* ]] || fail "VRAI_DOWNLOAD_URL_PREFIX must be an https URL."
   [[ "$(printf '%s' "$VRAI_PUBLIC_ED_KEY" | base64 -D 2>/dev/null | wc -c | tr -d ' ')" == 32 ]] || fail "VRAI_PUBLIC_ED_KEY must be the base64 public key from generate_keys."
+  feed="$VRAI_FEED_URL"
+  key="$VRAI_PUBLIC_ED_KEY"
+else
+  feed=""
+  key=""
+fi
+
+if [[ "$mode" == developer-id ]]; then
   git -C "$root" diff --quiet HEAD -- || fail "Commit or stash your changes first; the build number comes from the commit count."
   identity="$VRAI_SIGN_IDENTITY"
   timestamp=(--timestamp)
-  feed="$VRAI_FEED_URL"
-  key="$VRAI_PUBLIC_ED_KEY"
   team="$VRAI_TEAM_ID"
 else
   identity="-"
   timestamp=(--timestamp=none)
-  feed=""
-  key=""
   team=""
 fi
 
@@ -213,17 +233,24 @@ if [[ "$mode" == developer-id ]]; then
   step "Notarizing and stapling the DMG"
   notarize "$dmg" dmg
   xcrun stapler staple "$dmg"
+fi
 
+if [[ -n "$with_updates" ]]; then
   step "Writing the EdDSA-signed appcast"
   generate_appcast="$packages/artifacts/sparkle/Sparkle/bin/generate_appcast"
   [[ -x "$generate_appcast" ]] || fail "generate_appcast was not found at $generate_appcast."
   updates="$out/updates"
   mkdir -p "$updates"
   cp "$dmg" "$updates/"
-  "$generate_appcast" --download-url-prefix "$VRAI_DOWNLOAD_URL_PREFIX" -o "$out/appcast.xml" "$updates"
+  appcast=(--download-url-prefix "$VRAI_DOWNLOAD_URL_PREFIX" -o "$out/appcast.xml" "$updates")
+  if [[ -n "${VRAI_PRIVATE_ED_KEY:-}" ]]; then
+    printf '%s' "$VRAI_PRIVATE_ED_KEY" | "$generate_appcast" --ed-key-file - "${appcast[@]}"
+  else
+    "$generate_appcast" "${appcast[@]}"
+  fi
   rm -rf "$updates"
 else
-  step "Skipping the appcast (ad hoc)"
+  step "Skipping the appcast (no VRAI_FEED_URL)"
 fi
 
 rm -rf "$out/DerivedData"

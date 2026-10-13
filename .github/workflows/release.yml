@@ -59,9 +59,14 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Build the DMG
+      # "latest" skips pre-releases, so stable users are never offered a beta.
+      - name: Build the DMG and the appcast
         env:
           VRAI_VERSION: ${{ needs.version.outputs.version }}
+          VRAI_FEED_URL: https://github.com/${{ github.repository }}/releases/latest/download/appcast.xml
+          VRAI_DOWNLOAD_URL_PREFIX: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/
+          VRAI_PUBLIC_ED_KEY: GMkjaYeFYrt1wRG9fOTGSD0sVUix2riAaLSH7Rc+DsU=
+          VRAI_PRIVATE_ED_KEY: ${{ secrets.VRAI_PRIVATE_ED_KEY }}
         run: Scripts/release.sh --adhoc
 
       - name: Check every binary runs on Apple silicon and Intel
@@ -81,4 +86,4 @@ jobs:
         run: |
           flags=(--verify-tag --title "Vrai $VERSION" --generate-notes)
           [[ "$PRERELEASE" == true ]] && flags+=(--prerelease)
-          gh release create "$GITHUB_REF_NAME" "build/release/Vrai-$VERSION.dmg" "${flags[@]}"
+          gh release create "$GITHUB_REF_NAME" "build/release/Vrai-$VERSION.dmg" build/release/appcast.xml "${flags[@]}"
