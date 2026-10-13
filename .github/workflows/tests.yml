@@ -15,8 +15,6 @@ concurrency:
 
 env:
   DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
-  # A fixed sandbox keeps the paths inside the cached large fixture valid.
-  VRAI_SANDBOX: /private/tmp/vrai-sandbox
 
 defaults:
   run:
@@ -30,6 +28,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The large fixture records absolute paths, so its cache is keyed on
+      # where the sandbox lives.
+      - name: Locate the sandbox
+        run: |
+          sandbox="${TMPDIR%/}/vrai-sandbox"
+          echo "VRAI_SANDBOX=$sandbox" >> "$GITHUB_ENV"
+          echo "SANDBOX_ID=$(printf %s "$sandbox" | shasum | cut -c1-12)" >> "$GITHUB_ENV"
+
       # The 200k-commit monorepo takes minutes to generate and only changes
       # when its script does.
       - name: Restore the large fixture
@@ -37,7 +43,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/large
-          key: large-fixture-${{ runner.os }}-${{ hashFiles('Scripts/fixtures/large.mjs', 'Scripts/sandbox-env.sh') }}
+          key: large-fixture-${{ runner.os }}-${{ env.SANDBOX_ID }}-${{ hashFiles('Scripts/fixtures/large.mjs', 'Scripts/sandbox-env.sh') }}
 
       # Compiling and building fixtures take a few minutes each, so they
       # overlap. Without the fixtures most suites skip instead of running.
