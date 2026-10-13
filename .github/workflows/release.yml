@@ -90,3 +90,37 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: Scripts/appcast-notes.sh "$GITHUB_REF_NAME"
+
+  # Stable releases only; the cask should never point at a beta.
+  homebrew:
+    name: Update the Homebrew cask
+    needs: [version, release]
+    if: needs.version.outputs.prerelease == 'false'
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - name: Point Casks/vrai.rb at the new DMG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAP_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: |
+          if [[ -z "$TAP_TOKEN" ]]; then
+            echo "::error::Add a TAP_GITHUB_TOKEN secret that can push to aaravmaloo/homebrew-tap, then re-run this job."
+            exit 1
+          fi
+          gh release download "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" -p "Vrai-$VERSION.dmg"
+          sha="$(sha256sum "Vrai-$VERSION.dmg" | cut -d' ' -f1)"
+          git clone --depth 1 "https://x-access-token:$TAP_TOKEN@github.com/aaravmaloo/homebrew-tap.git" tap
+          cd tap
+          sed -i -E "s/^  version \".*\"$/  version \"$VERSION\"/; s/^  sha256 \".*\"$/  sha256 \"$sha\"/" Casks/vrai.rb
+          grep -q "version \"$VERSION\"" Casks/vrai.rb && grep -q "sha256 \"$sha\"" Casks/vrai.rb || { echo "::error::Casks/vrai.rb did not take the new version."; exit 1; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/vrai.rb
+          if git diff --cached --quiet; then
+            echo "The cask already points at $VERSION."
+            exit 0
+          fi
+          git commit -m "Update vrai to $VERSION"
+          git push
