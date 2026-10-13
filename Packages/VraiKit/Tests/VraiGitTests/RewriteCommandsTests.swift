@@ -76,6 +76,8 @@ struct RewriteCommandsTests {
         #expect(BisectOutcome.parse(testing) == .testing(current: OID("6fb0127667c5d753c9fba2022ff9b94935c99129"), remaining: 3))
         let found = "be68bbffd7262d18cfaf2741ff7fe77591273dbf is the first bad commit\ncommit be68bbffd7262d18cfaf2741ff7fe77591273dbf\nAuthor: Avery Chen <avery@vrai.app>\n\n    E one\n"
         #expect(BisectOutcome.parse(found) == .found(OID("be68bbffd7262d18cfaf2741ff7fe77591273dbf")!))
+        let quoted = "be68bbffd7262d18cfaf2741ff7fe77591273dbf is the first 'bad' commit\ncommit be68bbffd7262d18cfaf2741ff7fe77591273dbf\n"
+        #expect(BisectOutcome.parse(quoted) == .found(OID("be68bbffd7262d18cfaf2741ff7fe77591273dbf")!))
         let skipped = "There are only 'skip'ped commits left to test.\nThe first bad commit could be any of:\n02d1595e9bb01f41141768dea84f8be13ac618be\n1af25b5a0f25f24ecf40b9501dfca046ffb0c852\nWe cannot bisect more!\n"
         #expect(BisectOutcome.parse(skipped) == .inconclusive(candidates: [OID("02d1595e9bb01f41141768dea84f8be13ac618be")!, OID("1af25b5a0f25f24ecf40b9501dfca046ffb0c852")!]))
     }

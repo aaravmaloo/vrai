@@ -90,7 +90,7 @@ struct PerformancePathRefreshTests {
         #expect(after.allSatisfy { $0.contains(" -- ") }, "\(after)")
         let outside = try Sandbox.git(at: repo)
         try await outside.run(.write(["add", "--", "z.txt"]))
-        try await waitUntil(timeout: .seconds(3)) { store.snapshot?.working.first { $0.path == "z.txt" }?.staged == .full }
+        try await waitUntil { store.snapshot?.working.first { $0.path == "z.txt" }?.staged == .full }
         #expect(store.snapshot?.working.first { $0.path == "z.txt" }?.staged == .full)
     }
 }

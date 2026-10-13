@@ -44,6 +44,13 @@ extension RepositoryStore {
                 let after = try await resolve("refs/stash")
                 if after != before { stashed = after }
             }
+            if carry == .bring {
+                // Git before 2.56 refuses `switch --merge` with staged changes. Newer git merges
+                // them and can leave conflicts in the index, so keep the refusal everywhere.
+                let staged = try await git.run(.read(["diff", "--cached", "--name-only", "--no-renames", "-z"])).output
+                    .split(separator: "\u{0}").map(String.init)
+                if !staged.isEmpty { throw GitError(.localChangesWouldBeOverwritten(paths: staged)) }
+            }
             do {
                 switch target {
                 case .local(let local):

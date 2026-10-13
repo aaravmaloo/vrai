@@ -39,7 +39,7 @@ public enum BisectOutcome: Sendable, Hashable {
     case inconclusive(candidates: [OID])
 
     public static func parse(_ output: String) -> BisectOutcome {
-        if let found = output.firstMatch(of: /(?m)^([0-9a-f]{40,64}) is the first bad commit/), let oid = OID(String(found.output.1)) {
+        if let found = output.firstMatch(of: /(?m)^([0-9a-f]{40,64}) is the first '?bad'? commit/), let oid = OID(String(found.output.1)) {
             return .found(oid)
         }
         if output.contains("only 'skip'ped commits left to test") {

@@ -15,6 +15,8 @@ concurrency:
 
 env:
   DEVELOPER_DIR: /Applications/Xcode_27.0.app/Contents/Developer
+  # A fixed sandbox keeps the paths inside the cached large fixture valid.
+  VRAI_SANDBOX: /private/tmp/vrai-sandbox
 
 defaults:
   run:
@@ -24,18 +26,45 @@ jobs:
   package:
     name: Package tests
     runs-on: xcode-27
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
 
-      # Without the sandbox fixtures most suites skip instead of running.
-      - name: Build the fixtures
-        run: Scripts/make-fixtures.sh
+      # The 200k-commit monorepo takes minutes to generate and only changes
+      # when its script does.
+      - name: Restore the large fixture
+        id: large
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/large
+          key: large-fixture-${{ runner.os }}-${{ hashFiles('Scripts/fixtures/large.mjs', 'Scripts/sandbox-env.sh') }}
 
-      # The suites drive real git processes, file watchers and timers against
-      # copied fixtures. Run in parallel on a 3-core runner they starve each
-      # other: index writes collide and 60-second waits expire. One at a time
-      # they finish in a few minutes and stay deterministic.
+      # Compiling and building fixtures take a few minutes each, so they
+      # overlap. Without the fixtures most suites skip instead of running.
+      - name: Build the tests and fixtures
+        run: |
+          (cd Packages/VraiKit && swift build --build-tests) > "$RUNNER_TEMP/build.log" 2>&1 &
+          build=$!
+          Scripts/make-fixtures.sh --no-large
+          if [ -d "$RUNNER_TEMP/large/monorepo" ]; then
+            cp -Rc "$RUNNER_TEMP/large" "$VRAI_SANDBOX/fixtures/large"
+            git -C "$VRAI_SANDBOX/fixtures/large/monorepo" update-index -q --refresh || true
+          else
+            Scripts/make-fixtures.sh large
+            cp -Rc "$VRAI_SANDBOX/fixtures/large" "$RUNNER_TEMP/large"
+          fi
+          if ! wait "$build"; then
+            cat "$RUNNER_TEMP/build.log"
+            exit 1
+          fi
+          tail -n 3 "$RUNNER_TEMP/build.log"
+
       - name: Run VraiGit, VraiCore and VraiUI tests
         working-directory: Packages/VraiKit
-        run: swift test --no-parallel
+        run: swift test --skip-build --skip BackgroundFetcherTests
+
+      # Background fetches run git at background priority, which macOS
+      # throttles hard while the rest of the suite saturates the runner.
+      - name: Run the background fetch tests on their own
+        working-directory: Packages/VraiKit
+        run: swift test --skip-build --no-parallel --filter BackgroundFetcherTests
