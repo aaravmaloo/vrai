@@ -45,7 +45,7 @@ public struct GitExecutable: Sendable, Hashable {
         process.standardInput = FileHandle.nullDevice
         try process.run()
         let data = out.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
+        process.waitWithoutRunLoop()
         guard process.terminationStatus == 0, let version = GitVersion(parsing: String(decoding: data, as: UTF8.self)) else {
             throw GitError(.gitNotFound)
         }
@@ -63,9 +63,17 @@ public struct GitExecutable: Sendable, Hashable {
         process.standardError = FileHandle.nullDevice
         guard (try? process.run()) != nil else { return false }
         let data = out.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
+        process.waitWithoutRunLoop()
         let dir = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
         return process.terminationStatus == 0 && fileManager.isExecutableFile(atPath: dir + "/usr/bin/git")
+    }
+}
+
+extension Process {
+    // waitUntilExit() spins the current run loop, so on the main thread it lets queued
+    // blocks run mid-call. During launch that re-enters SwiftUI's graph and aborts.
+    func waitWithoutRunLoop() {
+        while isRunning { usleep(1_000) }
     }
 }
 

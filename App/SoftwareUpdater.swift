@@ -12,7 +12,7 @@ final class SoftwareUpdater {
 
     init(bundle: Bundle = .main, arguments: [String] = ProcessInfo.processInfo.arguments) {
         guard Self.isReleaseBuild, UpdateFeed(info: bundle.infoDictionary ?? [:], arguments: arguments) != nil else { return }
-        let controller = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
         self.controller = controller
         let check = check
         check.managed = true
@@ -22,6 +22,11 @@ final class SoftwareUpdater {
             .sink { value in
                 MainActor.assumeIsolated { check.canCheck = value }
             }
+    }
+
+    // Started after launch so Sparkle's first prompt can't open while SwiftUI builds its scenes.
+    func start() {
+        controller?.startUpdater()
     }
 
     static var isReleaseBuild: Bool {

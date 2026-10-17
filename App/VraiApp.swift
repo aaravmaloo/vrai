@@ -73,4 +73,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case nil: break
         }
     }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        updater.start()
+    }
 }

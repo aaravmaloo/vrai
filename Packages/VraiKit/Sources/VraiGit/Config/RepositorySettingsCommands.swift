@@ -223,7 +223,7 @@ public enum SSHKeys {
         process.standardInput = FileHandle.nullDevice
         guard (try? process.run()) != nil else { return nil }
         let data = out.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
+        process.waitWithoutRunLoop()
         guard process.terminationStatus == 0 else { return nil }
         return parseFingerprint(String(decoding: data, as: UTF8.self))
     }
