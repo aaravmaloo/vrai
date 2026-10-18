@@ -141,9 +141,32 @@ final class SpawnedProcess: @unchecked Sendable {
         if !done { kill(target, signal) }
     }
 
-    func abandonOutput() {
+    // Stops waiting for end of file, but keeps what is already in the pipes.
+    // A busy machine can leave the readability handlers seconds behind, and
+    // the last lines git wrote would otherwise be thrown away.
+    @discardableResult
+    func abandonOutput() -> (stdout: Data, stderr: Data) {
         let handles = lock.withLock { (outHandle, errHandle) }
         handles.0?.readabilityHandler = nil
         handles.1?.readabilityHandler = nil
+        return (handles.0.map { Self.drain($0.fileDescriptor) } ?? Data(), handles.1.map { Self.drain($0.fileDescriptor) } ?? Data())
+    }
+
+    static func drain(_ descriptor: Int32) -> Data {
+        let flags = fcntl(descriptor, F_GETFL)
+        guard flags != -1, fcntl(descriptor, F_SETFL, flags | O_NONBLOCK) != -1 else { return Data() }
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 65_536)
+        while true {
+            let count = read(descriptor, &buffer, buffer.count)
+            if count > 0 {
+                data.append(buffer, count: count)
+            } else if count == -1, errno == EINTR {
+                continue
+            } else {
+                break
+            }
+        }
+        return data
     }
 }

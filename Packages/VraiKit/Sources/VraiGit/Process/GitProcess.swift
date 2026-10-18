@@ -209,7 +209,13 @@ final class ProcessBox: @unchecked Sendable {
     private func forceFinish() {
         let stillWaiting = lock.withLock { continuation != nil && exited }
         guard stillWaiting else { return }
-        spawned.abandonOutput()
+        let rest = spawned.abandonOutput()
+        lock.withLock {
+            stdout.append(rest.stdout)
+            stderr.append(rest.stderr)
+            stderrLine.append(rest.stderr)
+        }
+        flushProgress(final: true)
         complete()
     }
 

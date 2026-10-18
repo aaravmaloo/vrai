@@ -186,6 +186,34 @@ struct GitProcessTests {
         #expect(result.output == "ok\n")
         #expect(lines.all.compactMap { ProgressParser.parse($0)?.percent } == [10, 100])
     }
+
+    @Test func drainingKeepsOutputAWriterHasNotClosed() throws {
+        var ends: [Int32] = [-1, -1]
+        #expect(pipe(&ends) == 0)
+        defer {
+            close(ends[0])
+            close(ends[1])
+        }
+        let text = "Submodule path 'Vendor/libgit2': checked out 'abc'\n"
+        _ = text.withCString { write(ends[1], $0, strlen($0)) }
+        #expect(String(decoding: SpawnedProcess.drain(ends[0]), as: UTF8.self) == text)
+        #expect(SpawnedProcess.drain(ends[0]).isEmpty)
+    }
+
+    @Test func outputStillOpenAfterGitExitsIsKept() async throws {
+        let dir = try Self.scratchRepo()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let script = dir.appending(path: "lingering-git")
+        try Data("#!/bin/sh\nprintf 'Cloning into done\\n' >&2\nsleep 5 &\necho ok\n".utf8).write(to: script)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path(percentEncoded: false))
+        let git = GitProcess(executable: GitExecutable(url: script, version: GitVersion(2, 54, 0)), workingDirectory: dir, environment: TestSandbox.environment)
+        let lines = EntryLines()
+        let started = ContinuousClock.now
+        let result = try await git.run(.read(["clone"]), progress: { lines.append($0) })
+        #expect(ContinuousClock.now - started < .seconds(5))
+        #expect(result.output == "ok\n")
+        #expect(lines.all == ["Cloning into done"])
+    }
 }
 
 final class EntryLines: @unchecked Sendable {

@@ -54,7 +54,7 @@ struct CloneTests {
         #expect(receiving.last?.fraction == 1)
         #expect(events.contains { $0.stage == .resolving || $0.stage == .checkingOut })
         let submodules = Set(events.compactMap(\.submodule))
-        #expect(submodules.isSuperset(of: ["Vendor/libgit2", "Vendor/cmark-gfm", "Vendor/swift-argument-parser"]))
+        #expect(submodules.isSuperset(of: ["Vendor/libgit2", "Vendor/cmark-gfm", "Vendor/swift-argument-parser"]), "saw \(submodules.sorted()) in \(events.count) events")
         let status = try await lab.git(["submodule", "status"], in: target)
         let lines = status.split(separator: "\n")
         #expect(lines.count == 3)
