@@ -81,6 +81,7 @@ struct SettingsPaneHost: View {
         Group {
             switch pane {
             case .general: GeneralPane(context: context)
+            case .notifications: NotificationsPane(context: context)
             case .notch: NotchPane(context: context)
             case .git: GitPane(context: context)
             case .accounts: AccountsPane(context: context)

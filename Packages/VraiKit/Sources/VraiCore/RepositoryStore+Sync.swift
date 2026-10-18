@@ -19,6 +19,7 @@ public struct FetchResult: Sendable, Hashable {
     public var updatedRefs: [String]
     public var prunedRefs: [String]
     public var total: Int
+    public var rewrittenRefs: [String] = []
 
     public var summary: ActionSummary {
         if total > 0 {
@@ -367,12 +368,15 @@ extension RepositoryStore {
     func fetchResult(remotes: [String], before: [String: String], after: [String: String]) async throws -> FetchResult {
         var newCommits: [String: Int] = [:]
         var updated: [String] = []
+        var rewritten: [String] = []
         let oldTips = Array(Set(before.values)).sorted()
         for (ref, tip) in after.sorted(by: { $0.key < $1.key }) where before[ref] != tip {
             let name = String(ref.dropFirst("refs/remotes/".count))
             updated.append(name)
             if let old = before[ref] {
                 newCommits[name] = try await count([old + ".." + tip])
+                let kept = try await isAncestor(old, of: tip)
+                if !kept { rewritten.append(name) }
             } else {
                 newCommits[name] = try await count([tip, "--not"] + oldTips)
             }
@@ -380,7 +384,12 @@ extension RepositoryStore {
         let pruned = before.keys.filter { after[$0] == nil }.map { String($0.dropFirst("refs/remotes/".count)) }.sorted()
         let changedTips = Array(Set(updated.compactMap { after["refs/remotes/" + $0] })).sorted()
         let total = changedTips.isEmpty ? 0 : try await count(changedTips + ["--not"] + oldTips)
-        return FetchResult(remotes: remotes, newCommits: newCommits, updatedRefs: updated, prunedRefs: pruned, total: total)
+        return FetchResult(remotes: remotes, newCommits: newCommits, updatedRefs: updated, prunedRefs: pruned, total: total, rewrittenRefs: rewritten)
+    }
+
+    func isAncestor(_ ancestor: String, of tip: String) async throws -> Bool {
+        let result = try await git.runAllowingFailure(.read(["merge-base", "--is-ancestor", ancestor, tip]), background: true)
+        return result.exitCode == 0
     }
 
     func count(_ arguments: [String]) async throws -> Int {

@@ -26,6 +26,7 @@ struct SyncAlert: Identifiable {
     var toggle: String?
     var toggleDefault = false
     var actions: [AlertAction]
+    var notifyButtons = true
 }
 
 struct SignInAnswer: Sendable {
@@ -53,9 +54,19 @@ final class SyncModel {
     let window: WindowModel
     var running: [SyncKind: SyncRun] = [:]
     var surfaced = false
-    var alert: SyncAlert?
+    var alert: SyncAlert? {
+        didSet {
+            guard alert?.id != oldValue?.id else { return }
+            if let alert {
+                NotificationHub.shared.alertShown(title: alert.title, message: alert.message, actions: alert.actions, buttons: alert.notifyButtons, slot: "sync", window: window) { [weak self] in self?.closeAlert(then: nil) }
+            } else {
+                NotificationHub.shared.alertClosed(slot: "sync", window: window)
+            }
+        }
+    }
     var toggleOn = false
     var isKey = true
+    var unfocusedSince: Date?
     var windowHeight: CGFloat = 0
     var windowWidth: CGFloat = 0
     var userNetwork = 0
@@ -111,7 +122,7 @@ final class SyncModel {
     @discardableResult
     func island(_ alert: SyncAlert, tone: Tone = .danger) -> Bool {
         let island = IslandCenter.shared
-        guard island.isActive, island.attentionOpens else { return false }
+        guard island.isActive, island.attentionOpens, !NotificationHub.shared.delivers(.needsYou, window: window) else { return false }
         let actions = alert.actions.filter { $0.role != .cancel }.enumerated().map { index, action in
             IslandAction(title: action.title, prominent: index == 0, activates: action.title.hasSuffix("\u{2026}")) { action.action?() }
         }
@@ -143,13 +154,14 @@ final class SyncModel {
         }
     }
 
-    func toast(_ summary: ActionSummary, icon: String, action: String? = nil, onAction: (@MainActor () -> Void)? = nil) {
-        toasts.show(Toast(message: summary.message, detail: summary.detail, icon: icon, action: action, onAction: onAction))
+    func toast(_ summary: ActionSummary, icon: String, action: String? = nil, category: VraiNotification.Category? = nil, target: VraiNotification.Target? = nil, notifyButton: Bool = true, onAction: (@MainActor () -> Void)? = nil) {
+        toasts.show(Toast(message: summary.message, detail: summary.detail, icon: icon, action: action, category: category, target: target, notifyButton: notifyButton, onAction: onAction))
     }
 
     func run<Value: Sendable>(_ kind: SyncKind, _ handle: OperationHandle<Value>, busy: String, retry: (@MainActor () -> Void)?, done: @escaping @MainActor (Value) -> Void) {
         running[kind] = SyncRun(cancel: { handle.cancel() })
         userNetwork += 1
+        if preferences.notify { NotificationHub.shared.permission.askOnce() }
         Task { [weak self] in
             for await progress in handle.progress {
                 self?.running[kind]?.progress = progress
@@ -228,6 +240,7 @@ final class SyncHub: NSObject, UNUserNotificationCenterDelegate {
         let key = ObjectIdentifier(window)
         models[key]?.stop()
         models.removeValue(forKey: key)
+        DockBadge.refresh()
     }
 
     func install(app: AppModel) {
@@ -242,7 +255,9 @@ final class SyncHub: NSObject, UNUserNotificationCenterDelegate {
         NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { _ in
             MainActor.assumeIsolated { SyncHub.shared.app?.askpass?.close() }
         }
-        if app.launch.sandbox == nil { UNUserNotificationCenter.current().delegate = self }
+        NotificationHub.shared.configure(launch: app.launch)
+        NotificationHub.shared.start()
+        Task { await NotificationHub.shared.permission.refresh() }
     }
 
     var sandbox: URL? { app?.launch.sandbox }
@@ -252,19 +267,7 @@ final class SyncHub: NSObject, UNUserNotificationCenterDelegate {
     }
 
     var notifier: any Notifier {
-        if let sandbox {
-            let log = sandbox.appending(path: "notifications.log")
-            return ClosureNotifier { notification in
-                let line = notification.title + "\t" + notification.body.replacingOccurrences(of: "\n", with: " | ") + "\n"
-                if let handle = try? FileHandle(forWritingTo: log) {
-                    _ = try? handle.seekToEnd()
-                    try? handle.write(contentsOf: Data(line.utf8))
-                    try? handle.close()
-                } else {
-                    try? Data(line.utf8).write(to: log)
-                }
-            }
-        }
+        if let sandbox { return LogNotifier(log: sandbox.appending(path: "notifications.log")) }
         return SystemNotifier()
     }
 
@@ -296,22 +299,16 @@ final class SyncHub: NSObject, UNUserNotificationCenterDelegate {
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         [.banner, .list]
     }
-}
 
-struct SystemNotifier: Notifier {
-    func post(_ notification: FetchNotification) async {
-        let center = UNUserNotificationCenter.current()
-        let status = await center.notificationSettings().authorizationStatus
-        if status == .notDetermined {
-            guard (try? await center.requestAuthorization(options: [.alert, .sound])) == true else { return }
-        } else if status == .denied {
-            return
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        let request = response.notification.request
+        let id = request.identifier
+        let action = response.actionIdentifier
+        let repository = request.content.userInfo["repository"] as? String
+        let target = request.content.userInfo["target"] as? String
+        await MainActor.run {
+            NotificationHub.shared.respond(id: id, action: action, repository: repository, target: target)
         }
-        let content = UNMutableNotificationContent()
-        content.title = notification.title
-        content.body = notification.body
-        content.threadIdentifier = notification.repository
-        try? await center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
 }
 
@@ -337,7 +334,7 @@ extension SyncModel {
         guard preferences.backgroundFetch else { return }
         let fetcher = BackgroundFetcher(
             store: store,
-            notifier: IslandNotifier(fallback: SyncHub.shared.notifier),
+            notifier: FetchAnnouncer(),
             interval: BackgroundFetcher.interval(minutes: preferences.fetchInterval),
             notifyAboutNewCommits: preferences.notifications,
             isWindowKey: { [weak self] in self?.isKey ?? false }
@@ -347,10 +344,13 @@ extension SyncModel {
     }
 
     func askCredentials(_ request: AskpassRequest) async -> SignInAnswer? {
-        await withCheckedContinuation { continuation in
+        NotificationHub.shared.promptShown(request, window: window)
+        let answer = await withCheckedContinuation { continuation in
             let reply = PromptReply(continuation)
             showSheet { SignInSheet(prompt: request, reply: reply) }
         }
+        NotificationHub.shared.promptAnswered(window: window)
+        return answer
     }
 
     func askConfirm(_ request: AskpassRequest) async -> Bool {
@@ -363,7 +363,8 @@ extension SyncModel {
                 actions: [
                     AlertAction(title: String(localized: "Continue", bundle: .module)) { reply.finish(SignInAnswer(username: "", token: "yes")) },
                     AlertAction(title: String(localized: "Cancel", bundle: .module), role: .cancel) { reply.finish(nil) }
-                ]
+                ],
+                notifyButtons: false
             ))
         } != nil
     }
@@ -391,6 +392,7 @@ struct SyncWiring: ViewModifier {
     let window: WindowModel
     @Environment(AppModel.self) private var app
     @Environment(\.appearsActive) private var active
+    @Environment(\.openWindow) private var openWindow
 
     func body(content: Content) -> some View {
         let sync = window.sync
@@ -398,10 +400,16 @@ struct SyncWiring: ViewModifier {
             .background { SyncAlertHosts(sync: sync) }
             .onAppear {
                 SyncHub.shared.install(app: app)
+                NotificationHub.shared.openWindow = openWindow
                 sync.start(app: app)
+                NotificationHub.shared.appeared(window)
             }
             .onDisappear { SyncHub.shared.remove(window) }
-            .onChange(of: active, initial: true) { _, value in sync.isKey = value }
+            .onChange(of: active, initial: true) { _, value in
+                sync.isKey = value
+                sync.unfocusedSince = value ? nil : (sync.unfocusedSince ?? Date())
+                if value { NotificationHub.shared.focused(window) }
+            }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { sync.windowHeight = $0 }
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { sync.windowWidth = $0 }
             .onChange(of: window.preferences.backgroundFetch) { _, _ in sync.restartFetcher() }

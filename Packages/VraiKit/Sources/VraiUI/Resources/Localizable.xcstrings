@@ -557,6 +557,9 @@
     "%@ still have conflicts." : {
 
     },
+    "%@ stopped with exit code %d" : {
+
+    },
     "%@ to edit" : {
 
     },
@@ -860,6 +863,9 @@
     "A second working folder for this repository, on another branch. Both share one history." : {
 
     },
+    "A sign-in, a passphrase, a rejected push or a decision waiting in the window." : {
+
+    },
     "A submodule already lives at this path." : {
 
     },
@@ -933,6 +939,9 @@
 
     },
     "Add Signed-off-by" : {
+
+    },
+    "Add Vrai as a Focus filter to hear only about failures and requests while that Focus is on." : {
 
     },
     "Add a Co-authored-by trailer to the message" : {
@@ -1030,6 +1039,9 @@
 
     },
     "All remotes" : {
+
+    },
+    "Allow notifications" : {
 
     },
     "Already applied" : {
@@ -1252,6 +1264,9 @@
 
     },
     "Bring your changes to %@?" : {
+
+    },
+    "CI results" : {
 
     },
     "Can't fast-forward" : {
@@ -1773,6 +1788,9 @@
     "Counting objects…" : {
 
     },
+    "Counts commits waiting to be pulled in open repositories, plus one for each whose CI is failing." : {
+
+    },
     "Create a branch here to push these commits." : {
 
     },
@@ -2070,6 +2088,9 @@
 
     },
     "Drop…" : {
+
+    },
+    "During a Focus" : {
 
     },
     "Each sheet shows the git command it runs, under Options." : {
@@ -2395,6 +2416,12 @@
     "Finish the rebase first" : {
 
     },
+    "Finished %@" : {
+
+    },
+    "Finished work arrives quietly." : {
+
+    },
     "First" : {
 
     },
@@ -2502,6 +2529,9 @@
 
     },
     "Garbage" : {
+
+    },
+    "Garbage collection, integrity checks, worktrees, submodules, saved archives and commands you typed that ran a while." : {
 
     },
     "General" : {
@@ -2983,6 +3013,9 @@
     "Maintenance" : {
 
     },
+    "Maintenance and long commands" : {
+
+    },
     "Maintenance didn't finish" : {
 
     },
@@ -3110,6 +3143,9 @@
         }
       }
     },
+    "Merges, rebases and other history edits" : {
+
+    },
     "Merge…" : {
 
     },
@@ -3217,6 +3253,9 @@
 
     },
     "New commit message" : {
+
+    },
+    "New commits from background fetch" : {
 
     },
     "New file that git doesn't track yet. Stage it to include it in the next commit." : {
@@ -3471,7 +3510,10 @@
     "Notifications" : {
 
     },
-    "Notify me about new commits" : {
+    "Notifications from Vrai look like this. Click one to jump to its repository." : {
+
+    },
+    "Notify me when Vrai isn't in front" : {
 
     },
     "Nowhere, ask every time" : {
@@ -3566,6 +3608,12 @@
       }
     },
     "Open Changes" : {
+
+    },
+    "Open Focus Settings" : {
+
+    },
+    "Open System Settings" : {
 
     },
     "Open a repository" : {
@@ -3771,6 +3819,9 @@
     "Pins another repository at an exact commit inside this one." : {
 
     },
+    "Play a sound when something fails" : {
+
+    },
     "Points at" : {
 
     },
@@ -3923,6 +3974,9 @@
 
     },
     "Push without the hook" : {
+
+    },
+    "Push, pull, fetch and clone" : {
 
     },
     "Pushed %@ to %@/%@" : {
@@ -4360,6 +4414,9 @@
     "Resolve them in Changes, then commit to finish." : {
 
     },
+    "Resolve them in Changes, then continue." : {
+
+    },
     "Restore" : {
 
     },
@@ -4395,6 +4452,9 @@
           }
         }
       }
+    },
+    "Results and requests go to Notification Center while you work in another app or window. Click one to jump to the repository." : {
+
     },
     "Retry" : {
 
@@ -4658,6 +4718,12 @@
     "Send" : {
 
     },
+    "Send a test notification" : {
+
+    },
+    "Sends a sample so you can see how it looks." : {
+
+    },
     "Sent to the server with -o. Separate several with commas." : {
 
     },
@@ -4692,6 +4758,9 @@
 
     },
     "Show %@, the first bad commit" : {
+
+    },
+    "Show a badge on the Dock icon" : {
 
     },
     "Show all" : {
@@ -5258,7 +5327,13 @@
     "Target" : {
 
     },
+    "Tell me about new commits" : {
+
+    },
     "Terminal app" : {
+
+    },
+    "Test" : {
 
     },
     "Testing %@. Build and try it, then mark it." : {
@@ -5463,6 +5538,9 @@
 
     },
     "The rebase didn't finish" : {
+
+    },
+    "The rebase stopped so you can edit a commit. Amend it, then continue." : {
 
     },
     "The reflog didn't load" : {
@@ -5789,10 +5867,19 @@
     "Turn off" : {
 
     },
+    "Turn on Allow notifications for Vrai in System Settings, then come back here." : {
+
+    },
     "Turn on Expert mode" : {
 
     },
     "Turn on Expert mode to edit these values. Everyday settings are in the other tabs." : {
+
+    },
+    "Turn on GitHub checks and Tell me when checks finish in General first." : {
+
+    },
+    "Turn on background fetch and Tell me about new commits in General first." : {
 
     },
     "Turn the hook on to run it" : {
@@ -6133,6 +6220,9 @@
     "What happens to your files" : {
 
     },
+    "What to tell you about" : {
+
+    },
     "When" : {
 
     },
@@ -6140,6 +6230,9 @@
 
     },
     "When a conflict you resolved before comes back, during a rebase for example, git resolves it the same way." : {
+
+    },
+    "When a fetch brings commits to a branch you track." : {
 
     },
     "When a fetch brings new commits to a branch you track." : {
@@ -6151,7 +6244,19 @@
     "When both sides have new commits" : {
 
     },
+    "When checks pass or fail after you push." : {
+
+    },
+    "When git needs you" : {
+
+    },
     "When it finishes, choose Check again." : {
+
+    },
+    "When they finish or fail." : {
+
+    },
+    "When they finish or stop on a conflict." : {
 
     },
     "Where" : {
@@ -6507,6 +6612,18 @@
     "git is asking to continue" : {
 
     },
+    "git is waiting for the passphrase of your SSH key." : {
+
+    },
+    "git is waiting for you to answer a question." : {
+
+    },
+    "git is waiting for your password for %@." : {
+
+    },
+    "git is waiting for your username for %@." : {
+
+    },
     "git itself discourages filter-branch: it's slow and easy to get wrong, and git filter-repo is the tool it recommends. This rewrites history, and Vrai can't undo what you run here." : {
 
     },
@@ -6639,6 +6756,12 @@
 
     },
     "lightweight" : {
+
+    },
+    "macOS asks once whether Vrai may send notifications." : {
+
+    },
+    "macOS is blocking notifications from Vrai" : {
 
     },
     "memory" : {

@@ -56,8 +56,8 @@ struct GeneralPane: View {
                         disabled: !preferences.backgroundFetch
                     ) { preferences.fetchInterval = $0 }
                 }
-                SettingsRow(String(localized: "Notify me about new commits", bundle: .module), description: String(localized: "When a fetch brings new commits to a branch you track.", bundle: .module)) {
-                    SettingsSwitch(label: String(localized: "Notify me about new commits", bundle: .module), isOn: preferences.notifications, id: "settings.notifications", disabled: !preferences.backgroundFetch) { preferences.notifications = $0 }
+                SettingsRow(String(localized: "Tell me about new commits", bundle: .module), description: String(localized: "When a fetch brings new commits to a branch you track.", bundle: .module)) {
+                    SettingsSwitch(label: String(localized: "Tell me about new commits", bundle: .module), isOn: preferences.notifications, id: "settings.notifications", disabled: !preferences.backgroundFetch) { preferences.notifications = $0 }
                 }
             }
             SettingsSection(String(localized: "CI and deploys", bundle: .module)) {

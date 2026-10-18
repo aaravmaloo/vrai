@@ -80,7 +80,7 @@ enum PlacesActions {
                 let summary = try await store.addWorktree(path: path, branch: branch, createBranch: createBranch, startPoint: startPoint)
                 let resolved = store.resolvedPath(path)
                 let listed = store.snapshot?.worktrees.first { RepositoryStore.isSamePath($0.path, resolved) }?.path ?? resolved
-                window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "rectangle.on.rectangle", action: opener == nil ? nil : String(localized: "Open", bundle: .module)) {
+                window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "rectangle.on.rectangle", action: opener == nil ? nil : String(localized: "Open", bundle: .module), category: .maintenance, target: .history) {
                     opener?.open(listed, window: window)
                 })
                 if store.view == .worktrees { store.sidebarSelection = worktreeKey(listed) }
@@ -196,13 +196,13 @@ enum PlacesActions {
                 let summary = try await store.submodule(path: path, action: action)
                 switch action {
                 case .record:
-                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "shippingbox", action: String(localized: "Show changes", bundle: .module)) { window.show(.changes) })
+                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "shippingbox", action: String(localized: "Show changes", bundle: .module), category: .maintenance, target: .changes, notifyButton: false) { window.show(.changes) })
                 case .sync:
-                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "arrow.triangle.2.circlepath"))
+                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "arrow.triangle.2.circlepath", category: .maintenance))
                 case .deinit:
-                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "trash"))
+                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "trash", category: .maintenance))
                 default:
-                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "shippingbox"))
+                    window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "shippingbox", category: .maintenance))
                 }
             } catch {
                 let failure: String
@@ -243,7 +243,7 @@ enum PlacesActions {
         Task {
             do {
                 let summary = try await store.addSubmodule(url: url, path: path, branch: branch)
-                window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "shippingbox", action: String(localized: "Show changes", bundle: .module)) { window.show(.changes) })
+                window.toasts.show(Toast(message: summary.message, detail: summary.detail, icon: "shippingbox", action: String(localized: "Show changes", bundle: .module), category: .maintenance, target: .changes, notifyButton: false) { window.show(.changes) })
             } catch {
                 report(error, window, failure: String(localized: "The submodule wasn't added", bundle: .module))
             }

@@ -20,7 +20,7 @@ struct BackgroundFetcherTests {
         _ = try await copy.git(["fetch", "-q", "origin"])
         let console = ConsoleRecorder()
         let store = try await copy.store(observer: console.observer)
-        let posted = Recorder<FetchNotification>()
+        let posted = Recorder<VraiNotification>()
         let fetcher = BackgroundFetcher(store: store, notifier: ClosureNotifier { await posted.append($0) }, interval: .seconds(3600))
         var events: [[String: Int]] = []
         fetcher.onFetched = { events.append($0) }
@@ -50,7 +50,7 @@ struct BackgroundFetcherTests {
         defer { copy.remove() }
         _ = try await copy.git(["fetch", "-q", "origin"])
         let store = try await copy.store()
-        let posted = Recorder<FetchNotification>()
+        let posted = Recorder<VraiNotification>()
         let fetcher = BackgroundFetcher(store: store, notifier: ClosureNotifier { await posted.append($0) }, isWindowKey: { true })
         try await pushToOrigin(copy, branch: "main", count: 1)
         #expect(await fetcher.fetchNow() == .fetched(newCommits: ["origin/main": 1]))
@@ -59,6 +59,31 @@ struct BackgroundFetcherTests {
         try await pushToOrigin(copy, branch: "main", count: 1)
         #expect(await fetcher.fetchNow() == .fetched(newCommits: ["origin/main": 1]))
         #expect(await posted.values.isEmpty)
+    }
+
+    @Test func warnsWhenATrackedUpstreamIsForcePushed() async throws {
+        let copy = try ScenarioCopy.make("everyday")
+        defer { copy.remove() }
+        _ = try await copy.git(["fetch", "-q", "origin"])
+        let store = try await copy.store()
+        let posted = Recorder<VraiNotification>()
+        let fetcher = BackgroundFetcher(store: store, notifier: ClosureNotifier { await posted.append($0) })
+        let other = try await copy.clone("origin", branch: "main")
+        _ = try await copy.git(["reset", "-q", "--hard", "HEAD~1"], in: other)
+        _ = try await copy.commit(in: other, file: "rewritten.txt", contents: "new\n", message: "Rewritten")
+        _ = try await copy.git(["push", "-q", "-f", "origin", "main"], in: other)
+
+        #expect(await fetcher.fetchNow() == .fetched(newCommits: ["origin/main": 1]))
+        let notes = await posted.values
+        let warning = try #require(notes.first { $0.isUpstreamChange })
+        #expect(warning.body == "origin/main was force-pushed")
+        #expect(warning.level == .alert)
+        #expect(warning.target == .ref("origin/main"))
+        #expect(notes.count == 2)
+
+        try await pushToOrigin(copy, branch: "main", count: 1)
+        _ = await fetcher.fetchNow()
+        #expect(await posted.values.filter(\.isUpstreamChange).count == 1)
     }
 
     @Test func prunesOnlyRemotesConfiguredToPrune() async throws {
@@ -100,7 +125,7 @@ struct BackgroundFetcherTests {
         let copy = try ScenarioCopy.make("offline")
         defer { copy.remove() }
         let store = try await copy.store()
-        let posted = Recorder<FetchNotification>()
+        let posted = Recorder<VraiNotification>()
         let fetcher = BackgroundFetcher(store: store, notifier: ClosureNotifier { await posted.append($0) })
         let outcome = await fetcher.fetchNow()
         #expect(outcome == .failed(.networkUnreachable(host: "127.0.0.1")))

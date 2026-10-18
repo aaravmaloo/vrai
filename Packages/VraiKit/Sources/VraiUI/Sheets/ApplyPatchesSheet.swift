@@ -121,11 +121,11 @@ struct ApplyPatchesSheet: View {
             do {
                 let made = try await store.applyPatches(files: chosen, threeWay: three, signoff: sign)
                 let by = people.count == 1 ? String(localized: " by \(people[0])", bundle: .module) : ""
-                window.toasts.show(RewriteActions.undoToast(window, message: String(localized: "Applied \(n(count, "patch"))", bundle: .module), detail: String(localized: "From \(folder), as \(n(made, "commit"))\(by) on \(head).", bundle: .module), icon: "doc.on.doc"))
+                window.toasts.show(RewriteActions.undoToast(window, message: String(localized: "Applied \(n(count, "patch"))", bundle: .module), detail: String(localized: "From \(folder), as \(n(made, "commit"))\(by) on \(head).", bundle: .module), icon: "doc.on.doc", category: .history))
                 RewriteActions.selectHead(store)
             } catch {
                 if case .applyingPatches? = store.snapshot?.state {
-                    window.toasts.show(Toast(tone: .warning, message: String(localized: "Stopped applying patches", bundle: .module), detail: String(localized: "Fix the patch, then continue from the banner.", bundle: .module), icon: "bandage"))
+                    window.toasts.show(Toast(tone: .warning, message: String(localized: "Stopped applying patches", bundle: .module), detail: String(localized: "Fix the patch, then continue from the banner.", bundle: .module), icon: "bandage", category: .history))
                     return
                 }
                 RewriteActions.report(error, window, failure: String(localized: "The patches didn't apply", bundle: .module))

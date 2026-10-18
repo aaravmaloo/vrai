@@ -88,6 +88,15 @@ public final class Preferences {
     public var islandHover: Bool { didSet { write("islandHover", islandHover) } }
     public var islandLinger: IslandLinger { didSet { write("islandLinger", islandLinger.rawValue) } }
     public var islandScreen: IslandScreen { didSet { write("islandScreen", islandScreen.rawValue) } }
+    public var notify: Bool { didSet { write("notify", notify) } }
+    public var notifySync: Bool { didSet { write("notifySync", notifySync) } }
+    public var notifyNeedsYou: Bool { didSet { write("notifyNeedsYou", notifyNeedsYou) } }
+    public var notifyHistory: Bool { didSet { write("notifyHistory", notifyHistory) } }
+    public var notifyFetch: Bool { didSet { write("notifyFetch", notifyFetch) } }
+    public var notifyChecks: Bool { didSet { write("notifyChecks", notifyChecks) } }
+    public var notifyMaintenance: Bool { didSet { write("notifyMaintenance", notifyMaintenance) } }
+    public var notifySound: Bool { didSet { write("notifySound", notifySound) } }
+    public var dockBadge: Bool { didSet { write("dockBadge", dockBadge) } }
 
     public init(defaults: UserDefaults) {
         self.defaults = defaults
@@ -125,6 +134,15 @@ public final class Preferences {
         islandHover = defaults.object(forKey: "islandHover") as? Bool ?? true
         islandLinger = IslandLinger(rawValue: defaults.string(forKey: "islandLinger") ?? "") ?? .standard
         islandScreen = IslandScreen(rawValue: defaults.string(forKey: "islandScreen") ?? "") ?? .window
+        notify = defaults.object(forKey: "notify") as? Bool ?? true
+        notifySync = defaults.object(forKey: "notifySync") as? Bool ?? true
+        notifyNeedsYou = defaults.object(forKey: "notifyNeedsYou") as? Bool ?? true
+        notifyHistory = defaults.object(forKey: "notifyHistory") as? Bool ?? true
+        notifyFetch = defaults.object(forKey: "notifyFetch") as? Bool ?? true
+        notifyChecks = defaults.object(forKey: "notifyChecks") as? Bool ?? true
+        notifyMaintenance = defaults.object(forKey: "notifyMaintenance") as? Bool ?? true
+        notifySound = defaults.object(forKey: "notifySound") as? Bool ?? true
+        dockBadge = defaults.object(forKey: "dockBadge") as? Bool ?? false
     }
 
     private func write(_ key: String, _ value: Any) {

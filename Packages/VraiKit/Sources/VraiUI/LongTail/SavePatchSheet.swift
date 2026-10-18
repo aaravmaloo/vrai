@@ -105,7 +105,7 @@ struct SavePatchSheet: View {
                     Clipboard.copy("cat " + quoted + " | " + store.imapSendCommand().display)
                     detail += String(localized: ". Copied the imap-send command.", bundle: .module)
                 }
-                window.toasts.show(Toast(message: files.count == 1 ? String(localized: "Saved a patch", bundle: .module) : String(localized: "Saved \(n(files.count, "patch"))", bundle: .module), detail: detail, icon: "envelope", action: String(localized: "Show in Finder", bundle: .module)) {
+                window.toasts.show(Toast(message: files.count == 1 ? String(localized: "Saved a patch", bundle: .module) : String(localized: "Saved \(n(files.count, "patch"))", bundle: .module), detail: detail, icon: "envelope", action: String(localized: "Show in Finder", bundle: .module), category: .maintenance) {
                     LongTailReveal.show(files)
                 })
             } catch let error as GitError {

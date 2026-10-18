@@ -79,17 +79,17 @@ enum RewriteActions {
                 let outcome = try await store.merge(source: source, mode: mode, message: message, strategyOption: strategyOption)
                 switch outcome {
                 case .upToDate:
-                    window.toasts.show(Toast(message: String(localized: "Already up to date", bundle: .module), detail: String(localized: "\(head) already has everything on \(source).", bundle: .module)))
+                    window.toasts.show(Toast(message: String(localized: "Already up to date", bundle: .module), detail: String(localized: "\(head) already has everything on \(source).", bundle: .module), category: .history))
                 case .fastForwarded:
-                    window.toasts.show(undoToast(window, message: String(localized: "Fast-forwarded \(head) to \(source)", bundle: .module), icon: "arrow.triangle.merge"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Fast-forwarded \(head) to \(source)", bundle: .module), icon: "arrow.triangle.merge", category: .history))
                 case .merged:
-                    window.toasts.show(undoToast(window, message: String(localized: "Merged \(source) into \(head)", bundle: .module), icon: "arrow.triangle.merge"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Merged \(source) into \(head)", bundle: .module), icon: "arrow.triangle.merge", category: .history))
                 case .squashed:
                     window.show(.changes)
-                    window.toasts.show(Toast(message: String(localized: "Squashed \(n(squashed ?? 0, "commit")) from \(source)", bundle: .module), detail: String(localized: "They're staged. Commit to finish the merge.", bundle: .module), icon: "rectangle.compress.vertical"))
+                    window.toasts.show(Toast(message: String(localized: "Squashed \(n(squashed ?? 0, "commit")) from \(source)", bundle: .module), detail: String(localized: "They're staged. Commit to finish the merge.", bundle: .module), icon: "rectangle.compress.vertical", category: .history, target: .changes))
                 }
             } catch let error as GitError where error.code == .notFastForward {
-                window.toasts.show(Toast(tone: .danger, message: String(localized: "Can't fast-forward \(head)", bundle: .module), detail: String(localized: "The branches have diverged. Merge with a merge commit instead.", bundle: .module)))
+                window.toasts.show(Toast(tone: .danger, message: String(localized: "Can't fast-forward \(head)", bundle: .module), detail: String(localized: "The branches have diverged. Merge with a merge commit instead.", bundle: .module), category: .history))
             } catch {
                 report(error, window, failure: String(localized: "The merge didn't finish", bundle: .module))
             }
@@ -105,11 +105,11 @@ enum RewriteActions {
                 let outcome = try await store.rebase(onto: onto, autostash: autostash, updateRefs: updateRefs, inBackground: inBackground)
                 switch outcome {
                 case .upToDate:
-                    window.toasts.show(Toast(message: String(localized: "Already up to date", bundle: .module), detail: String(localized: "\(head) already contains \(shown).", bundle: .module)))
+                    window.toasts.show(Toast(message: String(localized: "Already up to date", bundle: .module), detail: String(localized: "\(head) already contains \(shown).", bundle: .module), category: .history))
                 case .fastForwarded:
-                    window.toasts.show(undoToast(window, message: String(localized: "Rebased \(head) onto \(shown)", bundle: .module), detail: String(localized: "Fast-forwarded.", bundle: .module), icon: "arrow.triangle.swap"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Rebased \(head) onto \(shown)", bundle: .module), detail: String(localized: "Fast-forwarded.", bundle: .module), icon: "arrow.triangle.swap", category: .history))
                 case .rebased(let commits):
-                    window.toasts.show(undoToast(window, message: String(localized: "Rebased \(head) onto \(shown)", bundle: .module), detail: String(localized: "\(n(commits, "commit")) rewritten.", bundle: .module) + forcePushNote(store), icon: "arrow.triangle.swap"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Rebased \(head) onto \(shown)", bundle: .module), detail: String(localized: "\(n(commits, "commit")) rewritten.", bundle: .module) + forcePushNote(store), icon: "arrow.triangle.swap", category: .history))
                 }
                 selectHead(store)
             } catch {
@@ -134,7 +134,7 @@ enum RewriteActions {
                 if squashed > 0 { parts.append(String(localized: "\(n(squashed, "commit")) squashed", bundle: .module)) }
                 if dropped > 0 { parts.append(String(localized: "\(n(dropped, "commit")) dropped", bundle: .module)) }
                 let detail = parts.isEmpty ? String(localized: "\(n(steps.count, "commit")) replayed.", bundle: .module) : parts.joined(separator: ", ")
-                window.toasts.show(undoToast(window, message: String(localized: "Rebased \(head) onto \(shown)", bundle: .module), detail: detail, icon: "arrow.triangle.swap"))
+                window.toasts.show(undoToast(window, message: String(localized: "Rebased \(head) onto \(shown)", bundle: .module), detail: detail, icon: "arrow.triangle.swap", category: .history))
                 selectHead(store)
             } catch {
                 selectHead(store)
@@ -152,9 +152,9 @@ enum RewriteActions {
             do {
                 try await store.cherryPick(ids: ids, recordOrigin: recordOrigin, noCommit: noCommit, mainline: mainline)
                 if noCommit {
-                    window.toasts.show(Toast(message: String(localized: "Cherry-picked \(what) onto \(head)", bundle: .module), detail: String(localized: "The changes are staged, not committed yet.", bundle: .module), icon: "arrow.turn.down.right", action: String(localized: "Show changes", bundle: .module)) { window.show(.changes) })
+                    window.toasts.show(Toast(message: String(localized: "Cherry-picked \(what) onto \(head)", bundle: .module), detail: String(localized: "The changes are staged, not committed yet.", bundle: .module), icon: "arrow.turn.down.right", action: String(localized: "Show changes", bundle: .module), category: .history, target: .changes, notifyButton: false) { window.show(.changes) })
                 } else {
-                    window.toasts.show(undoToast(window, message: String(localized: "Cherry-picked \(what) onto \(head)", bundle: .module), detail: subject, icon: "arrow.turn.down.right"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Cherry-picked \(what) onto \(head)", bundle: .module), detail: subject, icon: "arrow.turn.down.right", category: .history))
                     selectHead(store)
                 }
             } catch {
@@ -171,7 +171,7 @@ enum RewriteActions {
             do {
                 try await store.revert(id: id, mainline: mainline)
                 let made = store.snapshot?.headOID?.short ?? ""
-                window.toasts.show(undoToast(window, message: String(localized: "Reverted \(id.short)", bundle: .module), detail: String(localized: "Made \(made), which undoes its changes.", bundle: .module), icon: "arrow.uturn.backward"))
+                window.toasts.show(undoToast(window, message: String(localized: "Reverted \(id.short)", bundle: .module), detail: String(localized: "Made \(made), which undoes its changes.", bundle: .module), icon: "arrow.uturn.backward", category: .history))
                 selectHead(store)
             } catch {
                 report(error, window, failure: String(localized: "The revert didn't finish", bundle: .module))
@@ -310,7 +310,7 @@ enum RewriteActions {
             store.selectCommit(id, scroll: true)
             Task {
                 let subject = await store.subject(of: id)
-                window.toasts.show(Toast(message: String(localized: "\(id.short) is the first bad commit", bundle: .module), detail: subject, icon: "scope", action: String(localized: "Show", bundle: .module)) { store.showRef(id.rawValue) })
+                window.toasts.show(Toast(message: String(localized: "\(id.short) is the first bad commit", bundle: .module), detail: subject, icon: "scope", action: String(localized: "Show", bundle: .module), category: .history, target: .commit(id.rawValue), notifyButton: false) { store.showRef(id.rawValue) })
             }
         case .testing(let current, _):
             if let current = current ?? store.snapshot?.headOID { store.selectCommit(current, scroll: true) }
@@ -352,18 +352,18 @@ enum RewriteActions {
                 case .rebasing(_, _, _, _, let branch, _):
                     let name = branch ?? window.headName
                     let detail = onto.map { String(localized: "\(name) now sits on \($0).", bundle: .module) } ?? ""
-                    window.toasts.show(undoToast(window, message: String(localized: "Rebase finished", bundle: .module), detail: detail + forcePushNote(store), icon: "checkmark.circle"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Rebase finished", bundle: .module), detail: detail + forcePushNote(store), icon: "checkmark.circle", category: .history))
                 case .merging(let source):
                     let message = source.map { String(localized: "Merged \($0) into \(head)", bundle: .module) } ?? String(localized: "Committed the merge", bundle: .module)
-                    window.toasts.show(undoToast(window, message: message, icon: "arrow.triangle.merge"))
+                    window.toasts.show(undoToast(window, message: message, icon: "arrow.triangle.merge", category: .history))
                 case .cherryPicking(let id):
                     let what = id?.short ?? String(localized: "the commit", bundle: .module)
-                    window.toasts.show(undoToast(window, message: String(localized: "Cherry-picked \(what) onto \(head)", bundle: .module), icon: "arrow.turn.down.right"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Cherry-picked \(what) onto \(head)", bundle: .module), icon: "arrow.turn.down.right", category: .history))
                 case .reverting(let id):
                     let what = id?.short ?? String(localized: "the commit", bundle: .module)
-                    window.toasts.show(undoToast(window, message: String(localized: "Reverted \(what)", bundle: .module), icon: "arrow.uturn.backward"))
+                    window.toasts.show(undoToast(window, message: String(localized: "Reverted \(what)", bundle: .module), icon: "arrow.uturn.backward", category: .history))
                 case .applyingPatches:
-                    window.toasts.show(Toast(message: String(localized: "Applied the patches", bundle: .module), icon: "checkmark.circle"))
+                    window.toasts.show(Toast(message: String(localized: "Applied the patches", bundle: .module), icon: "checkmark.circle", category: .history))
                 default:
                     break
                 }
@@ -395,7 +395,7 @@ enum RewriteActions {
                 case .reverting: message = String(localized: "Aborted the revert", bundle: .module)
                 default: message = String(localized: "Aborted", bundle: .module)
                 }
-                window.toasts.show(Toast(message: message, detail: String(localized: "\(window.headName) is back where it was.", bundle: .module), icon: "arrow.uturn.backward"))
+                window.toasts.show(Toast(message: message, detail: String(localized: "\(window.headName) is back where it was.", bundle: .module), icon: "arrow.uturn.backward", category: .history))
                 selectHead(store)
             } catch {
                 report(error, window, failure: String(localized: "Abort didn't finish", bundle: .module))
@@ -495,8 +495,25 @@ enum RewriteActions {
         }
     }
 
-    static func undoToast(_ window: WindowModel, message: String, detail: String? = nil, icon: String) -> Toast {
-        Toast(message: message, detail: detail, icon: icon, action: String(localized: "Undo", bundle: .module)) { undo(window) }
+    static func undoToast(_ window: WindowModel, message: String, detail: String? = nil, icon: String, category: VraiNotification.Category? = nil) -> Toast {
+        Toast(message: message, detail: detail, icon: icon, action: String(localized: "Undo", bundle: .module), category: category, target: category == nil ? nil : headTarget(window.store)) { undo(window) }
+    }
+
+    static func headTarget(_ store: RepositoryStore) -> VraiNotification.Target {
+        store.snapshot?.headOID.map { .commit($0.rawValue) } ?? .history
+    }
+
+    static func stopped(_ window: WindowModel, conflicts: Int?) {
+        let body = if let conflicts {
+            String(localized: "Stopped on \(n(max(1, conflicts), "conflict"))", bundle: .module) + "\n" + String(localized: "Resolve them in Changes, then continue.", bundle: .module)
+        } else {
+            String(localized: "The rebase stopped so you can edit a commit. Amend it, then continue.", bundle: .module)
+        }
+        let note = VraiNotification(id: NotificationHub.stoppedID(window), category: .history, repository: window.reference.path, title: window.repositoryName, body: body, level: .alert, target: conflicts == nil ? .history : .conflicts)
+        let abort = NotificationAction("abort", String(localized: "Abort", bundle: .module), opensApp: false, destructive: true) { [weak window] in
+            if let window { RewriteActions.abort(window) }
+        }
+        if NotificationHub.shared.deliver(note, window: window, actions: [abort]) { NotificationHub.shared.track(note.id) }
     }
 
     static func forcePushNote(_ store: RepositoryStore) -> String {
@@ -520,9 +537,12 @@ enum RewriteActions {
             return
         }
         switch error.code {
-        case .conflicts:
+        case .conflicts(let paths):
             window.show(.changes)
-        case .stoppedForEdit, .cancelled:
+            stopped(window, conflicts: paths.count)
+        case .stoppedForEdit:
+            stopped(window, conflicts: nil)
+        case .cancelled:
             break
         default:
             let copy = ErrorCopy(error)

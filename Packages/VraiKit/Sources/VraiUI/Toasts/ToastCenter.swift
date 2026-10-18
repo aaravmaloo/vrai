@@ -12,8 +12,11 @@ public struct Toast: Identifiable {
     public var onAction: (@MainActor () -> Void)?
     public var busy = false
     public var timeout: TimeInterval?
+    public var category: VraiNotification.Category?
+    public var target: VraiNotification.Target?
+    public var notifyButton = true
 
-    public init(tone: Tone = .neutral, message: String, detail: String? = nil, icon: String? = nil, action: String? = nil, timeout: TimeInterval? = nil, busy: Bool = false, onAction: (@MainActor () -> Void)? = nil) {
+    public init(tone: Tone = .neutral, message: String, detail: String? = nil, icon: String? = nil, action: String? = nil, timeout: TimeInterval? = nil, busy: Bool = false, category: VraiNotification.Category? = nil, target: VraiNotification.Target? = nil, notifyButton: Bool = true, onAction: (@MainActor () -> Void)? = nil) {
         self.tone = tone
         self.message = message
         self.detail = detail
@@ -21,6 +24,9 @@ public struct Toast: Identifiable {
         self.action = action
         self.timeout = timeout
         self.busy = busy
+        self.category = category
+        self.target = target
+        self.notifyButton = notifyButton
         self.onAction = onAction
     }
 

@@ -85,12 +85,18 @@ public final class BackgroundFetcher {
             let result = try await store.fetchResult(remotes: remotes, before: before, after: after)
             let upstreams = try await upstreamNames()
             let counts = result.newCommits.filter { upstreams.contains($0.key) && $0.value > 0 }
+            let rewritten = result.rewrittenRefs.filter(upstreams.contains)
+            let gone = result.prunedRefs.filter(upstreams.contains)
             try? await store.refresh()
             if !counts.isEmpty {
                 onFetched?(counts)
                 if notifyAboutNewCommits, !isWindowKey() {
                     await notifier.post(notification(for: counts))
                 }
+            }
+            if !rewritten.isEmpty || !gone.isEmpty, notifyAboutNewCommits, !isWindowKey() {
+                let root = store.snapshot?.root ?? store.git.workingDirectory
+                await notifier.post(.upstreamChanged(repository: root.path(percentEncoded: false), name: root.lastPathComponent, rewritten: rewritten, gone: gone))
             }
             return .fetched(newCommits: counts)
         } catch let error as GitError {
@@ -105,9 +111,8 @@ public final class BackgroundFetcher {
         return Set(output.split(separator: "\n").map(String.init).filter { !$0.isEmpty })
     }
 
-    private func notification(for counts: [String: Int]) -> FetchNotification {
+    private func notification(for counts: [String: Int]) -> VraiNotification {
         let root = store.snapshot?.root ?? store.git.workingDirectory
-        let name = root.lastPathComponent
-        return FetchNotification(repository: root.path(percentEncoded: false), title: name, body: FetchNotification.lines(for: counts).joined(separator: "\n"), newCommits: counts)
+        return .fetched(repository: root.path(percentEncoded: false), name: root.lastPathComponent, newCommits: counts)
     }
 }

@@ -38,14 +38,14 @@ extension SyncModel {
     func fetched(_ result: FetchResult) {
         let summary = result.summary
         if result.total > 0, let first = result.updatedRefs.first(where: { (result.newCommits[$0] ?? 0) > 0 }) {
-            toast(summary, icon: "arrow.triangle.2.circlepath", action: String(localized: "Show", bundle: .module)) { [weak self] in
+            toast(summary, icon: "arrow.triangle.2.circlepath", action: String(localized: "Show", bundle: .module), category: .sync, target: .ref(first), notifyButton: false) { [weak self] in
                 self?.window.show(.history)
                 self?.store.showRef(first)
             }
         } else if !result.prunedRefs.isEmpty, result.total == 0 {
-            toasts.show(Toast(message: summary.message, detail: String(localized: "Removed \(n(result.prunedRefs.count, "branch", "branches")) that no longer exist on the remote.", bundle: .module), icon: "trash"))
+            toasts.show(Toast(message: summary.message, detail: String(localized: "Removed \(n(result.prunedRefs.count, "branch", "branches")) that no longer exist on the remote.", bundle: .module), icon: "trash", category: .sync))
         } else {
-            toast(summary, icon: "checkmark.circle")
+            toast(summary, icon: "checkmark.circle", category: .sync)
         }
     }
 
@@ -73,9 +73,10 @@ extension SyncModel {
             self.run(.pull, handle, busy: String(localized: "Pulling from \(source)", bundle: .module), retry: { [weak self] in self?.pull(mode: mode, autostash: autostash, remote: remote, branch: branch, then: next) }) { [weak self] result in
                 guard let self else { return }
                 if result.upToDate {
-                    self.toast(result.summary, icon: "checkmark.circle")
+                    self.toast(result.summary, icon: "checkmark.circle", category: .sync)
                 } else {
-                    self.toast(result.summary, icon: "arrow.down.to.line", action: String(localized: "Undo", bundle: .module)) { [weak self] in self?.undo() }
+                    let target = self.snapshot?.headOID.map { VraiNotification.Target.commit($0.rawValue) } ?? .history
+                    self.toast(result.summary, icon: "arrow.down.to.line", action: String(localized: "Undo", bundle: .module), category: .sync, target: target) { [weak self] in self?.undo() }
                     if let head = self.snapshot?.headOID { self.store.select(.commit(head), scroll: true) }
                 }
                 next?()
@@ -119,14 +120,14 @@ extension SyncModel {
                 try await store.perform("push") { _ = try await store.git.run(command) }
             }
             run(.push, handle, busy: busy, retry: retry) { [weak self] _ in
-                self?.toasts.show(Toast(message: String(localized: "Pushed \(local.name) to \(target)/\(remoteBranch)", bundle: .module), icon: "arrow.up.to.line"))
+                self?.toasts.show(Toast(message: String(localized: "Pushed \(local.name) to \(target)/\(remoteBranch)", bundle: .module), icon: "arrow.up.to.line", category: .sync, target: .ref(local.name)))
                 self?.window.checks.watch(local.tip, branch: remoteBranch)
             }
             return
         }
         let handle = store.pushOperation(remote: remote ?? (local.upstream == nil ? target : nil), branch: branch, force: force, setUpstream: setUpstream, tags: tags, noVerify: noVerify, pushOptions: pushOptions)
         run(.push, handle, busy: busy, retry: retry) { [weak self] result in
-            self?.toast(result.summary, icon: "arrow.up.to.line")
+            self?.toast(result.summary, icon: "arrow.up.to.line", category: .sync, target: .ref(local.name))
             self?.window.checks.watch(local.tip, branch: local.name)
         }
     }
@@ -205,7 +206,10 @@ extension SyncModel {
                 tone: .warning,
                 message: String(localized: "Stopped on \(n(max(1, paths.count), "conflict"))", bundle: .module),
                 detail: String(localized: "Resolve them in Changes, then commit to finish.", bundle: .module),
-                action: String(localized: "Resolve conflicts", bundle: .module)
+                action: String(localized: "Resolve conflicts", bundle: .module),
+                category: .sync,
+                target: .conflicts,
+                notifyButton: false
             ) { [weak self] in self?.window.showConflicts() })
         case .remoteNotFound:
             noRemotes()
@@ -266,6 +270,7 @@ extension SyncModel {
             detail: retry == nil ? String(localized: "Check your connection, then try again.", bundle: .module) : String(localized: "Check your connection. Vrai retries \(verb) when you're back online.", bundle: .module),
             icon: "wifi.slash",
             action: retry == nil ? nil : String(localized: "Retry", bundle: .module),
+            category: .sync,
             onAction: retry
         ))
         if let retry {

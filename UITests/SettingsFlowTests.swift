@@ -326,7 +326,7 @@ final class SettingsFlowTests: XCTestCase {
     @MainActor
     private func captureEveryPane(_ appearance: String) throws {
         let (app, _) = try launch(pane: "general", appearance: appearance)
-        let panes = [("general", "General"), ("git", "Git"), ("accounts", "Accounts"), ("appearance", "Appearance"), ("shortcuts", "Shortcuts"), ("repository", "Repository"), ("expert", "Expert")]
+        let panes = [("general", "General"), ("notifications", "Notifications"), ("git", "Git"), ("accounts", "Accounts"), ("appearance", "Appearance"), ("shortcuts", "Shortcuts"), ("repository", "Repository"), ("expert", "Expert")]
         for (pane, title) in panes {
             tab(app, title, pane: pane)
             attach(app, "settings-" + pane + (pane == "expert" ? "-off" : "") + "-" + appearance)

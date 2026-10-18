@@ -71,7 +71,7 @@ enum CoverageActions {
                 let detail = summary.packed == 0
                     ? String(localized: "Every reachable object was already in a pack.", bundle: .module)
                     : String(localized: "\(n(summary.packed, "loose object")) moved into a new pack; \(n(summary.looseAfter, "loose object")) left.", bundle: .module)
-                window.toasts.show(Toast(message: String(localized: "Packed loose objects", bundle: .module), detail: detail, icon: "archivebox", action: String(localized: "Show console", bundle: .module)) {
+                window.toasts.show(Toast(message: String(localized: "Packed loose objects", bundle: .module), detail: detail, icon: "archivebox", action: String(localized: "Show console", bundle: .module), category: .maintenance, target: .console, notifyButton: false) {
                     window.console.show()
                 })
             } catch {
@@ -86,9 +86,9 @@ enum CoverageActions {
             do {
                 let packs = try await store.redundantPacks()
                 if packs.isEmpty {
-                    window.toasts.show(Toast(message: String(localized: "No redundant packs", bundle: .module), detail: String(localized: "Every pack holds objects that no other pack has.", bundle: .module), icon: "archivebox"))
+                    window.toasts.show(Toast(message: String(localized: "No redundant packs", bundle: .module), detail: String(localized: "Every pack holds objects that no other pack has.", bundle: .module), icon: "archivebox", category: .maintenance))
                 } else {
-                    window.toasts.show(Toast(tone: .warning, message: String(localized: "Found \(n(packs.count, "redundant pack"))", bundle: .module), detail: String(localized: "Their objects are in other packs too. Clean up removes them.", bundle: .module), icon: "archivebox", action: String(localized: "Clean up", bundle: .module)) {
+                    window.toasts.show(Toast(tone: .warning, message: String(localized: "Found \(n(packs.count, "redundant pack"))", bundle: .module), detail: String(localized: "Their objects are in other packs too. Clean up removes them.", bundle: .module), icon: "archivebox", action: String(localized: "Clean up", bundle: .module), category: .maintenance) {
                         LongTailActions.maintenance(window, .gc)
                     })
                 }

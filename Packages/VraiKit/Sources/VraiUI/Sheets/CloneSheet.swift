@@ -34,6 +34,10 @@ final class CloneRunner {
         hidden = false
         let handle = app.startClone(request)
         self.handle = handle
+        let hub = NotificationHub.shared
+        hub.configure(launch: app.launch)
+        hub.start()
+        if app.preferences.notify { hub.permission.askOnce() }
         let island = IslandCenter.shared
         let notch: UUID? = island.allows(.sync) ? island.show(IslandActivity(
             phase: .running,
@@ -58,6 +62,14 @@ final class CloneRunner {
             do {
                 let reference = try await handle.value
                 self.running = false
+                if hub.deliversWhileAway(.sync, level: .quiet, preferences: app.preferences) {
+                    if let notch { island.dismiss(notch, after: 0) }
+                    let body = String(localized: "Cloned \(name)", bundle: .module) + "\n" + String(localized: "Into \(folder).", bundle: .module)
+                    hub.post(VraiNotification(id: "clone:" + reference.path, category: .sync, repository: request.opensWindow ? reference.path : "", title: name, body: body, target: request.opensWindow ? .history : nil), preferences: app.preferences)
+                    if !self.hidden { context.dismiss() }
+                    if request.opensWindow { context.opened(reference) } else { LongTailReveal.show([reference.url]) }
+                    return
+                }
                 if let notch {
                     island.finish(notch) { activity in
                         activity.phase = .success
@@ -88,7 +100,10 @@ final class CloneRunner {
                     return
                 }
                 let copy = LongTailCopy.cloneFailure(error, url: request.url, folder: folder)
-                if let notch {
+                if hub.deliversWhileAway(.sync, preferences: app.preferences) {
+                    if let notch { island.dismiss(notch, after: 0) }
+                    hub.post(VraiNotification(id: "clone:" + request.url, category: .sync, repository: "", title: name, body: copy.title + "\n" + copy.message, level: .alert), preferences: app.preferences)
+                } else if let notch {
                     island.finish(notch) { activity in
                         activity.phase = .failure
                         activity.title = copy.title

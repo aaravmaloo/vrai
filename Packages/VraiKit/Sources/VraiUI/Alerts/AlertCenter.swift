@@ -40,7 +40,10 @@ public struct AlertRequest: Identifiable {
 @MainActor
 @Observable
 public final class AlertCenter {
-    public var current: AlertRequest?
+    public var current: AlertRequest? {
+        didSet { onChange?(current) }
+    }
+    @ObservationIgnored public var onChange: (@MainActor (AlertRequest?) -> Void)?
 
     public init() {}
 

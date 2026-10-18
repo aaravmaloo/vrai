@@ -63,7 +63,7 @@ enum LongTailActions {
             do {
                 let files = try await store.savePatches(ids: [id], to: folder)
                 let name = files.first?.lastPathComponent ?? ""
-                window.toasts.show(Toast(message: String(localized: "Saved a patch to the Desktop", bundle: .module), detail: name, icon: "square.and.arrow.down", action: String(localized: "Show in Finder", bundle: .module)) {
+                window.toasts.show(Toast(message: String(localized: "Saved a patch to the Desktop", bundle: .module), detail: name, icon: "square.and.arrow.down", action: String(localized: "Show in Finder", bundle: .module), category: .maintenance) {
                     LongTailReveal.show(files)
                 })
             } catch {
@@ -248,7 +248,7 @@ enum LongTailActions {
             }
             do {
                 let result = try await store.maintenance(task)
-                window.toasts.show(Toast(message: doneTitle(task), detail: detail(result), icon: icon(task), action: String(localized: "Show console", bundle: .module)) {
+                window.toasts.show(Toast(message: doneTitle(task), detail: detail(result), icon: icon(task), action: String(localized: "Show console", bundle: .module), category: .maintenance, target: .console, notifyButton: false) {
                     window.console.open = true
                 })
             } catch {
@@ -275,7 +275,7 @@ enum LongTailActions {
                     let detail = dangling == 0
                         ? String(localized: "Every object is reachable and intact.", bundle: .module)
                         : String(localized: "\(n(dangling, "dangling object")), which the reflog or Undo history may still keep.", bundle: .module)
-                    window.toasts.show(Toast(message: String(localized: "No problems found", bundle: .module), detail: detail, icon: "stethoscope", action: String(localized: "Show console", bundle: .module)) {
+                    window.toasts.show(Toast(message: String(localized: "No problems found", bundle: .module), detail: detail, icon: "stethoscope", action: String(localized: "Show console", bundle: .module), category: .maintenance, target: .console, notifyButton: false) {
                         window.console.open = true
                     })
                 } else {
@@ -305,7 +305,7 @@ enum LongTailActions {
         Task {
             do {
                 try await store.repairPackIndex(pack)
-                window.toasts.show(Toast(message: String(localized: "Rebuilt the index for \(pack)", bundle: .module), detail: String(localized: "Verify integrity again to confirm.", bundle: .module), icon: "wrench.and.screwdriver"))
+                window.toasts.show(Toast(message: String(localized: "Rebuilt the index for \(pack)", bundle: .module), detail: String(localized: "Verify integrity again to confirm.", bundle: .module), icon: "wrench.and.screwdriver", category: .maintenance))
             } catch {
                 RewriteActions.report(error, window, failure: String(localized: "The pack index wasn't rebuilt", bundle: .module))
             }

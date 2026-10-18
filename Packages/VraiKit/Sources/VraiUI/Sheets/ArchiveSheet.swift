@@ -96,7 +96,7 @@ struct ArchiveSheet: View {
                 let made = try await store.exportArchive(ref: ref, format: chosen, prefix: folder, paths: only, to: file)
                 window.sheets.dismiss()
                 let place = app.displayPath(made.deletingLastPathComponent())
-                window.toasts.show(Toast(message: String(localized: "Exported \(made.lastPathComponent)", bundle: .module), detail: String(localized: "In \(place).", bundle: .module), icon: "archivebox", action: String(localized: "Show in Finder", bundle: .module)) {
+                window.toasts.show(Toast(message: String(localized: "Exported \(made.lastPathComponent)", bundle: .module), detail: String(localized: "In \(place).", bundle: .module), icon: "archivebox", action: String(localized: "Show in Finder", bundle: .module), category: .maintenance) {
                     LongTailReveal.show([made])
                 })
             } catch let error as GitError {

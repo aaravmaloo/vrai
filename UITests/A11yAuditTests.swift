@@ -168,7 +168,7 @@ final class A11yAuditTests: XCTestCase {
 
     @MainActor
     func testSettingsPanes() throws {
-        let panes = [("general", "General"), ("git", "Git"), ("accounts", "Accounts"), ("appearance", "Appearance"), ("shortcuts", "Shortcuts"), ("repository", "Repository"), ("expert", "Expert")]
+        let panes = [("general", "General"), ("notifications", "Notifications"), ("git", "Git"), ("accounts", "Accounts"), ("appearance", "Appearance"), ("shortcuts", "Shortcuts"), ("repository", "Repository"), ("expert", "Expert")]
         for appearance in AuditLab.appearances {
             let lab = try AuditLab.make(["everyday"])
             defer { lab.remove() }

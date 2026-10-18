@@ -103,21 +103,33 @@ extension WindowModel {
         console.show()
         let id = UUID()
         let store = store
+        let started = Date()
         console.tasks[id] = Task { [weak self] in
             defer { self?.console.tasks.removeValue(forKey: id) }
+            var last: TypedRun?
             for typed in commands {
                 do {
                     let run = try await store.run(typed)
+                    last = run
                     if !run.succeeded { break }
                 } catch let error as GitError {
                     if error.code != .cancelled { self?.alerts.present(error) }
-                    break
+                    return
                 } catch {
-                    break
+                    return
                 }
-                if Task.isCancelled { break }
+                if Task.isCancelled { return }
             }
+            if let self, let last, Date().timeIntervalSince(started) >= NotificationPolicy.longCommand { self.announce(last) }
         }
+    }
+
+    func announce(_ run: TypedRun) {
+        let body = run.succeeded
+            ? String(localized: "Finished \(run.typed.display)", bundle: .module)
+            : String(localized: "\(run.typed.display) stopped with exit code \(run.result.exitCode)", bundle: .module)
+        let note = VraiNotification(id: "console:" + reference.path, category: .maintenance, repository: reference.path, title: repositoryName, body: body, level: run.succeeded ? .quiet : .alert, target: .console)
+        NotificationHub.shared.deliver(note, window: self, clearsOnReturn: true)
     }
 
     public func showObject(_ id: OID) {

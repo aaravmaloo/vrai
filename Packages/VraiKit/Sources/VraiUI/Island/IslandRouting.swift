@@ -172,6 +172,11 @@ final class IslandRouter {
     func failed(_ id: UUID?, _ error: any Error) {
         guard let id, routed.contains(id) else { return }
         if case .cancelled? = (error as? GitError)?.code { return }
+        if let window, NotificationHub.shared.delivers(.sync, window: window) {
+            routed.remove(id)
+            island.dismiss(id, after: 0)
+            return
+        }
         let copy = (error as? GitError).map(ErrorCopy.init) ?? ErrorCopy(title: String(localized: "git stopped", bundle: .module), message: String(describing: error))
         routed.remove(id)
         handoffUntil = Date().addingTimeInterval(0.6)
@@ -187,19 +192,13 @@ final class IslandRouter {
     }
 }
 
-struct IslandNotifier: Notifier {
-    let fallback: any Notifier
-
-    func post(_ notification: FetchNotification) async {
-        let shown = await MainActor.run { IslandNotifier.show(notification) }
-        if !shown { await fallback.post(notification) }
-    }
-
-    @MainActor static func show(_ notification: FetchNotification) -> Bool {
+enum IslandNotifier {
+    @discardableResult
+    @MainActor static func show(_ notification: VraiNotification) -> Bool {
         let island = IslandCenter.shared
         guard island.allows(.fetch) else { return false }
         let model = SyncHub.shared.model(path: notification.repository)
-        let lines = FetchNotification.lines(for: notification.newCommits)
+        let lines = VraiNotification.lines(for: notification.newCommits)
         var actions: [IslandAction] = []
         if let model {
             let first = notification.newCommits.filter { $0.value > 0 }.keys.sorted().first
@@ -276,6 +275,7 @@ enum ChecksAnnouncer {
         let island = IslandCenter.shared
         let id = window.checksActivity(for: checks.sha)
         window.forgetChecksActivity(checks.sha)
+        DockBadge.refresh()
         let oid = OID(checks.sha)
         let failed = checks.state == .failed
         let title = failed
@@ -283,18 +283,24 @@ enum ChecksAnnouncer {
             : (checks.state == .cancelled ? String(localized: "Checks cancelled on \(branch)", bundle: .module) : String(localized: "Checks passed on \(branch)", bundle: .module))
         let span = checks.runs.compactMap { $0.duration(now: now) }.max()
         let detail = [ChecksCopy.summary(checks), span.map(ChecksCopy.duration)].compactMap { $0 }.joined(separator: ", ")
-        var actions: [IslandAction] = []
+        var choices: [NotificationAction] = []
         if failed {
             if let url = checks.failed.first?.url ?? checks.url {
-                actions.append(IslandAction(title: String(localized: "Logs", bundle: .module), activates: false) { NSWorkspace.shared.open(url) })
+                choices.append(NotificationAction("logs", String(localized: "Logs", bundle: .module), opensApp: false) { NSWorkspace.shared.open(url) })
             }
             if window.checks.canWrite, !checks.rerunnable.isEmpty {
-                actions.append(IslandAction(title: String(localized: "Re-run", bundle: .module), activates: false) { [weak window] in
+                choices.append(NotificationAction("rerun", String(localized: "Re-run", bundle: .module), opensApp: false) { [weak window] in
                     guard let window, let oid else { return }
                     ChecksActions.rerun(window, id: oid, branch: branch)
                 })
             }
         }
+        let note = VraiNotification(id: "checks:" + checks.sha, category: .checks, repository: window.reference.path, title: window.repositoryName, body: title + "\n" + detail, level: failed ? .alert : .quiet, target: .commit(checks.sha))
+        if NotificationHub.shared.deliver(note, window: window, actions: choices) {
+            if island.contains(id) { island.dismiss(id, after: 0) }
+            return
+        }
+        var actions = choices.map { IslandAction(title: $0.button.title, activates: $0.button.opensApp, perform: $0.perform) }
         actions.append(IslandAction(title: String(localized: "Show", bundle: .module), prominent: failed) { [weak window] in
             guard let window, let oid else { return }
             window.show(.history)
@@ -333,12 +339,7 @@ enum ChecksAnnouncer {
             window.show(.history)
             window.store.selectCommit(oid, scroll: true)
         }
-        if window.sync.isKey {
-            window.toasts.show(toast)
-        } else if window.preferences.notifications {
-            let note = FetchNotification(repository: window.reference.path, title: window.repositoryName, body: title + "\n" + detail, newCommits: [:])
-            Task { await SyncHub.shared.notifier.post(note) }
-        }
+        window.toasts.show(toast)
     }
 }
 
@@ -360,8 +361,19 @@ struct IslandWiring: ViewModifier {
                 IslandCenter.shared.preferences = model.preferences
                 IslandCenter.shared.mode = model.preferences.island
                 model.router.syncState(model.store.snapshot)
-                model.toasts.route = { [weak model] toast in model?.router.route(toast) ?? false }
+                model.toasts.route = { [weak model] toast in
+                    guard let model else { return false }
+                    return NotificationHub.shared.route(toast, window: model) || model.router.route(toast)
+                }
                 model.toasts.onDismiss = { [weak model] id in model?.router.dismissed(id) }
+                model.alerts.onChange = { [weak model] request in
+                    guard let model else { return }
+                    guard let request else {
+                        NotificationHub.shared.alertClosed(slot: "window", window: model)
+                        return
+                    }
+                    NotificationHub.shared.alertShown(title: request.title, message: request.message, actions: request.actions, slot: "window", window: model) { [weak model] in model?.alerts.current = nil }
+                }
                 checks.onEvent = { [weak model] event in
                     guard let model else { return }
                     ChecksAnnouncer.handle(event, window: model)
@@ -375,17 +387,21 @@ struct IslandWiring: ViewModifier {
                 checks.stop()
                 window.toasts.route = nil
                 window.toasts.onDismiss = nil
+                window.alerts.onChange = nil
             }
             .onChange(of: window.preferences.island) { _, mode in
                 IslandCenter.shared.mode = mode
                 window.router.syncState(window.store.snapshot)
             }
             .onChange(of: window.preferences.checks) { _, on in checks.enabled = on }
+            .onChange(of: window.preferences.dockBadge, initial: true) { _, _ in DockBadge.refresh() }
             .onChange(of: window.preferences.islandStates) { _, _ in window.router.syncState(window.store.snapshot) }
             .onChange(of: active, initial: true) { _, value in checks.active = value }
             .onChange(of: window.store.snapshot) { _, snapshot in
                 if let snapshot { checks.update(snapshot) }
                 window.router.syncState(snapshot)
+                NotificationHub.shared.stateChanged(snapshot, window: window)
+                DockBadge.refresh()
             }
             .onChange(of: window.store.selection) { _, selection in
                 if case .commit(let id)? = selection { checks.request(id) }

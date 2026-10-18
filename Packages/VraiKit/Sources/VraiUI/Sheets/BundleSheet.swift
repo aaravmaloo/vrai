@@ -61,7 +61,7 @@ struct BundleSheet: View {
                 window.sheets.dismiss()
                 let size = (try? made.resourceValues(forKeys: [.fileSizeKey]).fileSize).map { LongTailReveal.bytes(Int64($0)) } ?? ""
                 let place = app.displayPath(made.deletingLastPathComponent())
-                window.toasts.show(Toast(message: String(localized: "Saved \(made.lastPathComponent) to \(place)", bundle: .module), detail: size.isEmpty ? what : size + ", " + what, icon: "archivebox", action: String(localized: "Show in Finder", bundle: .module)) {
+                window.toasts.show(Toast(message: String(localized: "Saved \(made.lastPathComponent) to \(place)", bundle: .module), detail: size.isEmpty ? what : size + ", " + what, icon: "archivebox", action: String(localized: "Show in Finder", bundle: .module), category: .maintenance) {
                     LongTailReveal.show([made])
                 })
             } catch let error as GitError {

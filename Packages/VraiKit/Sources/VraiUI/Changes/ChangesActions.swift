@@ -381,11 +381,12 @@ extension WindowModel {
                 try await store.commit(subject: model.subject, body: model.body, amend: amend, signoff: model.signoff, noVerify: model.noVerify)
                 guard let self else { return }
                 let toast: Toast
+                let target = RewriteActions.headTarget(store)
                 if let merging {
-                    toast = Toast(message: String(localized: "Merged \(merging) into \(head)", bundle: .module), detail: subject, icon: "arrow.triangle.merge", action: String(localized: "Undo", bundle: .module), onAction: self.undoToastAction())
+                    toast = Toast(message: String(localized: "Merged \(merging) into \(head)", bundle: .module), detail: subject, icon: "arrow.triangle.merge", action: String(localized: "Undo", bundle: .module), category: .history, target: target, onAction: self.undoToastAction())
                 } else {
                     let message = amend ? String(localized: "Amended the last commit on \(head)", bundle: .module) : String(localized: "Committed to \(head)", bundle: .module)
-                    toast = Toast(message: message, detail: subject, icon: "checkmark.circle", action: String(localized: "Undo", bundle: .module), onAction: self.undoToastAction())
+                    toast = Toast(message: message, detail: subject, icon: "checkmark.circle", action: String(localized: "Undo", bundle: .module), category: .history, target: target, onAction: self.undoToastAction())
                 }
                 model.resetComposer()
                 model.clearLines()
@@ -394,6 +395,10 @@ extension WindowModel {
             } catch let error as GitError {
                 if case .hookFailed(let name, let output) = error.code, error.result?.command.subcommand == "commit" {
                     model.hookFailure = CommitHookFailure(name: name, output: output)
+                    if let self {
+                        let body = String(localized: "The \(name) hook stopped the commit", bundle: .module) + "\n" + SyncCopy.trimmed(output)
+                        NotificationHub.shared.deliver(VraiNotification(id: "hook:" + self.reference.path, category: .history, repository: self.reference.path, title: self.repositoryName, body: body, level: .alert, target: .changes), window: self, clearsOnReturn: true)
+                    }
                     if let kept = error.commitMessage, model.subject.trimmedForCommit.isEmpty {
                         model.subject = kept.subject
                         model.body = kept.body
@@ -410,7 +415,7 @@ extension WindowModel {
     func pushAfterCommit() async {
         do {
             let result = try await store.push()
-            toasts.show(Toast(message: result.summary.message, detail: result.summary.detail, icon: "arrow.up.to.line"))
+            toasts.show(Toast(message: result.summary.message, detail: result.summary.detail, icon: "arrow.up.to.line", category: .sync, target: headName.isEmpty ? nil : .ref(headName)))
         } catch {
             presentChangesError(error)
         }

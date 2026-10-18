@@ -95,11 +95,11 @@ struct SparseSheet: View {
             do {
                 if off {
                     try await store.disableSparseCheckout()
-                    window.toasts.show(Toast(message: String(localized: "Sparse checkout is off", bundle: .module), detail: String(localized: "Every folder is checked out again.", bundle: .module), icon: "folder"))
+                    window.toasts.show(Toast(message: String(localized: "Sparse checkout is off", bundle: .module), detail: String(localized: "Every folder is checked out again.", bundle: .module), icon: "folder", category: .maintenance))
                 } else {
                     try await store.setSparseCheckout(dirs: folders)
                     let detail = hidden.isEmpty ? nil : String(localized: "Hidden until you add them back: \(ListFormatter.localizedString(byJoining: Array(hidden.prefix(3))))\(hidden.count > 3 ? "\u{2026}" : "").", bundle: .module)
-                    window.toasts.show(Toast(message: String(localized: "Checking out \(n(folders.count, "folder"))", bundle: .module), detail: detail, icon: "folder"))
+                    window.toasts.show(Toast(message: String(localized: "Checking out \(n(folders.count, "folder"))", bundle: .module), detail: detail, icon: "folder", category: .maintenance))
                 }
             } catch {
                 RewriteActions.report(error, window, failure: String(localized: "Sparse checkout didn't change", bundle: .module))
